@@ -31,5 +31,6 @@
                 </div>
             </div>
         </section>
+        <x-pages.home.product-section />
     </main>
 @endsection
