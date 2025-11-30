@@ -1,3 +1,3 @@
-<div>
-    <!-- Well begun is half done. - Aristotle -->
-</div>
+<a href="{{ $link }}" class=` {{$extraClass}} font-bold py-2 px-4 rounded`>
+    {{ $slot }}
+</a>
