@@ -9,4 +9,7 @@ class Brand extends Model
 {
     /** @use HasFactory<\Database\Factories\BrandsFactory> */
     use HasFactory;
+    protected $fillable = [
+        'name',
+    ];
 }

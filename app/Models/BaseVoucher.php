@@ -9,4 +9,9 @@ class BaseVoucher extends Model
 {
     /** @use HasFactory<\Database\Factories\BaseVoucherFactory> */
     use HasFactory;
+    protected $fillable = [
+        'name',
+        'discount_amount',
+        'points_required',
+    ];
 }

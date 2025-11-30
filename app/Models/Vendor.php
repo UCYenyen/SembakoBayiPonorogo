@@ -9,4 +9,8 @@ class Vendor extends Model
 {
     /** @use HasFactory<\Database\Factories\VendorFactory> */
     use HasFactory;
+    protected $fillable = [
+        'name',
+        'phone_number',
+    ];
 }

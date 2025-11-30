@@ -9,4 +9,7 @@ class Delivery extends Model
 {
     /** @use HasFactory<\Database\Factories\DeliveryFactory> */
     use HasFactory;
+    protected $fillable = [
+        'name',
+    ];
 }
