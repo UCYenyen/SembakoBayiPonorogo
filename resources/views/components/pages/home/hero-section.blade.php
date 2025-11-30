@@ -47,6 +47,6 @@
             </div>
         </div>
     </div>
-    <img src="/images/misc/bg-waves.svg" alt="background waves" class="h-auto absolute z-1 bottom-14 left-0 w-full">
+    <img src="/images/misc/bg-waves.svg" alt="background waves" class="h-auto absolute z-1 bottom-8 md:bottom-14 left-0 w-full">
     <img src="/images/misc/fr-waves.svg" alt="front waves" class="h-auto absolute z-2 bottom-0 left-0 w-full">
 </section>
