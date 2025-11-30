@@ -1,4 +1,4 @@
-<section class="w-full min-h-[80vh] relative z-1 flex justify-center">
+<section class="w-full min-h-[95vh] sm:min-h-[80vh] relative z-1 flex justify-center">
     <div class="w-[80%]">
         <div class="hidden md:flex justify-center items-center">
             <div class="flex flex-col gap-8 basis-[40%]">
@@ -11,11 +11,11 @@
                 </h2>
                 <div class="flex items-center justify-start gap-4">
                     <x-pages.solid-button link="#"
-                        extraClass="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white">
+                        extraClass="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E]">
                         Shop Now
                     </x-pages.solid-button>
                     <x-pages.solid-button link="#"
-                        extraClass="bg-white shadow-lg rounded-lg text-xl text-[#3F3142]">
+                        extraClass="bg-white shadow-lg rounded-lg text-xl text-[#3F3142] hover:bg-gray-100/80">
                         Contact Us
                     </x-pages.solid-button>
                 </div>
@@ -38,15 +38,15 @@
                 The cheapest and most complete baby shop in Ponorogo
             </h2>
             <div class="flex items-center justify-start gap-4">
-                <x-pages.solid-button link="#" extraClass="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white">
+                <x-pages.solid-button link="#" extraClass="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E]">
                     Shop Now
                 </x-pages.solid-button>
-                <x-pages.solid-button link="#" extraClass="bg-white shadow-lg rounded-lg text-xl text-[#3F3142]">
+                <x-pages.solid-button link="#" extraClass="bg-white shadow-lg rounded-lg text-xl text-[#3F3142] hover:bg-gray-100/80">
                     Contact Us
                 </x-pages.solid-button>
             </div>
         </div>
     </div>
-    <img src="/images/misc/bg-waves.svg" alt="background waves" class="h-auto absolute z-1 bottom-8 md:bottom-14 left-0 w-full">
-    <img src="/images/misc/fr-waves.svg" alt="front waves" class="h-auto absolute z-2 bottom-0 left-0 w-full">
+    <img src="/images/misc/bg-waves.svg" draggable="false" alt="background waves" class="h-auto absolute z-1 bottom-6 md:bottom-14 left-0 w-full">
+    <img src="/images/misc/fr-waves.svg" draggable="false" alt="front waves" class="h-auto absolute z-2 bottom-0 left-0 w-full">
 </section>
