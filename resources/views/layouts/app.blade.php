@@ -19,7 +19,7 @@
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-[#FFF3F3]">
         <x-pages.navigation-bar />
-        <div class="h-[10vh]"></div>
+        <div class="h-[8vh]"></div>
         @yield('content')
         <x-pages.footer />
         <script>

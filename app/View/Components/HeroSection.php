@@ -6,12 +6,12 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class SolidButton extends Component
+class HeroSection extends Component
 {
     /**
      * Create a new component instance.
      */
-    public function __construct(public string $link = '#', public string $extraClass = '')
+    public function __construct()
     {
         //
     }
@@ -21,6 +21,6 @@ class SolidButton extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.solid-button');
+        return view('components.pages.home.hero-section');
     }
 }
