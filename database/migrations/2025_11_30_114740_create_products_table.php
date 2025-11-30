@@ -13,6 +13,16 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->bigInteger('price')->default(0);
+            $table->string('image_public_id');
+            $table->string('image_url');
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->foreignId('brand_id')->constrained('brands')->onDelete('cascade');
+            $table->integer('stocks')->default(0);
+            $table->boolean('is_hidden')->default(true);
+            $table->bigInteger('discount_amount')->default(0);
+            $table->boolean('is_on_sale')->default(false);
             $table->timestamps();
         });
     }
@@ -22,6 +32,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('products', function (Blueprint $table) {
+            $table->dropForeign(['category_id']);
+            $table->dropForeign(['brand_id']);
+        });
+
         Schema::dropIfExists('products');
     }
 };

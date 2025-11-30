@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('phone_number')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('role')->default('guest');
+            $table->enum('role', ['guest', 'member', 'admin'])->default('guest');
             $table->timestamp("member_since")->useCurrent()->nullable();
-            $table->int("points")->default(0);
+            $table->bigInteger("points")->default(0);
             $table->rememberToken();
             $table->timestamps();
         });

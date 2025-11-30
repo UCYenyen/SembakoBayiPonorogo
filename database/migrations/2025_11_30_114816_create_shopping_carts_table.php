@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('shopping_carts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->enum('status', ['active', 'ordered'])->default('active');
             $table->timestamps();
         });
     }
@@ -22,6 +24,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('shopping_carts', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+        });
         Schema::dropIfExists('shopping_carts');
     }
 };

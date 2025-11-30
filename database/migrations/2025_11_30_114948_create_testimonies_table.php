@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('testimonies', function (Blueprint $table) {
             $table->id();
+            $table->integer('rating_star');
+            $table->text('description');
+            $table->foreignId('transaction_id')->constrained('transactions')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -22,6 +25,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('testimonies', function (Blueprint $table) {
+            $table->dropForeign(['transaction_id']);
+        });
         Schema::dropIfExists('testimonies');
     }
 };

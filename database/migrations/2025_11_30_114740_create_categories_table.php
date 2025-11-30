@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('level');
+            $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -22,6 +25,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('categories', function (Blueprint $table) {
+            $table->dropForeign(['parent_id']);
+        });
+
         Schema::dropIfExists('categories');
     }
 };
+

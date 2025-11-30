@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('shopping_cart_items', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('shopping_cart_id')->constrained('shopping_carts')->onDelete('cascade');
+            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+            $table->integer('quantity')->default(1);
             $table->timestamps();
         });
     }
@@ -22,6 +25,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('shopping_cart_items', function (Blueprint $table) {
+            $table->dropForeign(['shopping_cart_id']);
+            $table->dropForeign(['product_id']);
+        });
+
         Schema::dropIfExists('shopping_cart_items');
     }
 };
