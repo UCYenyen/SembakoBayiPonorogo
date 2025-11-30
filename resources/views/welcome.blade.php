@@ -16,7 +16,7 @@
                         The cheapest and most complete baby shop in Ponorogo
                     </h2>
                     <div class="flex items-center justify-center gap-4">
-                        <x-pages.solid-button link="#" extraClass="bg-white shadow-lg text-white hover:bg-primary-dark">
+                        <x-pages.solid-button link="#" extraClass="bg-black shadow-lg text-white">
                             Shop Now
                         </x-pages.solid-button>
                     </div>
