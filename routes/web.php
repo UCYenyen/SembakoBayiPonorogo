@@ -6,6 +6,7 @@ use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\ShopController;
 use App\Http\Controllers\Pages\AdminController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Middleware\AdminPageGuard;
 
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/unauthorized', [AdminController::class, 'unauthorized']);
