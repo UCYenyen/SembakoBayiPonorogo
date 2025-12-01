@@ -5,6 +5,7 @@ use App\Http\Controllers\Pages\ShopController;
 use App\Http\Controllers\Pages\AdminController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Pages\UserDashboardController;
+use App\Http\Controllers\ProductController;
 use App\Http\Middleware\AdminPageGuard;
 
 Route::get('/', [HomeController::class, 'index']);
@@ -17,8 +18,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/user', [UserDashboardController::class, 'index'])->name('dashboard');
 });
 
-Route::middleware(AdminPageGuard::class)->group(function () {
-    Route::get('/admin', [AdminController::class, 'index']);
+Route::middleware(['auth', AdminPageGuard::class])->group(function () {
+    Route::get('/dashboard/admin', [AdminController::class, 'index']);
+    Route::get('/dashboard/admin/products', [AdminController::class, 'products']);
+    Route::get('/dashboard/admin/products/create', [AdminController::class, 'createProduct']);
+    Route::post('/dashboard/admin/products', [ProductController::class, 'create']);
 });
 
 require __DIR__.'/auth.php';

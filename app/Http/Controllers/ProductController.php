@@ -20,9 +20,10 @@ class ProductController extends Controller
 
     public function create(Request $request){
         $request->validate([
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'price' => 'required|numeric',
+            'price' => 'required|numeric|min:0',
+            'stocks' => 'required|integer|min:0',
             'image_url' => 'required|string',
             'image_public_id' => 'required|string',
             'category_id' => 'required|exists:categories,id',
@@ -33,13 +34,15 @@ class ProductController extends Controller
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
+            'stocks' => $request->stocks,
             'image_url' => $request->image_url,
             'image_public_id' => $request->image_public_id,
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
+            'is_hidden' => false, // Set to visible by default
         ]);
 
-         return redirect('/');
+         return redirect('/dashboard/admin/products')->with('success', 'Product created successfully!');
     }
 
     public function editProduct(Request $request, $id){
