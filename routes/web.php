@@ -14,7 +14,7 @@ Route::get('/register', [AuthController::class, 'register']);
 Route::get('/shop', [ShopController::class, 'index']);
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', [UserDashboardController::class, 'index']);
+    Route::get('/dashboard/user', [UserDashboardController::class, 'index'])->name('dashboard');
 });
 
 Route::middleware(AdminPageGuard::class)->group(function () {
