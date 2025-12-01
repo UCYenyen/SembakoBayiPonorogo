@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Pages;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
 
 class AdminController extends Controller
 {

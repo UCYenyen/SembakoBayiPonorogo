@@ -52,8 +52,8 @@
                 <!-- Submit Button -->
                 <div class="flex flex-col items-center gap-4 mt-6">
                     <Button type="submit"
-                        class="w-full bg-interactible-primary-active text-white hover:text-interactible-primary-active font-semibold py-2 rounded-lg hover:bg-zinc-50 border border-interactible-primary-active">Register
-                    </Button>
+                    class="w-full bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E] px-4 py-2">Register
+                </Button>
 
 
                     <p class="text-center text-sm text-gray-600">

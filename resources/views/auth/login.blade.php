@@ -3,7 +3,7 @@
 @section('content')
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
-    <div class="relative min-h-screen w-screen overflow-hidden flex flex-col justify-center items-center">
+    <div class="relative min-h-[80vh] w-screen overflow-hidden flex flex-col justify-center items-center">
         <form method="POST" action="{{ route('login') }}" class="bg-white rounded-lg shadow-lg p-12 max-w-[90%]">
             @csrf
 
@@ -42,7 +42,7 @@
 
             <div class="flex items-center flex-col justify-end mt-4 gap-4">
                 <Button type="submit"
-                    class="w-full bg-interactible-primary-active text-white hover:text-interactible-primary-active font-semibold py-2 rounded-lg hover:bg-zinc-50 border border-interactible-primary-active">Login
+                    class="w-full bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E] px-4 py-2">Login
                 </Button>
                  <p class="text-center text-sm text-gray-600">
                        Don't have an account?

@@ -1,11 +1,10 @@
 <?php
-
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\ShopController;
 use App\Http\Controllers\Pages\AdminController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Pages\UserDashboardController;
 use App\Http\Middleware\AdminPageGuard;
 
 Route::get('/', [HomeController::class, 'index']);
@@ -14,14 +13,8 @@ Route::get('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'register']);
 Route::get('/shop', [ShopController::class, 'index']);
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/dashboard', [UserDashboardController::class, 'index']);
 });
 
 Route::middleware(AdminPageGuard::class)->group(function () {
