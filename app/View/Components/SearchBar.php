@@ -11,7 +11,7 @@ class SearchBar extends Component
     /**
      * Create a new component instance.
      */
-    public function __construct(public string $route, public string $placeholder)
+    public function __construct(public string $route, public string $placeholder, public string $extraClass = '')
     {
         //
     }
