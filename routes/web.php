@@ -18,7 +18,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(AdminPageGuard::class)->group(function () {
-    Route::get('/admin', [AdminController::class, 'index']);
+    Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('dashboard-admin');
 });
 
 require __DIR__.'/auth.php';

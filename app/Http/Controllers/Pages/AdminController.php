@@ -13,7 +13,7 @@ class AdminController extends Controller
     public function index()
     {
         $currentUser = Auth::user();
-        return view('admin.index', [
+        return view('dashboard.admin.index', [
             'adminName' => $currentUser->name
         ]);
     }
