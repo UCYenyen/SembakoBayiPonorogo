@@ -23,7 +23,7 @@
             <div class="absolute -bottom-6 w-full flex justify-center items-center">
                 <div class="absolute z-10 -bottom-14 w-full flex justify-center items-center">
                     <x-pages.solid-button link="#"
-                        extraClass="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E]">Read
+                        extraClasses="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E]">Read
                         More
                         Testimonials
                     </x-pages.solid-button>
@@ -41,7 +41,7 @@
             <div class="absolute -bottom-6 w-full flex justify-center items-center">
                 <div class="absolute z-10 -bottom-14 w-full flex justify-center items-center">
                     <x-pages.solid-button link="#"
-                        extraClass="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E]">Read
+                        extraClasses="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E]">Read
                         More
                         Testimonials
                     </x-pages.solid-button>

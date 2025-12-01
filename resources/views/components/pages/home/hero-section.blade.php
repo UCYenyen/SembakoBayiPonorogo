@@ -11,11 +11,11 @@
                 </h2>
                 <div class="flex items-center justify-start gap-4">
                     <x-pages.solid-button link="#"
-                        extraClass="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E]">
+                        extraClasses="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E]">
                         Shop Now
                     </x-pages.solid-button>
                     <x-pages.solid-button link="#"
-                        extraClass="bg-white shadow-lg rounded-lg text-xl text-[#3F3142] hover:bg-gray-100/80">
+                        extraClasses="bg-white shadow-lg rounded-lg text-xl text-[#3F3142] hover:bg-gray-100/80">
                         Contact Us
                     </x-pages.solid-button>
                 </div>
@@ -38,10 +38,10 @@
                 The cheapest and most complete baby shop in Ponorogo
             </h2>
             <div class="flex items-center justify-start gap-4">
-                <x-pages.solid-button link="#" extraClass="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E]">
+                <x-pages.solid-button link="#" extraClasses="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E]">
                     Shop Now
                 </x-pages.solid-button>
-                <x-pages.solid-button link="#" extraClass="bg-white shadow-lg rounded-lg text-xl text-[#3F3142] hover:bg-gray-100/80">
+                <x-pages.solid-button link="#" extraClasses="bg-white shadow-lg rounded-lg text-xl text-[#3F3142] hover:bg-gray-100/80">
                     Contact Us
                 </x-pages.solid-button>
             </div>

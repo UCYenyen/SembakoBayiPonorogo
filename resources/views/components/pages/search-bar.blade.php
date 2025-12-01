@@ -1,4 +1,4 @@
-<form action="{{ url($route) }}" method="GET" class="md:flex gap-2 w-full {{ $extraClass ?? '' }}">
+<form action="{{ url($route) }}" method="GET" class="md:flex gap-2 w-full {{ $extraClasses ?? '' }}">
     <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ $placeholder }}"
         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent text-sm md:text-base">
     <button type="submit"

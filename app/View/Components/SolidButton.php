@@ -11,7 +11,7 @@ class SolidButton extends Component
     /**
      * Create a new component instance.
      */
-    public function __construct(public string $link = '#', public string $extraClass = '')
+    public function __construct(public string $link = '#', public string $extraClasses = '')
     {
         //
     }

@@ -6,12 +6,12 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class SearchBar extends Component
+class DashboardTransaction extends Component
 {
     /**
      * Create a new component instance.
      */
-    public function __construct(public string $route, public string $placeholder, public string $extraClasses = '')
+    public function __construct()
     {
         //
     }
@@ -21,6 +21,6 @@ class SearchBar extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.pages.search-bar');
+        return view('components.pages.dashboard.user.dashboard-transaction');
     }
 }
