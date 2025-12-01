@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\ShopController;
@@ -23,6 +24,7 @@ Route::middleware(['auth', AdminPageGuard::class])->group(function () {
     Route::get('/dashboard/admin/products', [AdminController::class, 'products']);
     Route::get('/dashboard/admin/products/create', [AdminController::class, 'createProduct']);
     Route::post('/dashboard/admin/products', [ProductController::class, 'create']);
+    Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('dashboard-admin');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
