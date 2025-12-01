@@ -12,4 +12,7 @@ class UserDashboardController extends Controller
     {
         return view('dashboard.user.index');
     }
+    public function cart(){
+        return view('dashboard.user.cart');
+    }
 }

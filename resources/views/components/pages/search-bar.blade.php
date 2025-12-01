@@ -6,11 +6,4 @@
         <x-heroicon-o-magnifying-glass class="w-5 h-5 inline-block mr-2" />
         Search
     </button>
-    @if (request('search'))
-        <a href="{{ url($route) }}"
-            class="hidden md:inline-block px-4 md:px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200 text-sm md:text-base whitespace-nowrap">
-            Clear
-            <x-heroicon-o-x-mark class="w-5 h-5" />
-        </a>
-    @endif
 </form>
