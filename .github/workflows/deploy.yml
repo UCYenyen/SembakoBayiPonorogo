@@ -26,12 +26,14 @@ jobs:
             cd ${{ secrets.DEPLOY_PATH }}
             
             git fetch origin main
-            
+
             # Pull the latest code
             git pull origin main
             
             # Install Composer dependencies
             composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
+            npm install 
             
             # Clear and optimize Laravel caches
             php artisan cache:clear
