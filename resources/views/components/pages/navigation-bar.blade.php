@@ -60,7 +60,7 @@
                 </div>
             @else
                 <x-pages.solid-button link="/login"
-                    extraClass="bg-[#3F3142] shadow-lg rounded-lg text-lg text-white hover:bg-[#5C4B5E]">
+                    extraClasses="bg-[#3F3142] shadow-lg rounded-lg text-lg text-white hover:bg-[#5C4B5E]">
                     Login
                 </x-pages.solid-button>
             @endif
