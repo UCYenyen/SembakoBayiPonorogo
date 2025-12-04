@@ -15,8 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('phone_number')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['guest', 'member', 'admin'])->default('guest');
+            $table->timestamp("member_since")->useCurrent()->nullable();
+            $table->bigInteger("points")->default(0);
             $table->rememberToken();
             $table->timestamps();
         });

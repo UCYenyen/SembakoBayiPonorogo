@@ -1,20 +1,30 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Pages\HomeController;
+use App\Http\Controllers\Pages\ShopController;
+use App\Http\Controllers\Pages\AdminController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Pages\UserDashboardController;
+use App\Http\Controllers\ProductController;
+use App\Http\Middleware\AdminPageGuard;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/', [HomeController::class, 'index']);
+Route::get('/unauthorized', [AdminController::class, 'unauthorized']);
+Route::get('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'register']);
+Route::get('/shop', [ShopController::class, 'index']);
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/dashboard/user', [UserDashboardController::class, 'index'])->name('dashboard');
 });
 
-require __DIR__.'/auth.php';
+Route::middleware(['auth', AdminPageGuard::class])->group(function () {
+    Route::get('/dashboard/admin', [AdminController::class, 'index']);
+    Route::get('/dashboard/admin/products', [AdminController::class, 'products']);
+    Route::get('/dashboard/admin/products/create', [AdminController::class, 'createProduct']);
+    Route::post('/dashboard/admin/products', [ProductController::class, 'create']);
+    Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('dashboard-admin');
+});
+
+require __DIR__ . '/auth.php';
