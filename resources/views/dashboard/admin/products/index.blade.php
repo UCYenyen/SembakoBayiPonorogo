@@ -1,14 +1,15 @@
 @extends('layouts.app')
-@section('title', 'Home')
+@section('title', 'Product Management')
 @section('content')
-    <x-pages.section title="Product Manager" extraClasses="bg-white">
-        <div class="w-[90%] mx-auto">
+    <x-pages.section title="" extraClasses="">
+        <div class="w-[80%] mx-auto">
             <!-- Header -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <div class="flex justify-between items-center">
+                <div class="flex justify-between items-center flex-col gap-4 sm:flex-row">
                     <h1 class="text-3xl font-bold">Product Management</h1>
-                    <a href="/dashboard/admin/products/create"
-                        class="bg-[#3F3142] text-white px-6 py-3 rounded-lg hover:bg-[#5C4B5E] transition-colors font-semibold">
+                    {{-- ✅ Gunakan route() helper --}}
+                    <a href="{{ route('admin.products.create') }}"
+                        class="bg-[#3F3142] w-full sm:w-fit text-white px-6 py-3 rounded-lg hover:bg-[#5C4B5E] transition-colors font-semibold">
                         + Add New Product
                     </a>
                 </div>
@@ -59,18 +60,15 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         @if ($product->is_hidden)
-                                            <span
-                                                class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">Hidden</span>
+                                            <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">Hidden</span>
                                         @else
-                                            <span
-                                                class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">Visible</span>
+                                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">Visible</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex justify-center items-center gap-2">
                                             <!-- Toggle Visibility -->
-                                            <form action="/dashboard/admin/products/{{ $product->id }}/toggle-visibility"
-                                                method="POST" class="inline">
+                                            <form action="{{ route('admin.products.toggle', $product) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit"
@@ -85,14 +83,14 @@
                                             </form>
 
                                             <!-- Edit -->
-                                            <a href="/dashboard/admin/products/{{ $product->id }}/edit"
+                                            <a href="{{ route('admin.products.edit', $product) }}"
                                                 class="p-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-lg transition-colors"
                                                 title="Edit Product">
                                                 <x-heroicon-o-pencil class="w-5 h-5" />
                                             </a>
 
                                             <!-- Delete -->
-                                            <form action="/dashboard/admin/products/{{ $product->id }}" method="POST"
+                                            <form action="{{ route('admin.products.delete', $product) }}" method="POST"
                                                 class="inline"
                                                 onsubmit="return confirm('Are you sure you want to delete this product?')">
                                                 @csrf
@@ -109,9 +107,8 @@
                             @empty
                                 <tr>
                                     <td colspan="9" class="px-4 py-8 text-center text-gray-500">
-                                        No products found. <a href="/dashboard/admin/products/create"
-                                            class="text-[#3F3142] hover:underline font-semibold">Add your first
-                                            product</a>
+                                        No products found. <a href="{{ route('admin.products.create') }}"
+                                            class="text-[#3F3142] hover:underline font-semibold">Add your first product</a>
                                     </td>
                                 </tr>
                             @endforelse

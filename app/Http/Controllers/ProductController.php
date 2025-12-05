@@ -19,7 +19,7 @@ class ProductController extends Controller
 
     public static function getLatestProducts($limit = 10)
     {
-        $products = Product::orderBy('created_at', 'desc')->take($limit)->get();
+        $products = Product::where('is_hidden', false)->orderBy('created_at', 'desc')->take($limit)->get();
         return $products;
     }
 
@@ -61,27 +61,25 @@ class ProductController extends Controller
             'price' => $request->price,
             'stocks' => $request->stocks,
             'image_url' => $path,
-            'image_public_id' => $imageName,
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
             'is_hidden' => false,
         ]);
 
-        return redirect('/dashboard/admin/products')->with('success', 'Product created successfully!');
+        return redirect('/dashboard/admin/products/create')->with('success', 'Product created successfully!');
     }
 
-    public function editProduct(Request $request, $id)
+    public function editProduct(Request $request, Product $product)
     {
         $request->validate([
             'name' => 'sometimes|required|string',
             'description' => 'sometimes|required|string',
             'price' => 'sometimes|required|numeric',
+            'stocks' => 'sometimes|required|integer',
             'image_file' => 'nullable|image|max:5120',
             'category_id' => 'sometimes|required|exists:categories,id',
             'brand_id' => 'sometimes|required|exists:brands,id',
         ]);
-
-        $product = Product::findOrFail($id);
 
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
@@ -90,8 +88,8 @@ class ProductController extends Controller
 
             try {
                 // Delete old image if it exists
-                if ($product->image_public_id) {
-                    Storage::disk('public')->delete('images/' . $product->image_public_id);
+                if ($product->image_url) {
+                    Storage::disk('public')->delete($product->image_url);
                 }
 
                 $webp = Image::read($file)->scale(width: 1280)
@@ -100,7 +98,6 @@ class ProductController extends Controller
                 Storage::disk('public')->put($path, $webp);
 
                 $product->image_url = $path;
-                $product->image_public_id = $imageName;
             } catch (\Throwable $e) {
                 return back()->withErrors('Image upload failed: ' . $e->getMessage());
             }
@@ -115,31 +112,28 @@ class ProductController extends Controller
             'brand_id',
         ]));
 
-        return redirect('/dashboard/admin/products')->with('success', 'Product updated successfully!');
+        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
     }
 
-    public function toggleVisibility($id)
+    public function toggleVisibility(Product $product)
     {
-        $product = Product::findOrFail($id);
         $product->is_hidden = !$product->is_hidden;
         $product->save();
         
         $status = $product->is_hidden ? 'hidden' : 'visible';
-        return redirect('/dashboard/admin/products')->with('success', "Product is now {$status}!");
+        return redirect()->route('admin.products.index')->with('success', "Product is now {$status}!");
     }
 
-    public function delete($id)
+    public function delete(Product $product)
     {
-        $product = Product::findOrFail($id);
-        
         // Delete image from storage
-        if ($product->image_public_id) {
-            Storage::disk('public')->delete('images/' . $product->image_public_id);
+        if ($product->image_url) {
+            Storage::disk('public')->delete($product->image_url);
         }
         
         $product->delete();
         
-        return redirect('/dashboard/admin/products')->with('success', 'Product deleted successfully!');
+        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
     }
 
     public function hideProduct($id)

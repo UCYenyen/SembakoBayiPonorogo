@@ -84,14 +84,6 @@
                             <input type="file" name="image_file" accept="image/*"  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent" required>
                     </div>
 
-                    <!-- Image Public ID -->
-                    <div>
-                        <label for="image_public_id" class="block text-sm font-medium mb-2">Image Public ID *</label>
-                        <input type="text" name="image_public_id" id="image_public_id" value="{{ old('image_public_id') }}" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent"
-                            placeholder="products/product-123">
-                    </div>
-
                     <!-- Buttons -->
                     <div class="flex gap-4 pt-4">
                         <button type="submit"

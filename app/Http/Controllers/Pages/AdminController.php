@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Pages;
+
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
@@ -13,7 +14,7 @@ class AdminController extends Controller
     {
         return view('unauthorized');
     }
-    
+
     public function index()
     {
         $currentUser = Auth::user();
@@ -21,25 +22,39 @@ class AdminController extends Controller
             'adminName' => $currentUser->name
         ]);
     }
-    
+
     public function products()
     {
         // Get all products with pagination
         $products = Product::with(['category', 'brand'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
-            
+
         return view('dashboard.admin.products.index', [
             'products' => $products
         ]);
     }
-    
+
     public function createProduct()
     {
         $categories = Category::all();
         $brands = Brand::all();
-        
+
         return view('dashboard.admin.products.create', [
+            'categories' => $categories,
+            'brands' => $brands
+        ]);
+    }
+    public function editProduct(Product $product)
+    {
+        // Product sudah ter-load dengan category dan brand otomatis
+        // Tidak perlu findOrFail() lagi
+        
+        $categories = Category::all();
+        $brands = Brand::all();
+        
+        return view('dashboard.admin.products.edit', [
+            'product' => $product,
             'categories' => $categories,
             'brands' => $brands
         ]);

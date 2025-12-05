@@ -17,7 +17,6 @@ class Product extends Model
         'is_hidden',
         'discount_amount',
         'is_on_sale',
-        'image_public_id',
         'image_url',
         'category_id',
         'brand_id',

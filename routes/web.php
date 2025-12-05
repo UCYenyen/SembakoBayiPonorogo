@@ -32,13 +32,14 @@ Route::middleware(['auth', AdminPageGuard::class])->group(function () {
     Route::get('/dashboard/admin', [AdminController::class, 'index']);
     
     // Product Routes
-    Route::get('/dashboard/admin/products', [AdminController::class, 'products']);
-    Route::get('/dashboard/admin/products/create', [AdminController::class, 'createProduct']);
-    Route::post('/dashboard/admin/products', [ProductController::class, 'create']);
-    Route::get('/dashboard/admin/products/{id}/edit', [ProductController::class, 'edit']);
-    Route::patch('/dashboard/admin/products/{id}', [ProductController::class, 'editProduct']);
-    Route::patch('/dashboard/admin/products/{id}/toggle-visibility', [ProductController::class, 'toggleVisibility']);
-    Route::delete('/dashboard/admin/products/{id}', [ProductController::class, 'delete']);
+    Route::get('/dashboard/admin/products', [AdminController::class, 'products'])->name('admin.products.index');
+    Route::get('/dashboard/admin/products/create', [AdminController::class, 'createProduct'])->name('admin.products.create');
+    Route::post('/dashboard/admin/products/create', [ProductController::class, 'create'])->name('admin.products.store');
+
+    Route::get('/dashboard/admin/products/{product}/edit', [AdminController::class, 'editProduct'])->name('admin.products.edit');
+    Route::put('/dashboard/admin/products/{product}', [ProductController::class, 'editProduct'])->name('admin.products.update');
+    Route::patch('/dashboard/admin/products/{product}/toggle-visibility', [ProductController::class, 'toggleVisibility'])->name('admin.products.toggle');
+    Route::delete('/dashboard/admin/products/{product}', [ProductController::class, 'delete'])->name('admin.products.delete');
 });
 
 require __DIR__ . '/auth.php';
