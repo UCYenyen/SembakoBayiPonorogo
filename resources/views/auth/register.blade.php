@@ -20,10 +20,8 @@
                 <div>
                     <x-input-label for="phone_number" :value="__('Phone Number')" />
                     <div class="relative flex items-center">
-                        {{-- ✅ Country code prefix (+62) --}}
-                        <span class="absolute left-3 text-gray-700 font-medium select-none pointer-events-none">+62</span>
-                        
-                        {{-- ✅ Input dengan padding kiri untuk country code --}}
+                        <span class="absolute left-3 text-gray-700 font-medium select-none pointer-events-none z-10">+62</span>
+                    
                         <input 
                             id="phone_number" 
                             name="phone_number" 
@@ -31,7 +29,7 @@
                             value="{{ old('phone_number') }}" 
                             required 
                             placeholder="812 3456 7890" 
-                            pattern="[0-9\s]*"
+                            maxlength="15"
                             inputmode="numeric"
                             class="block w-full pl-14 pr-4 py-2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                         />
@@ -42,7 +40,7 @@
                 <!-- Email Address -->
                 <div>
                     <x-input-label for="email" :value="__('Email')" />
-                    <x-text-input id="email" class="block mt-1 w-full" placeholder="example@example.com" type="email" name="email" :value="old('email')"
+                    <x-text-input id="email" class="block mt-1 w-full" placeholder="exampleuser@example.com" type="email" name="email" :value="old('email')"
                         required autocomplete="username" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
@@ -65,15 +63,15 @@
 
                 <!-- Submit Button -->
                 <div class="flex flex-col items-center gap-4 mt-6">
-                    <Button type="submit"
-                    class="w-full bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E] px-4 py-2">Register
-                </Button>
-
+                    <button type="submit"
+                        class="w-full bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E] px-4 py-2">
+                        Register
+                    </button>
 
                     <p class="text-center text-sm text-gray-600">
                        Already have an account?
                         <a href="/login"
-                            class="font-semibold text-interactible-primary-active hover:underline">
+                            class="font-semibold text-[#3F3142] hover:underline">
                            Login here
                         </a>
                     </p>
@@ -83,18 +81,88 @@
     </div>
 
     <script>
-        // Prevent non-numeric input on phone number field
-        document.getElementById('phone_number').addEventListener('input', function(e) {
-            // Allow only numbers, +, -, and spaces
-            this.value = this.value.replace(/[^0-9+\-\s]/g, '');
+        const phoneInput = document.getElementById('phone_number');
+
+        phoneInput.addEventListener('input', function(e) {
+            let cursorPosition = this.selectionStart;
+            let valueBeforeCursor = this.value.substring(0, cursorPosition);
+            
+            let value = this.value.replace(/\D/g, '');
+            
+            value = value.replace(/^0+/, '');
+            value = value.replace(/^62/, '');
+            
+            value = value.substring(0, 12);
+            
+            let formatted = '';
+            if (value.length > 0) {
+                formatted = value.substring(0, 3);
+                
+                if (value.length > 3) {
+                    formatted += ' ' + value.substring(3, 7);
+                }
+                
+                if (value.length > 7) {
+                    formatted += ' ' + value.substring(7);
+                }
+            }
+            
+            this.value = formatted;
+            
+            let spacesBeforeCursor = (valueBeforeCursor.match(/ /g) || []).length;
+            let spacesInFormatted = (formatted.substring(0, cursorPosition).match(/ /g) || []).length;
+            let newCursorPosition = cursorPosition + (spacesInFormatted - spacesBeforeCursor);
+            
+            this.setSelectionRange(newCursorPosition, newCursorPosition);
         });
 
-        // Prevent paste of non-numeric content
-        document.getElementById('phone_number').addEventListener('paste', function(e) {
+        phoneInput.addEventListener('paste', function(e) {
             e.preventDefault();
-            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-            const cleanedText = pastedText.replace(/[^0-9+\-\s]/g, '');
-            this.value = cleanedText;
+            let pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            
+            pastedText = pastedText.replace(/\D/g, '');
+            pastedText = pastedText.replace(/^0+/, '');
+            pastedText = pastedText.replace(/^62/, '');
+            pastedText = pastedText.substring(0, 12);
+            
+            let formatted = '';
+            if (pastedText.length > 0) {
+                formatted = pastedText.substring(0, 3);
+                if (pastedText.length > 3) {
+                    formatted += ' ' + pastedText.substring(3, 7);
+                }
+                if (pastedText.length > 7) {
+                    formatted += ' ' + pastedText.substring(7);
+                }
+            }
+            
+            this.value = formatted;
+            
+            this.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        phoneInput.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft' && this.selectionStart === 0) {
+                e.preventDefault();
+            }
+            if (e.key === 'Home') {
+                e.preventDefault();
+                this.setSelectionRange(0, 0);
+            }
+        });
+
+        // ✅ Prevent selection ke dalam prefix area
+        phoneInput.addEventListener('mousedown', function(e) {
+            if (this.selectionStart < 0) {
+                setTimeout(() => {
+                    this.setSelectionRange(0, 0);
+                }, 0);
+            }
+        });
+
+        // ✅ Clear validation saat user mengetik
+        phoneInput.addEventListener('input', function() {
+            this.setCustomValidity('');
         });
     </script>
 @endsection

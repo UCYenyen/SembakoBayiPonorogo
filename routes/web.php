@@ -19,12 +19,7 @@ Route::get('/shop', [ShopController::class, 'index']);
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard/user', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::get('/checkout', [PaymentController::class, 'showCheckout'])->name('payment.checkout');
-
-    // 2. Route untuk membuat transaksi Snap Token (POST, dipanggil via AJAX dari Blade)
     Route::post('/transaction/create', [PaymentController::class, 'createTransaction'])->name('payment.create');
-
-    // 3. Route untuk Notifikasi Midtrans (IPN). Ini HARUS POST.
-    // URL ini harus Anda daftarkan di Dashboard Midtrans Anda (Settings > Configuration > Payment Notification URL).
     Route::post('/midtrans/notification', [PaymentController::class, 'notificationHandler'])->name('midtrans.notification');
 });
 
