@@ -11,14 +11,19 @@
             @if (Auth::check())
                 <div x-data="{ open: false }" @click.away="open = false" class="relative">
                     <button @click="open = !open"
-                        class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        class="flex items-center justify-center p-1 rounded-full hover:bg-gray-100 transition-colors">
+                        {{-- ✅ Avatar saja, tanpa nama - BULAT SEMPURNA --}}
                         @if(Auth::user()->avatar)
                             <img src="{{ Auth::user()->avatar }}" 
                                  alt="{{ Auth::user()->name }}" 
-                                 class="w-9 h-9 rounded-full object-cover border-2 border-[#3F3142]"
-                                 referrerpolicy="no-referrer">
+                                 class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full object-cover border-2 border-[#3F3142]"
+                                 referrerpolicy="no-referrer"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="w-10 h-10 min-w-[40px] min-h-[40px] bg-[#3F3142] rounded-full items-center justify-center text-white text-sm font-semibold hidden">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            </div>
                         @else
-                            <div class="w-9 h-9 bg-[#3F3142] rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                            <div class="w-10 h-10 min-w-[40px] min-h-[40px] bg-[#3F3142] rounded-full flex items-center justify-center text-white text-sm font-semibold">
                                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                             </div>
                         @endif
@@ -29,32 +34,32 @@
                         class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl py-2 z-50">
                         
                         <div class="px-4 py-3 border-b border-gray-200">
-                            {{-- ✅ Avatar di Dropdown Header --}}
-                            <div class="flex items-center gap-3 mb-2">
+                            {{-- ✅ Avatar di Dropdown dengan info lengkap --}}
+                            <div class="flex items-center gap-3">
                                 @if(Auth::user()->avatar)
                                     <img src="{{ Auth::user()->avatar }}" 
                                          alt="{{ Auth::user()->name }}" 
-                                         class="w-12 h-12 rounded-full object-cover border-2 border-[#3F3142] flex-shrink-0"
+                                         class="w-12 h-12 min-w-[48px] min-h-[48px] rounded-full object-cover border-2 border-[#3F3142] flex-shrink-0"
                                          referrerpolicy="no-referrer"
                                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                    <div class="w-12 h-12 bg-[#3F3142] rounded-full items-center justify-center text-white font-bold flex-shrink-0 hidden">
+                                    <div class="w-12 h-12 min-w-[48px] min-h-[48px] bg-[#3F3142] rounded-full items-center justify-center text-white font-bold flex-shrink-0 hidden">
                                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                                     </div>
                                 @else
-                                    <div class="w-12 h-12 bg-[#3F3142] rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                                    <div class="w-12 h-12 min-w-[48px] min-h-[48px] bg-[#3F3142] rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
                                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                                     </div>
                                 @endif
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-semibold text-gray-900 truncate">{{ Auth::user()->name }}</p>
                                     <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
+                                    @if(Auth::user()->phone_number)
+                                        <p class="text-xs text-gray-500 truncate mt-0.5">
+                                            📱 {{ Auth::user()->phone_number }}
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
-                            @if(Auth::user()->phone_number)
-                                <p class="text-xs text-gray-500 truncate">
-                                    📱 {{ Auth::user()->phone_number }}
-                                </p>
-                            @endif
                         </div>
 
                         @if (Auth::user()->role === 'admin')
