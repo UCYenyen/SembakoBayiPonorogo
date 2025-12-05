@@ -32,7 +32,7 @@ class ProductController extends Controller
             'stocks' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
-            'image_file' => 'required|image|max:5120', // max 5 MB
+            'image_file' => 'required|image|max:5120',
         ]);
 
         $file = $request->file('image_file');
@@ -70,13 +70,35 @@ class ProductController extends Controller
             'name' => 'sometimes|required|string',
             'description' => 'sometimes|required|string',
             'price' => 'sometimes|required|numeric',
-            'image_url' => 'sometimes|required|string',
-            'image_public_id' => 'sometimes|required|string',
+            'image_file' => 'nullable|image|max:5120',
             'category_id' => 'sometimes|required|exists:categories,id',
             'brand_id' => 'sometimes|required|exists:brands,id',
         ]);
 
         $product = Product::findOrFail($id);
+
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $imageName = time() . '-' . uniqid() . '.webp';
+            $path = 'images/' . $imageName;
+
+            try {
+            // Delete old image if it exists
+            if ($product->image_public_id) {
+                Storage::disk('public')->delete('images/' . $product->image_public_id);
+            }
+
+            $webp = Image::read($file)->scale(width: 1280)
+                ->encode(new WebpEncoder(quality: 85));
+
+            Storage::disk('public')->put($path, $webp);
+
+            $product->image_url = asset('storage/' . $path);
+            $product->image_public_id = $imageName;
+            } catch (\Throwable $e) {
+            return back()->withErrors('Image upload failed: ' . $e->getMessage());
+            }
+        }
 
         $product->update($request->only([
             'name',
