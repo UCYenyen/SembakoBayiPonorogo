@@ -24,6 +24,9 @@ jobs:
             
             # Navigate to the deployment directory 
             cd ${{ secrets.DEPLOY_PATH }}
+            git checkout main
+
+            git status
             
             git fetch origin main
 
