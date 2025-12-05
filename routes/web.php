@@ -48,3 +48,5 @@ Route::middleware(['auth', 'profile.complete', AdminPageGuard::class])->group(fu
     Route::patch('/dashboard/admin/products/{product}/toggle-visibility', [ProductController::class, 'toggleVisibility'])->name('admin.products.toggle');
     Route::delete('/dashboard/admin/products/{product}', [ProductController::class, 'delete'])->name('admin.products.delete');
 });
+
+Route::get('/api/search', [ProductController::class, 'liveSearch'])->name('api.search');

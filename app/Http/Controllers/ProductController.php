@@ -156,4 +156,31 @@ class ProductController extends Controller
         $product->save();
         return redirect('/dashboard/admin/products')->with('success', 'Product set on sale!');
     }
+
+    /**
+     * Live search API endpoint - Optimized for speed
+     */
+    public function liveSearch(Request $request)
+    {
+        $query = $request->input('q', '');
+
+        // Validate minimum query length
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        // Optimized query with indexes and eager loading
+        $products = Product::select(['id', 'name', 'price', 'stocks', 'image_url', 'category_id', 'brand_id'])
+            ->with(['category:id,name', 'brand:id,name']) // Only select needed fields
+            ->where('is_hidden', false)
+            ->where(function($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('description', 'like', "%{$query}%");
+            })
+            ->orderBy('name', 'asc')
+            ->limit(10)
+            ->get();
+
+        return response()->json($products);
+    }
 }

@@ -1,6 +1,6 @@
-<section class="w-full min-h-[95vh] sm:min-h-[80vh] relative z-1 flex justify-center">
+<section class="w-full min-h-[95vh] sm:min-h-[80vh] md:min-h-[90vh] relative z-1 flex justify-center">
     <div class="w-[80%]">
-        <div class="hidden md:flex justify-center items-center">
+        <div class="hidden xl:flex justify-center items-center">
             <div class="flex flex-col gap-8 basis-[40%]">
                 <h1 class="text-7xl font-bold text-[#3F3142]">
                     Get the best
@@ -27,7 +27,7 @@
                     class="w-full max-w-full h-auto object-contain">
             </div>
         </div>
-        <div class="flex md:hidden h-full items-center justify-center text-center flex-col gap-8">
+        <div class="flex xl:hidden h-full items-center justify-center text-center flex-col gap-8">
             <img src="/images/home/baby-image.svg" alt="sembako bayi ponorogo baby image"
                 class="w-full max-w-full h-auto object-contain">
             <h1 class="text-5xl font-bold text-[#3F3142]">

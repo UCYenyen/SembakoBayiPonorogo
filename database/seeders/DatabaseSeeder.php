@@ -10,11 +10,10 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // ✅ Admin user dengan Google ID dummy
-        
         $this->call([
             CategorySeeder::class,
             BrandsSeeder::class,
+            ProductSeeder::class,
         ]);
     }
 }

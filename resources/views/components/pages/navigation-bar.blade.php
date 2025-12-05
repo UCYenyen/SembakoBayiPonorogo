@@ -3,7 +3,9 @@
         <a href="/" class="flex">
             <h1 class="text-2xl font-bold">SBP</h1>
         </a>
-        <x-pages.search-bar route="/" placeholder="Search..." extraClasses="hidden"/>
+        
+        <x-pages.search-bar route="/" placeholder="Search products..." extraClasses="hidden md:block flex-1"/>
+        
         <div class="flex gap-4 justify-center items-center text-xl">
             <a href="/shop"><x-heroicon-o-shopping-bag class="w-6 h-6 text-[#3F3142]"/></a>
             <a href="/cart"><x-heroicon-o-shopping-cart class="w-6 h-6 text-[#3F3142]" /></a>
@@ -98,7 +100,7 @@
                         <path class="group-hover:fill-white transition-colors" fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                         <path class="group-hover:fill-white transition-colors" fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    <span class="hidden md:inline font-semibold">Login with Google</span>
+                    <span class="hidden md:inline font-semibold">Login</span>
                     <span class="md:hidden font-semibold">Login</span>
                 </a>
             @endif
