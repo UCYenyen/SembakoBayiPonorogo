@@ -35,10 +35,8 @@ class ProductController extends Controller
             'image_file' => 'required|image|max:5120', // max 5 MB
         ]);
 
-        // 🔹 Upload + convert to WebP
         $file = $request->file('image_file');
         $imageName = time() . '-' . uniqid() . '.webp';
-        // ✅ Path yang benar: 'images/' akan menyimpan ke storage/app/public/images/
         $path = 'images/' . $imageName;
 
         try {
@@ -56,7 +54,6 @@ class ProductController extends Controller
             'description' => $request->description,
             'price' => $request->price,
             'stocks' => $request->stocks,
-            // ✅ Gunakan asset() helper
             'image_url' => asset('storage/' . $path),
             'image_public_id' => $imageName,
             'category_id' => $request->category_id,
