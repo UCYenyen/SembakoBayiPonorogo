@@ -14,14 +14,18 @@ class HomeController extends Controller
         $search = $request->input('search');
         
         if ($search) {
-            $products = Product::where('name', 'like', '%' . $search . '%')
-                ->orWhere('description', 'like', '%' . $search . '%')
+            $products = Product::with(['category', 'brand'])
+                ->where(function($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                          ->orWhere('description', 'like', "%{$search}%");
+                })
+                ->where('is_hidden', false) 
+                ->limit(20)
                 ->get();
         } else {
-            $products = Product::all();
+            $products = collect();
         }
         
-        // Get latest products for home section
         $latestProducts = ProductController::getLatestProducts(8);
         
         return view('welcome', [

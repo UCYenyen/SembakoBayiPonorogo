@@ -1,28 +1,27 @@
 <?php
 
-namespace App\View\Components;
+namespace App\Http\Controllers;
 
 use App\Models\Product;
-use Closure;
-use Illuminate\Contracts\View\View;
-use Illuminate\View\Component;
 
-class ProductSection extends Component
+class ProductController extends Controller
 {
-    public $products;
-    /**
-     * Create a new component instance.
-     */
-    public function __construct($products = [])
+    public static function getAllProducts()
     {
-        $this->products = $products;
+        return Product::with(['category', 'brand'])
+            ->get();
+    }
+    public static function getLatestProducts($limit = 10)
+    {
+        return Product::with(['category', 'brand'])
+            ->where('is_hidden', false)
+            ->latest('created_at')
+            ->limit($limit)
+            ->get();
     }
 
-    /**
-     * Get the view / contents that represent the component.
-     */
-    public function render(): View|Closure|string
+    public function getProductById(Product $product)
     {
-        return view('components.pages.home.product-section');
+        return view('product-details', ['product' => $product]);
     }
 }

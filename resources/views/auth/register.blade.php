@@ -3,8 +3,8 @@
 
 @section('content')
     <x-auth-session-status class="mb-4" :status="session('status')" />
-    <div class="relative min-h-screen w-screen overflow-hidden flex flex-col justify-center items-center py-12">
-        <div class="relative z-10 bg-white rounded-lg shadow-lg p-8 md:p-12 w-full max-w-[90%] sm:max-w-md mx-4">
+    <div class="relative min-h-[90vh] sm:min-h-[80vh] w-screen overflow-hidden flex flex-col justify-center items-center py-12">
+        <div class="relative z-10 bg-white rounded-lg shadow-lg p-8 md:p-12 w-full max-w-[80%] sm:max-w-md mx-4">
             <form method="POST" action="{{ route('register') }}" class="space-y-4">
                 @csrf
 
@@ -19,16 +19,30 @@
                 <!-- Phone Number -->
                 <div>
                     <x-input-label for="phone_number" :value="__('Phone Number')" />
-                    <x-text-input id="phone_number" class="block mt-1 w-full" type="tel" name="phone_number"
-                        :value="old('phone_number')" required placeholder="+62 XXX XXXX XXXX" pattern="[0-9+\-\s]*"
-                        inputmode="numeric" />
+                    <div class="relative flex items-center">
+                        {{-- ✅ Country code prefix (+62) --}}
+                        <span class="absolute left-3 text-gray-700 font-medium select-none pointer-events-none">+62</span>
+                        
+                        {{-- ✅ Input dengan padding kiri untuk country code --}}
+                        <input 
+                            id="phone_number" 
+                            name="phone_number" 
+                            type="tel" 
+                            value="{{ old('phone_number') }}" 
+                            required 
+                            placeholder="812 3456 7890" 
+                            pattern="[0-9\s]*"
+                            inputmode="numeric"
+                            class="block w-full pl-14 pr-4 py-2 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                        />
+                    </div>
                     <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
                 </div>
 
                 <!-- Email Address -->
                 <div>
                     <x-input-label for="email" :value="__('Email')" />
-                    <x-text-input id="email" class="block mt-1 w-full" placeholder="exampleuser@example.com" type="email" name="email" :value="old('email')"
+                    <x-text-input id="email" class="block mt-1 w-full" placeholder="example@example.com" type="email" name="email" :value="old('email')"
                         required autocomplete="username" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
