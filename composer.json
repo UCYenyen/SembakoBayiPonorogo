@@ -16,6 +16,7 @@
         "blade-ui-kit/blade-icons": "^1.8",
         "codeat3/blade-eos-icons": "^1.15",
         "codeat3/blade-google-material-design-icons": "^1.20",
+        "guzzlehttp/guzzle": "^7.10",
         "intervention/image": "^3.11",
         "intervention/image-laravel": "^1.5",
         "laravel/framework": "^12.0",
