@@ -186,6 +186,10 @@ class PaymentController extends Controller
             $orderId = 'TRX-' . $transaction->id . '-' . time();
             
             // ✅ Prepare Midtrans parameters dengan address yang sudah disesuaikan
+            // ✅ Get selected payment method
+            $payment = Payment::findOrFail($request->payment_id);
+
+            // Prepare Midtrans parameters
             $params = [
                 'transaction_details' => [
                     'order_id' => $orderId,
@@ -198,20 +202,32 @@ class PaymentController extends Controller
                     'phone' => $user->phone_number ?? '081234567890',
                     'billing_address' => [
                         'first_name' => substr($user->name, 0, 50),
-                        'address' => substr($address->detail, 0, 200), // ✅ Gunakan detail langsung
+                        'address' => substr($address->detail, 0, 200),
                         'city' => substr($city, 0, 50),
                         'postal_code' => substr($postalCode, 0, 10),
                         'country_code' => 'IDN',
                     ],
                     'shipping_address' => [
                         'first_name' => substr($user->name, 0, 50),
-                        'address' => substr($address->detail, 0, 200), // ✅ Gunakan detail langsung
+                        'address' => substr($address->detail, 0, 200),
                         'city' => substr($city, 0, 50),
                         'postal_code' => substr($postalCode, 0, 10),
                         'country_code' => 'IDN',
                     ],
                 ],
             ];
+
+            // ✅ Set enabled payments using model method
+            $enabledPayments = $payment->getEnabledPayments();
+            if (!empty($enabledPayments)) {
+                $params['enabled_payments'] = $enabledPayments;
+                
+                Log::info('Enabled Payments Set:', [
+                    'payment_method' => $payment->method,
+                    'payment_type' => $payment->getPaymentType(),
+                    'enabled_payments' => $enabledPayments
+                ]);
+            }
 
             Log::info('Midtrans Params:', $params);
 
