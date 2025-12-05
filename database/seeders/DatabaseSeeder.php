@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,6 +12,9 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             BrandsSeeder::class,
             ProductSeeder::class,
+            PaymentSeeder::class,
+            DeliverySeeder::class,
+            AddressSeeder::class,
         ]);
     }
 }

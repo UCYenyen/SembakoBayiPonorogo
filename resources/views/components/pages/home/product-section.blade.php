@@ -3,6 +3,7 @@
         <div class="w-[80%] grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             @foreach($products as $product)
                 <x-pages.product-card 
+                    :product="$product"
                     productImage="{{ $product->image_url }}" 
                     productName="{{ $product->name }}"
                     rating="4.5" 

@@ -8,7 +8,7 @@
         
         <div class="flex gap-4 justify-center items-center text-xl">
             <a href="/shop"><x-heroicon-o-shopping-bag class="w-6 h-6 text-[#3F3142]"/></a>
-            <a href="/cart"><x-heroicon-o-shopping-cart class="w-6 h-6 text-[#3F3142]" /></a>
+            <a href="{{ route('cart.index') }}"><x-heroicon-o-shopping-cart class="w-6 h-6 text-[#3F3142]" /></a>
             
             @if (Auth::check())
                 <div x-data="{ open: false }" @click.away="open = false" class="relative">
@@ -77,8 +77,13 @@
                             </a>
                         @endif
 
-                        <a href="/shop/cart" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <a href="{{ route('cart.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             My Cart
+                        </a>
+
+                        {{-- ✅ Add Address Link --}}
+                        <a href="{{ route('user.addresses.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            My Addresses
                         </a>
 
                         <form method="POST" action="/logout" class="block">

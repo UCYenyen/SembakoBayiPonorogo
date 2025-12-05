@@ -157,21 +157,16 @@ class ProductController extends Controller
         return redirect('/dashboard/admin/products')->with('success', 'Product set on sale!');
     }
 
-    /**
-     * Live search API endpoint - Optimized for speed
-     */
     public function liveSearch(Request $request)
     {
         $query = $request->input('q', '');
 
-        // Validate minimum query length
         if (strlen($query) < 2) {
             return response()->json([]);
         }
 
-        // Optimized query with indexes and eager loading
         $products = Product::select(['id', 'name', 'price', 'stocks', 'image_url', 'category_id', 'brand_id'])
-            ->with(['category:id,name', 'brand:id,name']) // Only select needed fields
+            ->with(['category:id,name', 'brand:id,name'])
             ->where('is_hidden', false)
             ->where(function($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
@@ -182,5 +177,21 @@ class ProductController extends Controller
             ->get();
 
         return response()->json($products);
+    }
+
+    public function showDetails(Product $product)
+    {
+        $similarProducts = Product::where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->where('is_hidden', false)
+            ->with(['category', 'brand'])
+            ->limit(4)
+            ->get();
+
+
+        return view('shop.product-detail', [
+            'product' => $product,
+            'similarProducts' => $similarProducts,
+        ]);
     }
 }
