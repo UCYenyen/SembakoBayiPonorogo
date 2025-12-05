@@ -16,7 +16,7 @@
                     </div>
                 @endif
 
-                <form action="/dashboard/admin/products" method="POST" class="space-y-6">
+                <form action="/dashboard/admin/products" method="POST" class="space-y-6" enctype="multipart/form-data">
                     @csrf
                     
                     <!-- Product Name -->
@@ -78,9 +78,10 @@
                     <!-- Image URL -->
                     <div>
                         <label for="image_url" class="block text-sm font-medium mb-2">Image URL *</label>
-                        <input type="text" name="image_url" id="image_url" value="{{ old('image_url') }}" required
+                        {{-- <input type="text" name="image_url" id="image_url" value="{{ old('image_url') }}" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent"
-                            placeholder="https://example.com/image.jpg">
+                            placeholder="https://example.com/image.jpg"> --}}
+                            <input type="file" name="image_file" accept="image/*"  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent" required>
                     </div>
 
                     <!-- Image Public ID -->

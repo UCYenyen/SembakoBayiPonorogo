@@ -1,5 +1,5 @@
 <form method="POST" class="flex flex-col items-center justify-center bg-[#F4F5FF] rounded-xl shadow-lg p-3 sm:p-4 md:p-6 gap-3 sm:gap-4 md:gap-5 w-full max-w-sm mx-auto">
-    <img src="{{ $productImage }}" alt="productImage" class="w-full h-auto max-w-[200px] sm:max-w-[250px] md:max-w-full object-contain">
+    <img src="{{ asset($productImage) }}" alt="productImage" class="w-full h-auto max-w-[200px] sm:max-w-[250px] md:max-w-full object-contain">
     <div class="flex flex-col justify-center items-center gap-2 sm:gap-3 w-full">
         <h3 class="font-bold text-lg sm:text-xl md:text-2xl text-center">{{ $productName }}</h3>
         <div class="flex justify-center items-center gap-1">
