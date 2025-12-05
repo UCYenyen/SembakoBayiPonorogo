@@ -16,7 +16,7 @@
                 </x-admin-menu-chooser>
                 <x-admin-menu-chooser
                     extraClasses="flex flex-col justify-center items-center w-full h-full p-4 gap-4 bg-white shadow-lg rounded-lg"
-                    link="/dashboard/admin/products/create" title="Atur Produk" description="Tambah, ubah, atau hapus produk dari gudang.">
+                    link="/dashboard/admin/products" title="Atur Produk" description="Tambah, ubah, atau hapus produk dari gudang.">
                     <x-gmdi-inventory-2-o class="text-xl max-w-[84px]"/>
                 </x-admin-menu-chooser>
                 <x-admin-menu-chooser

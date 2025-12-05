@@ -60,8 +60,7 @@ class ProductController extends Controller
             'description' => $request->description,
             'price' => $request->price,
             'stocks' => $request->stocks,
-            // ✅ Simpan HANYA path relatif, bukan full URL
-            'image_url' => $path, // 'images/1764898803-693237f38218d.webp'
+            'image_url' => $path,
             'image_public_id' => $imageName,
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
@@ -100,7 +99,6 @@ class ProductController extends Controller
 
                 Storage::disk('public')->put($path, $webp);
 
-                // ✅ Simpan HANYA path relatif
                 $product->image_url = $path;
                 $product->image_public_id = $imageName;
             } catch (\Throwable $e) {
@@ -112,13 +110,36 @@ class ProductController extends Controller
             'name',
             'description',
             'price',
-            'image_url',
-            'image_public_id',
+            'stocks',
             'category_id',
             'brand_id',
         ]));
 
-        return redirect('/');
+        return redirect('/dashboard/admin/products')->with('success', 'Product updated successfully!');
+    }
+
+    public function toggleVisibility($id)
+    {
+        $product = Product::findOrFail($id);
+        $product->is_hidden = !$product->is_hidden;
+        $product->save();
+        
+        $status = $product->is_hidden ? 'hidden' : 'visible';
+        return redirect('/dashboard/admin/products')->with('success', "Product is now {$status}!");
+    }
+
+    public function delete($id)
+    {
+        $product = Product::findOrFail($id);
+        
+        // Delete image from storage
+        if ($product->image_public_id) {
+            Storage::disk('public')->delete('images/' . $product->image_public_id);
+        }
+        
+        $product->delete();
+        
+        return redirect('/dashboard/admin/products')->with('success', 'Product deleted successfully!');
     }
 
     public function hideProduct($id)
@@ -126,7 +147,7 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $product->is_hidden = true;
         $product->save();
-        return redirect('/');
+        return redirect('/dashboard/admin/products')->with('success', 'Product hidden successfully!');
     }
 
     public function setProductOnSale(Request $request, $id)
@@ -139,13 +160,6 @@ class ProductController extends Controller
         $product->is_on_sale = true;
         $product->discount_amount = $request->discount_amount;
         $product->save();
-        return redirect('/');
-    }
-
-    public function delete($id)
-    {
-        $product = Product::findOrFail($id);
-        $product->delete();
-        return redirect('/');
+        return redirect('/dashboard/admin/products')->with('success', 'Product set on sale!');
     }
 }

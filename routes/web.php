@@ -30,10 +30,15 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', AdminPageGuard::class])->group(function () {
     Route::get('/dashboard/admin', [AdminController::class, 'index']);
+    
+    // Product Routes
     Route::get('/dashboard/admin/products', [AdminController::class, 'products']);
     Route::get('/dashboard/admin/products/create', [AdminController::class, 'createProduct']);
     Route::post('/dashboard/admin/products', [ProductController::class, 'create']);
-    Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('dashboard-admin');
+    Route::get('/dashboard/admin/products/{id}/edit', [ProductController::class, 'edit']);
+    Route::patch('/dashboard/admin/products/{id}', [ProductController::class, 'editProduct']);
+    Route::patch('/dashboard/admin/products/{id}/toggle-visibility', [ProductController::class, 'toggleVisibility']);
+    Route::delete('/dashboard/admin/products/{id}', [ProductController::class, 'delete']);
 });
 
 require __DIR__ . '/auth.php';

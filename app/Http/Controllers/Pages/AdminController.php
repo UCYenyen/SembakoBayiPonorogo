@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\Product;
 
 class AdminController extends Controller
 {
@@ -23,7 +24,14 @@ class AdminController extends Controller
     
     public function products()
     {
-        return view('dashboard.admin.products.index');
+        // Get all products with pagination
+        $products = Product::with(['category', 'brand'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+            
+        return view('dashboard.admin.products.index', [
+            'products' => $products
+        ]);
     }
     
     public function createProduct()
