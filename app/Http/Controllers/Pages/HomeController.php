@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -20,8 +21,12 @@ class HomeController extends Controller
             $products = Product::all();
         }
         
+        // Get latest products for home section
+        $latestProducts = ProductController::getLatestProducts(8);
+        
         return view('welcome', [
             'products' => $products,
+            'latestProducts' => $latestProducts,
             'searchQuery' => $search
         ]);
     }

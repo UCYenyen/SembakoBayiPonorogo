@@ -16,7 +16,7 @@
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             @foreach($products as $product)
                                 <x-pages.product-card 
-                                    productImage="{{ $product->image_url }}" 
+                                   productImage="{{ $product->image_url }}" 
                                     productName="{{ $product->name }}"
                                     rating="4.5" 
                                     price="{{ number_format($product->price, 0, ',', '.') }}" />
@@ -37,7 +37,7 @@
                 </div>
             </section>
         @else
-            <x-pages.home.product-section />
+             <x-pages.home.product-section :products="$latestProducts" />
             <x-pages.home.testimonials-section />
         @endif
     </main>

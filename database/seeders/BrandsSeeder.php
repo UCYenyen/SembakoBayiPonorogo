@@ -14,7 +14,10 @@ class BrandsSeeder extends Seeder
     public function run(): void
     {
         Brand::create([
-            'name' => 'Kontolodon',
+            'name' => 'Yummy Bites',
+        ]);
+        Brand::create([
+            'name' => 'Mamaku Bites',
         ]);
     }
 }

@@ -17,6 +17,12 @@ class ProductController extends Controller
         return $products;
     }
 
+    public static function getLatestProducts($limit = 10)
+    {
+        $products = Product::orderBy('created_at', 'desc')->take($limit)->get();
+        return $products;
+    }
+
     public function getProductById($id)
     {
         $product = Product::findOrFail($id);
@@ -54,7 +60,8 @@ class ProductController extends Controller
             'description' => $request->description,
             'price' => $request->price,
             'stocks' => $request->stocks,
-            'image_url' => asset('storage/' . $path),
+            // ✅ Simpan HANYA path relatif, bukan full URL
+            'image_url' => $path, // 'images/1764898803-693237f38218d.webp'
             'image_public_id' => $imageName,
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
@@ -83,20 +90,21 @@ class ProductController extends Controller
             $path = 'images/' . $imageName;
 
             try {
-            // Delete old image if it exists
-            if ($product->image_public_id) {
-                Storage::disk('public')->delete('images/' . $product->image_public_id);
-            }
+                // Delete old image if it exists
+                if ($product->image_public_id) {
+                    Storage::disk('public')->delete('images/' . $product->image_public_id);
+                }
 
-            $webp = Image::read($file)->scale(width: 1280)
-                ->encode(new WebpEncoder(quality: 85));
+                $webp = Image::read($file)->scale(width: 1280)
+                    ->encode(new WebpEncoder(quality: 85));
 
-            Storage::disk('public')->put($path, $webp);
+                Storage::disk('public')->put($path, $webp);
 
-            $product->image_url = asset('storage/' . $path);
-            $product->image_public_id = $imageName;
+                // ✅ Simpan HANYA path relatif
+                $product->image_url = $path;
+                $product->image_public_id = $imageName;
             } catch (\Throwable $e) {
-            return back()->withErrors('Image upload failed: ' . $e->getMessage());
+                return back()->withErrors('Image upload failed: ' . $e->getMessage());
             }
         }
 
