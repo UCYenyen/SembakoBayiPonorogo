@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('deliveries', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('courier_code')->unique()->after('name');
             $table->timestamps();
         });
     }
@@ -23,6 +24,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('deliveries', function (Blueprint $table) {
+            $table->dropColumn('courier_code');
+        });
         Schema::dropIfExists('deliveries');
     }
 };

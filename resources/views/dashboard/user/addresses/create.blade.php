@@ -64,6 +64,9 @@
                         <p class="text-xs text-gray-500 mt-1">You can edit the address if needed</p>
                     </div>
 
+                    <!-- Add hidden input for city_name -->
+                    <input type="hidden" name="city_name" id="city_name" required>
+
                     <!-- Buttons -->
                     <div class="flex gap-4 pt-4">
                         <button 
@@ -184,7 +187,30 @@
                 if (status === 'OK' && results[0]) {
                     const address = results[0].formatted_address;
                     document.getElementById('detail').value = address;
-                    document.getElementById('detail').readOnly = false; // Allow manual edit
+                    document.getElementById('detail').readOnly = false;
+                    
+                    // ✅ Extract city name dari address components
+                    const addressComponents = results[0].address_components;
+                    let cityName = '';
+                    
+                    // Cari city/administrative_area_level_2/locality
+                    for (let component of addressComponents) {
+                        if (component.types.includes('administrative_area_level_2') ||
+                            component.types.includes('locality')) {
+                            cityName = component.long_name;
+                            break;
+                        }
+                    }
+                    
+                    if (cityName) {
+                        document.getElementById('city_name').value = cityName;
+                        console.log('City extracted:', cityName);
+                    } else {
+                        alert('Could not detect city from this location. Please select a more specific address.');
+                        document.getElementById('submit-btn').disabled = true;
+                        return;
+                    }
+                    
                     document.getElementById('submit-btn').disabled = false;
                 } else {
                     alert('Cannot get address: ' + status);

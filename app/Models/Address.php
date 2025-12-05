@@ -11,6 +11,8 @@ class Address extends Model
     
     protected $fillable = [
         'detail',
+        'city_id',
+        'city_name',
         'is_default',
         'user_id',
     ];
@@ -24,15 +26,12 @@ class Address extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Set this address as default and unset others
     public function setAsDefault()
     {
-        // Unset all other addresses as default for this user
         self::where('user_id', $this->user_id)
             ->where('id', '!=', $this->id)
             ->update(['is_default' => false]);
 
-        // Set this address as default
         $this->update(['is_default' => true]);
     }
 }

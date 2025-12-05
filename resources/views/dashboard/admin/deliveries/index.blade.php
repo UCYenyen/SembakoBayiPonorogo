@@ -125,6 +125,194 @@
                     </a>
                 </div>
             @endif
+
+            <!-- Shipping Address -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
+                <h2 class="text-2xl font-bold mb-4">Shipping Address</h2>
+                
+                @if($addresses->count() > 0)
+                    <div class="space-y-3">
+                        @foreach($addresses as $address)
+                            <label class="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {{ $address->is_default ? 'border-[#3F3142] bg-[#FFF3F3]' : '' }}">
+                                <input type="radio" 
+                                       name="address_id" 
+                                       value="{{ $address->id }}" 
+                                       data-city-id="{{ $address->city_id }}"
+                                       class="mt-1 address-radio" 
+                                       {{ $address->is_default ? 'checked' : '' }} 
+                                       required
+                                       onchange="loadShippingOptions(this.value)">
+                                <div class="flex-1">
+                                    @if($address->is_default)
+                                        <span class="inline-block px-2 py-1 bg-[#3F3142] text-white text-xs font-semibold rounded mb-2">
+                                            Default
+                                        </span>
+                                    @endif
+                                    <p class="text-gray-700 leading-relaxed">{{ $address->detail }}</p>
+                                    @if($address->city_name)
+                                        <p class="text-xs text-gray-500 mt-1">📍 {{ $address->city_name }}</p>
+                                    @endif
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-gray-500">No address found. Please add an address first.</p>
+                    <a href="{{ route('user.addresses.create') }}" 
+                       class="inline-block mt-4 px-6 py-2 bg-[#3F3142] text-white rounded-lg hover:bg-[#5C4B5E]">
+                        Add Address
+                    </a>
+                @endif
+            </div>
+
+            <!-- Delivery Method -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mt-4">
+                <h2 class="text-2xl font-bold mb-4">Delivery Method</h2>
+                
+                <div id="shipping-options-container">
+                    <p class="text-gray-500 text-center py-4">
+                        <svg class="animate-spin h-5 w-5 mx-auto mb-2 text-[#3F3142]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading shipping options...
+                    </p>
+                </div>
+                
+                <input type="hidden" name="shipping_cost" id="shipping_cost" value="0">
+                <input type="hidden" name="courier_service" id="courier_service">
+            </div>
+
+            <!-- Order Summary -->
+            <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24 mt-4">
+                <h2 class="text-2xl font-bold mb-6">Order Summary</h2>
+
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span class="font-semibold">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Tax (11%)</span>
+                        <span class="font-semibold">Rp{{ number_format($tax, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Shipping</span>
+                        <span class="font-semibold" id="shipping-cost-display">Rp0</span>
+                    </div>
+                </div>
+
+                <div class="border-t pt-4 mb-6">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xl font-bold">Total</span>
+                        <span class="text-2xl font-bold text-[#3F3142]" id="total-display">
+                            Rp{{ number_format($total, 0, ',', '.') }}
+                        </span>
+                    </div>
+                </div>
+
+                <button type="button"
+                        id="pay-button"
+                        class="w-full bg-[#3F3142] text-white py-4 rounded-lg font-bold text-lg hover:bg-[#5C4B5E] transition-colors">
+                    Proceed to Payment
+                </button>
+
+                <div id="payment-status" class="mt-4"></div>
+            </div>
         </div>
     </main>
+
+    <script>
+    const subtotal = {{ $subtotal }};
+    const tax = {{ $tax }};
+    let selectedShippingCost = 0;
+
+    // Load shipping options when address changes
+    function loadShippingOptions(addressId) {
+        const container = document.getElementById('shipping-options-container');
+        container.innerHTML = `
+            <p class="text-gray-500 text-center py-4">
+                <svg class="animate-spin h-5 w-5 mx-auto mb-2 text-[#3F3142]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading shipping options...
+            </p>
+        `;
+
+        fetch('/api/shipping-options', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ address_id: addressId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.shipping_options.length > 0) {
+                let html = '<div class="space-y-3">';
+                
+                data.shipping_options.forEach((option, index) => {
+                    html += `
+                        <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${index === 0 ? 'border-[#3F3142] bg-[#FFF3F3]' : ''}">
+                            <input type="radio" 
+                                   name="shipping_option" 
+                                   value="${option.cost}"
+                                   data-service="${option.display_name}"
+                                   ${index === 0 ? 'checked' : ''}
+                                   onchange="updateShippingCost(${option.cost}, '${option.display_name}')"
+                                   required>
+                            <div class="flex-1">
+                                <p class="font-semibold">${option.display_name}</p>
+                                <p class="text-xs text-gray-500">Est: ${option.etd} days</p>
+                                <p class="font-bold text-[#3F3142] mt-1">Rp${formatNumber(option.cost)}</p>
+                            </div>
+                        </label>
+                    `;
+                });
+                
+                html += '</div>';
+                container.innerHTML = html;
+                
+                // Auto-select first option
+                if (data.shipping_options[0]) {
+                    updateShippingCost(data.shipping_options[0].cost, data.shipping_options[0].display_name);
+                }
+            } else {
+                container.innerHTML = '<p class="text-red-500 text-center py-4">No shipping options available</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            container.innerHTML = '<p class="text-red-500 text-center py-4">Failed to load shipping options</p>';
+        });
+    }
+
+    function updateShippingCost(cost, service) {
+        selectedShippingCost = cost;
+        
+        document.getElementById('shipping_cost').value = cost;
+        document.getElementById('courier_service').value = service;
+        document.getElementById('shipping-cost-display').textContent = 'Rp' + formatNumber(cost);
+        
+        const total = subtotal + tax + cost;
+        document.getElementById('total-display').textContent = 'Rp' + formatNumber(total);
+    }
+
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Load default shipping options on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const defaultAddress = document.querySelector('.address-radio:checked');
+        if (defaultAddress) {
+            loadShippingOptions(defaultAddress.value);
+        }
+    });
+
+    // Rest of payment script...
+    </script>
 @endsection

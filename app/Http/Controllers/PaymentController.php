@@ -11,21 +11,25 @@ use App\Models\TransactionItem;
 use App\Models\Payment;
 use App\Models\Delivery;
 use App\Models\Address;
+use App\Services\RajaOngkirService;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
 
 class PaymentController extends Controller
 {
-    public function __construct()
+    protected $rajaOngkir;
+
+    public function __construct(RajaOngkirService $rajaOngkir)
     {
+        $this->rajaOngkir = $rajaOngkir;
+
         // Set Midtrans configuration
         Config::$serverKey = config('midtrans.server_key');
         Config::$isProduction = config('midtrans.is_production', false);
         Config::$isSanitized = config('midtrans.is_sanitized', true);
         Config::$is3ds = config('midtrans.is_3ds', true);
 
-        // Log configuration for debugging
         Log::info('Midtrans Config:', [
             'server_key_exists' => !empty(config('midtrans.server_key')),
             'server_key_prefix' => substr(config('midtrans.server_key'), 0, 10),
@@ -37,7 +41,6 @@ class PaymentController extends Controller
     {
         $user = Auth::user();
         
-        // Check if user has addresses
         $addresses = Address::where('user_id', $user->id)->get();
         
         if ($addresses->isEmpty()) {
@@ -45,7 +48,6 @@ class PaymentController extends Controller
                 ->with('error', 'Please add a shipping address before checkout.');
         }
         
-        // Get active cart
         $cart = ShoppingCart::where('user_id', $user->id)
             ->where('status', 'active')
             ->with(['items.product'])
@@ -61,12 +63,14 @@ class PaymentController extends Controller
         });
 
         $tax = $subtotal * 0.11;
-        $shippingCost = 15000;
+        
+        // ✅ Shipping cost will be calculated dynamically
+        $shippingCost = 0;
         $total = $subtotal + $tax + $shippingCost;
 
         $payments = Payment::all();
-        $deliveries = Delivery::all();
 
+        // ✅ Remove deliveries - akan di-fetch via AJAX
         return view('shop.payment.index', [
             'cart' => $cart,
             'subtotal' => $subtotal,
@@ -75,7 +79,53 @@ class PaymentController extends Controller
             'total' => $total,
             'addresses' => $addresses,
             'payments' => $payments,
-            'deliveries' => $deliveries,
+        ]);
+    }
+
+    // ✅ New endpoint to get shipping options
+    public function getShippingOptions(Request $request)
+    {
+        $request->validate([
+            'address_id' => 'required|exists:addresses,id',
+        ]);
+
+        $address = Address::findOrFail($request->address_id);
+
+        if (!$address->city_id) {
+            return response()->json([
+                'error' => 'City information not available for this address'
+            ], 400);
+        }
+
+        // Get cart to calculate total weight
+        $cart = ShoppingCart::where('user_id', Auth::id())
+            ->where('status', 'active')
+            ->with(['items.product'])
+            ->first();
+
+        if (!$cart) {
+            return response()->json(['error' => 'Cart not found'], 404);
+        }
+
+        // Calculate total weight (assume 500g per product, adjust as needed)
+        $totalWeight = $cart->items->sum(function($item) {
+            return 500 * $item->quantity; // 500 grams per item
+        });
+
+        // Your shop city ID (e.g., Ponorogo = 321)
+        // Get from RajaOngkir city list
+        $origin = 321; // Change to your city ID
+
+        $shippingOptions = $this->rajaOngkir->getShippingOptions(
+            $origin,
+            $address->city_id,
+            $totalWeight
+        );
+
+        return response()->json([
+            'success' => true,
+            'shipping_options' => $shippingOptions,
+            'total_weight' => $totalWeight,
         ]);
     }
 
@@ -86,7 +136,9 @@ class PaymentController extends Controller
             $validated = $request->validate([
                 'address_id' => 'required|exists:addresses,id',
                 'payment_id' => 'required|exists:payments,id',
-                'delivery_id' => 'required|exists:deliveries,id',
+                'delivery_id' => 'required|exists:deliveries,id', // ✅ Tetap validasi delivery_id
+                'shipping_cost' => 'required|integer|min:0',
+                'shipping_service' => 'required|string', // ✅ Service name untuk display
             ]);
 
             Log::info('Payment Request Received:', $validated);
@@ -112,7 +164,7 @@ class PaymentController extends Controller
             });
 
             $tax = (int) round($subtotal * 0.11);
-            $shippingCost = 15000;
+            $shippingCost = (int) $request->shipping_cost; // ✅ Dynamic dari RajaOngkir
             $total = (int) ($subtotal + $tax + $shippingCost);
 
             Log::info('Order Totals:', [
@@ -128,7 +180,7 @@ class PaymentController extends Controller
                 'shopping_cart_id' => $cart->id,
                 'address_id' => $request->address_id,
                 'payment_id' => $request->payment_id,
-                'delivery_id' => $request->delivery_id,
+                'delivery_id' => $request->delivery_id, // ✅ Delivery ID dari table deliveries
                 'total_price' => $subtotal,
                 'delivery_price' => $shippingCost,
                 'status' => Transaction::STATUS_PENDING_PAYMENT,
@@ -169,24 +221,22 @@ class PaymentController extends Controller
                 'id' => 'SHIPPING',
                 'price' => $shippingCost,
                 'quantity' => 1,
-                'name' => 'Shipping Cost',
+                'name' => $request->shipping_service, // ✅ Display service name
             ];
 
             // Get address
             $address = Address::findOrFail($request->address_id);
             Log::info('Address found:', ['address_detail' => $address->detail]);
 
-            // ✅ Parse address detail untuk extract city jika perlu
-            // Misalnya: "Jl. Sudirman No. 123, Jakarta Selatan, DKI Jakarta 12850"
+            // Parse address detail
             $addressParts = explode(',', $address->detail);
             $city = isset($addressParts[1]) ? trim($addressParts[1]) : 'Jakarta';
-            $postalCode = '12345'; // Default atau extract dari address
+            $postalCode = '12345';
 
             // Generate unique order ID
             $orderId = 'TRX-' . $transaction->id . '-' . time();
             
-            // ✅ Prepare Midtrans parameters dengan address yang sudah disesuaikan
-            // ✅ Get selected payment method
+            // Get selected payment method
             $payment = Payment::findOrFail($request->payment_id);
 
             // Prepare Midtrans parameters
@@ -217,7 +267,7 @@ class PaymentController extends Controller
                 ],
             ];
 
-            // ✅ Set enabled payments using model method
+            // Set enabled payments
             $enabledPayments = $payment->getEnabledPayments();
             if (!empty($enabledPayments)) {
                 $params['enabled_payments'] = $enabledPayments;
@@ -249,7 +299,8 @@ class PaymentController extends Controller
 
             Log::info('Transaction completed successfully', [
                 'transaction_id' => $transaction->id,
-                'order_id' => $orderId
+                'order_id' => $orderId,
+                'delivery_id' => $request->delivery_id
             ]);
 
             return response()->json([

@@ -57,6 +57,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/payment', [PaymentController::class, 'showCheckout'])->name('payment.checkout');
     Route::post('/payment/create', [PaymentController::class, 'createTransaction'])->name('payment.create');
     Route::get('/payment/finish/{transaction}', [PaymentController::class, 'paymentFinish'])->name('payment.finish');
+
+    Route::post('/api/shipping-options', [PaymentController::class, 'getShippingOptions'])->name('api.shipping.options');
 });
 
 // Midtrans Notification (outside auth middleware)
