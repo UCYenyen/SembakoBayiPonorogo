@@ -9,6 +9,6 @@ class ShopController extends Controller
 {
     public function index()
     {
-        return view('shop.index', ['allProducts' => ProductController::getAllProducts()]);
+        return view('shop.index', ['promoProducts' => ProductController::getAllProducts(), 'topProducts' => ProductController::getAllProducts()]);
     }
 }
