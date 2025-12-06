@@ -95,6 +95,16 @@
                         required>
                 </div>
 
+                <!-- Google Maps API -->
+                <div>
+                    <label for="map" class="block text-sm font-medium mb-2">Location on Map *</label>
+                    <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $address->latitude ?? '') }}">
+                    <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $address->longitude ?? '') }}">
+                    <input type="text" id="search-input" placeholder="Search location..."
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">
+                    <div id="map" class="h-64 rounded-lg"></div>
+                </div>
+
                 <!-- Buttons -->
                 <div class="flex gap-4 pt-4">
                     <button type="submit"
@@ -109,4 +119,84 @@
             </form>
         </div>
     </x-pages.section>
+
+    <?php
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&libraries=places&callback=initMap" async defer></script>
+
+    <script>
+        let map, marker, geocoder, autocomplete;
+
+        function initMap() {
+            // ✅ Use existing coordinates or default
+            const existingLat = {{ $address->latitude ?? -6.2088 }};
+            const existingLng = {{ $address->longitude ?? 106.8456 }};
+            const defaultLocation = { lat: existingLat, lng: existingLng };
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: defaultLocation,
+                zoom: 15,
+            });
+
+            geocoder = new google.maps.Geocoder();
+            
+            marker = new google.maps.Marker({
+                map: map,
+                position: defaultLocation,
+                draggable: true,
+            });
+
+            const input = document.getElementById('search-input');
+            autocomplete = new google.maps.places.Autocomplete(input, {
+                componentRestrictions: { country: 'id' },
+                fields: ['geometry', 'formatted_address']
+            });
+
+            autocomplete.addListener('place_changed', function() {
+                const place = autocomplete.getPlace();
+                if (!place.geometry) return;
+
+                map.setCenter(place.geometry.location);
+                marker.setPosition(place.geometry.location);
+                updateAddress(place.geometry.location);
+            });
+
+            map.addListener('click', function(event) {
+                marker.setPosition(event.latLng);
+                updateAddress(event.latLng);
+            });
+
+            marker.addListener('dragend', function(event) {
+                updateAddress(event.latLng);
+            });
+        }
+
+        function updateAddress(location) {
+            const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
+            const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
+
+            // ✅ Set coordinates
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+
+            // Get address
+            geocoder.geocode({ location: { lat, lng } }, function(results, status) {
+                if (status === 'OK' && results[0]) {
+                    document.getElementById('detail').value = results[0].formatted_address;
+                    console.log('✅ Address updated:', { lat, lng });
+                }
+            });
+        }
+
+        // ✅ Validate before submit
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const lat = document.getElementById('latitude').value;
+            const lng = document.getElementById('longitude').value;
+
+            if (!lat || !lng) {
+                e.preventDefault();
+                alert('Please select a valid location on the map!');
+                return false;
+            }
+        });
+    </script>
 @endsection

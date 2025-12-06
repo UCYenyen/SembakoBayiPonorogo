@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
-            $table->string('detail');
-            $table->boolean('is_default')->default(false);
-            $table->string('city_id')->nullable()->after('detail');
-            $table->string('city_name')->nullable()->after('city_id');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('detail', 1000);
+            $table->string('subdistrict_id')->nullable();  // ✅ Komerce Subdistrict ID
+            $table->string('subdistrict_name')->nullable(); // ✅ For display
+            $table->string('city_name')->nullable();        // ✅ City name
+            $table->string('province')->nullable();         // ✅ Province name
+            $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
     }
@@ -27,10 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->dropColumn(['city_id', 'city_name']);
-        });
         Schema::dropIfExists('addresses');
     }
 };

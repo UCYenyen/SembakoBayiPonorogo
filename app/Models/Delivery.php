@@ -13,12 +13,4 @@ class Delivery extends Model
         'name',
         'courier_code',
     ];
-    
-    /**
-     * Find delivery by courier code and service
-     */
-    public static function findByCourierCode($courierCode)
-    {
-        return self::where('courier_code', $courierCode)->first();
-    }
 }

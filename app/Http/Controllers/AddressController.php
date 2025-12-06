@@ -37,11 +37,7 @@ class AddressController extends Controller
      */
     public function create()
     {
-        $googleMapsApiKey = config('services.google.maps_api_key');
-        
-        return view('dashboard.user.addresses.create', [
-            'googleMapsApiKey' => $googleMapsApiKey,
-        ]);
+        return view('dashboard.user.addresses.create');
     }
 
     /**
@@ -51,29 +47,35 @@ class AddressController extends Controller
     {
         $request->validate([
             'detail' => 'required|string|max:1000',
-            'city_name' => 'required|string', // ✅ Required from Google Maps
+            'subdistrict_id' => 'required|string', // ✅ Changed to string
         ]);
 
         $user = Auth::user();
 
-        // ✅ Auto-match city_id dari RajaOngkir berdasarkan city_name dari Google Maps
-        $cityId = $this->matchCityId($request->city_name);
+        // ✅ Get subdistrict details from Komerce
+        $subdistrictDetails = $this->rajaOngkir->getCityById($request->subdistrict_id);
 
-        if (!$cityId) {
+        if (!$subdistrictDetails) {
             return back()->withErrors([
-                'city_name' => 'Could not find matching city in delivery service database. Please contact support.'
+                'subdistrict_id' => 'Invalid location selected.'
             ])->withInput();
         }
 
-        // Check if this is the first address
         $isFirstAddress = Address::where('user_id', $user->id)->count() === 0;
 
         Address::create([
             'user_id' => $user->id,
             'detail' => $request->detail,
-            'city_id' => $cityId,
-            'city_name' => $request->city_name,
+            'subdistrict_id' => $subdistrictDetails['subdistrict_id'],
+            'subdistrict_name' => $subdistrictDetails['subdistrict_name'],
+            'city_name' => $subdistrictDetails['city'],
+            'province' => $subdistrictDetails['province'],
             'is_default' => $isFirstAddress,
+        ]);
+
+        Log::info('Address created with Komerce:', [
+            'subdistrict_id' => $subdistrictDetails['subdistrict_id'],
+            'location' => $subdistrictDetails['subdistrict_name'],
         ]);
 
         return redirect()->route('user.addresses.index')
@@ -90,11 +92,8 @@ class AddressController extends Controller
             abort(403);
         }
 
-        $googleMapsApiKey = config('services.google.maps_api_key');
-
         return view('dashboard.user.addresses.edit', [
             'address' => $address,
-            'googleMapsApiKey' => $googleMapsApiKey,
         ]);
     }
 
@@ -110,22 +109,23 @@ class AddressController extends Controller
 
         $request->validate([
             'detail' => 'required|string|max:1000',
-            'city_name' => 'required|string',
+            'city_id' => 'required|integer',
         ]);
 
-        // ✅ Auto-match city_id
-        $cityId = $this->matchCityId($request->city_name);
+        // Get city details
+        $cityDetails = $this->rajaOngkir->getCityById($request->city_id);
 
-        if (!$cityId) {
+        if (!$cityDetails) {
             return back()->withErrors([
-                'city_name' => 'Could not find matching city in delivery service database.'
+                'city_id' => 'Invalid city selected.'
             ])->withInput();
         }
 
         $address->update([
             'detail' => $request->detail,
-            'city_id' => $cityId,
-            'city_name' => $request->city_name,
+            'city_id' => $cityDetails['city_id'],
+            'city_name' => $cityDetails['type'] . ' ' . $cityDetails['city_name'],
+            'province' => $cityDetails['province'],
         ]);
 
         return redirect()->route('user.addresses.index')
@@ -173,175 +173,17 @@ class AddressController extends Controller
             ->with('success', 'Address deleted successfully!');
     }
 
-    /**
-     * ✅ Match city name dari Google Maps dengan RajaOngkir city_id
-     */
-    private function matchCityId(string $cityName): ?string
+    // ✅ API endpoint for city search
+    public function searchCities(Request $request)
     {
-        try {
-            // Get all cities dari RajaOngkir
-            $cities = $this->rajaOngkir->getCities();
-
-            // Clean city name dari Google Maps
-            $cleanCityName = $this->cleanCityName($cityName);
-
-            Log::info('Matching city:', [
-                'google_maps_city' => $cityName,
-                'cleaned_city' => $cleanCityName,
-                'total_cities' => count($cities)
-            ]);
-
-            $matches = [];
-
-            // Cari exact match atau partial match
-            foreach ($cities as $city) {
-                $rajaOngkirCityName = strtolower($city['city_name']);
-                $rajaOngkirType = strtolower($city['type'] ?? ''); // "Kota" atau "Kabupaten"
-
-                // Remove "Kota" or "Kabupaten" prefix
-                $rajaOngkirCityNameClean = str_replace(['kota ', 'kabupaten '], '', $rajaOngkirCityName);
-
-                // ✅ Strategy 1: Exact match
-                if ($cleanCityName === $rajaOngkirCityNameClean) {
-                    Log::info('City matched (exact):', [
-                        'city_id' => $city['city_id'], 
-                        'city_name' => $city['city_name'],
-                        'type' => $city['type']
-                    ]);
-                    return (string) $city['city_id'];
-                }
-
-                // ✅ Strategy 2: Contains match (dengan scoring)
-                $score = 0;
-                if (str_contains($cleanCityName, $rajaOngkirCityNameClean)) {
-                    $score = strlen($rajaOngkirCityNameClean) / strlen($cleanCityName) * 100;
-                } elseif (str_contains($rajaOngkirCityNameClean, $cleanCityName)) {
-                    $score = strlen($cleanCityName) / strlen($rajaOngkirCityNameClean) * 100;
-                }
-
-                if ($score > 50) { // Match jika similarity > 50%
-                    $matches[] = [
-                        'city_id' => $city['city_id'],
-                        'city_name' => $city['city_name'],
-                        'type' => $city['type'] ?? '',
-                        'score' => $score
-                    ];
-                }
-
-                // ✅ Strategy 3: Word-based matching (split by space)
-                $cleanWords = explode(' ', $cleanCityName);
-                $rajaWords = explode(' ', $rajaOngkirCityNameClean);
-                
-                $wordMatches = 0;
-                foreach ($cleanWords as $word) {
-                    if (strlen($word) > 3 && in_array($word, $rajaWords)) {
-                        $wordMatches++;
-                    }
-                }
-
-                if ($wordMatches > 0 && count($cleanWords) > 0) {
-                    $wordScore = ($wordMatches / count($cleanWords)) * 100;
-                    if ($wordScore > 50) {
-                        $matches[] = [
-                            'city_id' => $city['city_id'],
-                            'city_name' => $city['city_name'],
-                            'type' => $city['type'] ?? '',
-                            'score' => $wordScore
-                        ];
-                    }
-                }
-            }
-
-            // Sort matches by score (highest first)
-            usort($matches, function($a, $b) {
-                return $b['score'] <=> $a['score'];
-            });
-
-            // Remove duplicates based on city_id
-            $uniqueMatches = [];
-            $seenIds = [];
-            foreach ($matches as $match) {
-                if (!in_array($match['city_id'], $seenIds)) {
-                    $uniqueMatches[] = $match;
-                    $seenIds[] = $match['city_id'];
-                }
-            }
-
-            if (!empty($uniqueMatches)) {
-                $bestMatch = $uniqueMatches[0];
-                Log::info('City matched (best):', $bestMatch);
-                return (string) $bestMatch['city_id'];
-            }
-
-            Log::warning('City not found in RajaOngkir database', [
-                'city_name' => $cityName,
-                'cleaned' => $cleanCityName,
-                'tried_strategies' => ['exact', 'contains', 'word-based']
-            ]);
-            
-            return null;
-
-        } catch (\Exception $e) {
-            Log::error('Error matching city ID:', [
-                'message' => $e->getMessage(),
-                'city_name' => $cityName,
-                'trace' => $e->getTraceAsString()
-            ]);
-            return null;
-        }
-    }
-
-    /**
-     * Clean city name untuk matching
-     */
-    private function cleanCityName(string $cityName): string
-    {
-        $cleaned = strtolower($cityName);
+        $query = $request->get('q', '');
         
-        // Remove common prefixes/suffixes
-        $cleaned = str_replace([
-            'kota ', 'kabupaten ', 'kab. ', 'kab ', 'kab.', 
-            ' city', ' regency', 'city of ', 'regency of ',
-            'kabupaten administratif ', 'kota administratif ',
-            ', indonesia', ' - indonesia'
-        ], '', $cleaned);
-        
-        // Remove province names (common in Google Maps results)
-        $provinces = [
-            'dki jakarta', 'jakarta', 
-            'jawa barat', 'west java',
-            'jawa tengah', 'central java',
-            'jawa timur', 'east java',
-            'banten', 
-            'yogyakarta', 'daerah istimewa yogyakarta',
-            'bali', 
-            'sumatera utara', 'north sumatra',
-            'sumatera barat', 'west sumatra',
-            'sumatera selatan', 'south sumatra',
-            'lampung',
-            'kalimantan timur', 'east kalimantan',
-            'kalimantan barat', 'west kalimantan',
-            'kalimantan selatan', 'south kalimantan',
-            'kalimantan tengah', 'central kalimantan',
-            'sulawesi selatan', 'south sulawesi',
-            'sulawesi utara', 'north sulawesi',
-            'sulawesi tengah', 'central sulawesi',
-            'papua', 'west papua',
-            'maluku', 'maluku utara',
-            'nusa tenggara barat', 'west nusa tenggara',
-            'nusa tenggara timur', 'east nusa tenggara'
-        ];
-        
-        foreach ($provinces as $province) {
-            $cleaned = str_replace([', ' . $province, ' ' . $province], '', $cleaned);
+        if (strlen($query) < 2) {
+            return response()->json([]);
         }
 
-        // Remove special characters but keep spaces
-        $cleaned = preg_replace('/[^a-z0-9\s]/', '', $cleaned);
+        $cities = $this->rajaOngkir->searchCity($query);
         
-        // Remove extra spaces
-        $cleaned = preg_replace('/\s+/', ' ', $cleaned);
-
-        return trim($cleaned);
+        return response()->json($cities);
     }
 }

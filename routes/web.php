@@ -13,6 +13,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\AddressController; // ✅ Add this import
 use App\Http\Middleware\AdminPageGuard;
+use App\Models\Transaction;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/unauthorized', [AdminController::class, 'unauthorized']);
@@ -54,15 +56,20 @@ Route::middleware('auth')->group(function () {
     Route::delete('/cart/clear', [ShoppingCartController::class, 'clearCart'])->name('cart.clear');
 
     // Payment Routes
-    Route::get('/payment', [PaymentController::class, 'showCheckout'])->name('payment.checkout');
-    Route::post('/payment/create', [PaymentController::class, 'createTransaction'])->name('payment.create');
-    Route::get('/payment/finish/{transaction}', [PaymentController::class, 'paymentFinish'])->name('payment.finish');
+    Route::get('/payment', [PaymentController::class, 'index'])->name('payment.checkout');
+    Route::post('/payment/process', [PaymentController::class, 'processPayment'])->name('payment.process');
+    Route::get('/payment/finish', [PaymentController::class, 'finish'])->name('payment.finish'); // ✅ Use controller method
+    Route::get('/payment/unfinish', [PaymentController::class, 'unfinish'])->name('payment.unfinish'); // ✅ For pending payments
+    Route::get('/payment/check-status', [PaymentController::class, 'checkStatus'])
+        ->name('payment.check-status')
+        ->middleware('auth');
 
     Route::post('/api/shipping-options', [PaymentController::class, 'getShippingOptions'])->name('api.shipping.options');
 });
 
-// Midtrans Notification (outside auth middleware)
-Route::post('/payment/notification', [PaymentController::class, 'notificationHandler'])->name('payment.notification');
+// Midtrans Notification (outside auth middleware - must be publicly accessible)
+Route::post('/payment/notification', [PaymentController::class, 'notificationHandler'])
+    ->name('payment.notification');
 
 // Admin Routes
 Route::prefix('/dashboard/admin')->middleware(['auth', AdminPageGuard::class])->group(function () {
@@ -77,3 +84,5 @@ Route::prefix('/dashboard/admin')->middleware(['auth', AdminPageGuard::class])->
 });
 
 Route::get('/api/search', [ProductController::class, 'liveSearch'])->name('api.search');
+// City search API
+Route::get('/api/cities/search', [AddressController::class, 'searchCities'])->name('api.cities.search');

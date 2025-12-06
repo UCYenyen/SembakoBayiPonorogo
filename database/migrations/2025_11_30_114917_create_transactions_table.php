@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->string('no_resi')->nullable();
+            $table->string('snap_token')->nullable(); // ✅ Add this
             $table->bigInteger('delivery_price')->default(0);
             $table->bigInteger('total_price')->default(0);
 
@@ -28,11 +29,12 @@ return new class extends Migration
                 'failed'              // Gagal
             ])->default('pending_payment');
 
+            // Foreign keys
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('address_id')->constrained('addresses')->onDelete('cascade');
             $table->foreignId('payment_id')->constrained('payments')->onDelete('cascade');
             $table->foreignId('delivery_id')->constrained('deliveries')->onDelete('cascade');
             $table->foreignId('shopping_cart_id')->constrained('shopping_carts')->onDelete('cascade');
+            $table->foreignId('address_id')->constrained('addresses')->onDelete('cascade');
 
             $table->timestamps();
         });

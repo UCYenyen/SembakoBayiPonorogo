@@ -11,14 +11,18 @@ class Address extends Model
     
     protected $fillable = [
         'detail',
-        'city_id',
-        'city_name',
+        'subdistrict_id',   // ✅ Komerce Subdistrict ID
+        'subdistrict_name', // ✅ Full location name
+        'city_name',        // ✅ City
+        'province',         // ✅ Province
         'is_default',
         'user_id',
     ];
 
     protected $casts = [
         'is_default' => 'boolean',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
     
     public function user()

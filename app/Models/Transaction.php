@@ -19,9 +19,10 @@ class Transaction extends Model
         'delivery_price',
         'no_resi',
         'status',
+        'snap_token', // ✅ Add this
     ];
 
-    // Status constants
+    // ✅ Status constants
     const STATUS_PENDING_PAYMENT = 'pending_payment';
     const STATUS_PAID = 'paid';
     const STATUS_PROCESSING = 'processing';

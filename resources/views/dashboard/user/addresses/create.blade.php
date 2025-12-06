@@ -3,81 +3,126 @@
 @section('content')
     <main class="bg-[#FFF3F3] text-[#3F3142] min-h-screen py-8">
         <div class="w-[90%] lg:w-[70%] mx-auto">
-            <a href="{{ route('user.addresses.index') }}" 
-               class="inline-flex items-center gap-2 mb-6 text-[#3F3142] hover:underline">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-                Back to Addresses
-            </a>
+            <div class="flex items-center gap-4 mb-8">
+                <a href="{{ route('user.addresses.index') }}" class="text-[#3F3142] hover:text-[#5C4B5E]">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </a>
+                <h1 class="text-4xl font-bold">Add New Address</h1>
+            </div>
 
-            <div class="bg-white rounded-lg shadow-lg p-8">
-                <h1 class="text-3xl font-bold mb-6">Add New Address</h1>
+            @if($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                    <p class="font-semibold mb-2">⚠️ Validation Error</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-                @if($errors->any())
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                        <ul class="list-disc list-inside">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form action="{{ route('user.addresses.store') }}" method="POST" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <form action="{{ route('user.addresses.store') }}" method="POST" class="space-y-6" x-data="addressForm()">
                     @csrf
 
-                    <!-- Search Box -->
+                    <!-- ✅ Step 1: Google Maps - Pick Location -->
                     <div>
-                        <label for="search-input" class="block text-sm font-medium mb-2">
-                            Search Location
+                        <label class="block text-sm font-medium mb-2">
+                            📍 Step 1: Select Location on Map
                         </label>
                         <input 
-                            id="search-input" 
                             type="text" 
-                            placeholder="Search for your address..."
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent"
-                        />
-                        <p class="text-xs text-gray-500 mt-1">Type to search or click on the map to select your location</p>
+                            id="search-input" 
+                            placeholder="Search for a place..."
+                            class="w-full px-4 py-2 mb-2 border rounded-lg"
+                        >
+                        <div id="map" class="w-full h-[400px] rounded-lg border"></div>
+                        <p class="text-xs text-gray-500 mt-2">Click on map or search to select your location</p>
                     </div>
 
-                    <!-- Map -->
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Select Location on Map</label>
-                        <div id="map" class="w-full h-[400px] rounded-lg border border-gray-300"></div>
+                    <!-- ✅ Step 2: Komerce - Select Subdistrict -->
+                    <div x-show="mapLocationSelected">
+                        <label class="block text-sm font-medium mb-2">
+                            🏙️ Step 2: Select Precise Subdistrict from Komerce
+                        </label>
+                        
+                        <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg mb-3">
+                            <p class="text-sm text-blue-800">
+                                📌 Location from map: <span class="font-semibold" x-text="mapLocationName"></span>
+                            </p>
+                        </div>
+
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                x-model="komerceQuery"
+                                @input.debounce.300ms="searchKomerce()"
+                                placeholder="Type to search subdistrict in Komerce..."
+                                class="w-full px-4 py-2 border rounded-lg"
+                                autocomplete="off"
+                            >
+                            
+                            <!-- Komerce Results Dropdown -->
+                            <div x-show="komerceOpen && komerceResults.length > 0" 
+                                 @click.away="komerceOpen = false"
+                                 class="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                <template x-for="location in komerceResults" :key="location.subdistrict_id">
+                                    <button type="button"
+                                            @click="selectKomerce(location)"
+                                            class="w-full text-left px-4 py-2 hover:bg-gray-100 border-b">
+                                        <p class="font-semibold text-sm" x-text="location.subdistrict_name"></p>
+                                        <p class="text-xs text-gray-500" x-text="`${location.district}, ${location.city}, ${location.province}`"></p>
+                                    </button>
+                                </template>
+                            </div>
+
+                            <!-- No Results -->
+                            <div x-show="komerceOpen && komerceQuery.length >= 2 && komerceResults.length === 0"
+                                 class="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg p-4">
+                                <p class="text-gray-500 text-center text-sm">No subdistricts found</p>
+                            </div>
+                        </div>
+
+                        <!-- Selected Komerce Location -->
+                        <div x-show="komerceSelected" class="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <p class="text-sm text-green-800">
+                                ✅ Selected: <span class="font-semibold" x-text="selectedLocationName"></span>
+                            </p>
+                        </div>
+
+                        <!-- Hidden Input -->
+                        <input type="hidden" name="subdistrict_id" x-model="selectedSubdistrictId" required>
                     </div>
 
-                    <!-- Address Detail (Auto-filled) -->
+                    <!-- ✅ Step 3: Full Address Detail -->
                     <div>
                         <label for="detail" class="block text-sm font-medium mb-2">
-                            Full Address *
+                            📝 Step 3: Full Address Detail *
                         </label>
                         <textarea 
                             name="detail" 
                             id="detail" 
                             rows="4" 
                             required
-                            readonly
-                            placeholder="Address will appear here after selecting location on map..."
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent bg-gray-50"
-                        >{{ old('detail') }}</textarea>
-                        <p class="text-xs text-gray-500 mt-1">You can edit the address if needed</p>
+                            x-model="addressDetail"
+                            placeholder="Enter complete address (street, RT/RW, kelurahan, kecamatan)"
+                            class="w-full px-4 py-2 border rounded-lg"
+                        ></textarea>
+                        <p class="text-xs text-gray-500 mt-1">This will be pre-filled from map, but you can edit it</p>
                     </div>
 
-                    <!-- Add hidden input for city_name -->
-                    <input type="hidden" name="city_name" id="city_name" required>
-
                     <!-- Buttons -->
-                    <div class="flex gap-4 pt-4">
+                    <div class="flex gap-4">
                         <button 
                             type="submit" 
-                            id="submit-btn"
-                            disabled
-                            class="flex-1 bg-[#3F3142] text-white px-6 py-3 rounded-lg hover:bg-[#5C4B5E] transition-colors font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed">
+                            :disabled="!komerceSelected"
+                            class="flex-1 bg-[#3F3142] text-white py-3 rounded-lg font-semibold hover:bg-[#5C4B5E] disabled:bg-gray-300 disabled:cursor-not-allowed">
                             Save Address
                         </button>
                         <a href="{{ route('user.addresses.index') }}" 
-                           class="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors font-semibold text-center">
+                           class="flex-1 text-center border-2 py-3 rounded-lg font-semibold hover:bg-gray-50">
                             Cancel
                         </a>
                     </div>
@@ -86,136 +131,151 @@
         </div>
     </main>
 
-    <!-- Google Maps Script -->
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&libraries=places&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places&callback=initMap" async defer></script>
 
     <script>
-        let map;
-        let marker;
-        let geocoder;
-        let autocomplete;
+        let map, marker, geocoder, autocomplete;
 
         function initMap() {
-            // Default location (Indonesia)
-            const defaultLocation = { lat: -6.2088, lng: 106.8456 };
+            const defaultLocation = { lat: -7.8753, lng: 111.4638 }; // Ponorogo
 
-            // Initialize map
             map = new google.maps.Map(document.getElementById('map'), {
                 center: defaultLocation,
-                zoom: 15,
-                mapTypeControl: false,
-                streetViewControl: false,
+                zoom: 13,
             });
 
-            // Initialize geocoder
             geocoder = new google.maps.Geocoder();
-
-            // Initialize marker
+            
             marker = new google.maps.Marker({
                 map: map,
                 draggable: true,
-                animation: google.maps.Animation.DROP,
+                visible: false
             });
 
-            // Initialize autocomplete
             const input = document.getElementById('search-input');
             autocomplete = new google.maps.places.Autocomplete(input, {
-                componentRestrictions: { country: 'id' }, // Restrict to Indonesia
-                fields: ['geometry', 'formatted_address', 'name']
+                componentRestrictions: { country: 'id' },
             });
 
-            // Handle autocomplete selection
+            // Place changed from search
             autocomplete.addListener('place_changed', function() {
                 const place = autocomplete.getPlace();
+                if (!place.geometry) return;
 
-                if (!place.geometry) {
-                    alert('No details available for: ' + place.name);
-                    return;
-                }
-
-                // Center map on selected place
-                if (place.geometry.viewport) {
-                    map.fitBounds(place.geometry.viewport);
-                } else {
-                    map.setCenter(place.geometry.location);
-                    map.setZoom(17);
-                }
-
-                // Update marker position
+                map.setCenter(place.geometry.location);
+                map.setZoom(17);
                 marker.setPosition(place.geometry.location);
                 marker.setVisible(true);
-
-                // Update address field
-                updateAddress(place.geometry.location);
+                
+                updateFromMap(place.geometry.location, place.formatted_address);
             });
 
-            // Click on map to set marker
+            // Click on map
             map.addListener('click', function(event) {
                 marker.setPosition(event.latLng);
                 marker.setVisible(true);
-                updateAddress(event.latLng);
-            });
-
-            // Drag marker to update address
-            marker.addListener('dragend', function(event) {
-                updateAddress(event.latLng);
-            });
-
-            // Try to get user's current location
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        const userLocation = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-
-                        map.setCenter(userLocation);
-                        marker.setPosition(userLocation);
-                        marker.setVisible(true);
-                        updateAddress(userLocation);
-                    },
-                    function() {
-                        console.log('Geolocation permission denied');
+                
+                geocoder.geocode({ location: event.latLng }, function(results, status) {
+                    if (status === 'OK' && results[0]) {
+                        updateFromMap(event.latLng, results[0].formatted_address);
                     }
-                );
-            }
+                });
+            });
+
+            // Drag marker
+            marker.addListener('dragend', function(event) {
+                geocoder.geocode({ location: event.latLng }, function(results, status) {
+                    if (status === 'OK' && results[0]) {
+                        updateFromMap(event.latLng, results[0].formatted_address);
+                    }
+                });
+            });
         }
 
-        function updateAddress(location) {
+        function updateFromMap(location, formattedAddress) {
+            // Extract city/subdistrict from Google Maps result
             geocoder.geocode({ location: location }, function(results, status) {
                 if (status === 'OK' && results[0]) {
-                    const address = results[0].formatted_address;
-                    document.getElementById('detail').value = address;
-                    document.getElementById('detail').readOnly = false;
-                    
-                    // ✅ Extract city name dari address components
                     const addressComponents = results[0].address_components;
                     let cityName = '';
-                    
-                    // Cari city/administrative_area_level_2/locality
-                    for (let component of addressComponents) {
-                        if (component.types.includes('administrative_area_level_2') ||
-                            component.types.includes('locality')) {
+                    let subdistrictName = '';
+
+                    // Extract locality or administrative_area
+                    addressComponents.forEach(component => {
+                        if (component.types.includes('locality') || 
+                            component.types.includes('administrative_area_level_2')) {
                             cityName = component.long_name;
-                            break;
                         }
-                    }
-                    
-                    if (cityName) {
-                        document.getElementById('city_name').value = cityName;
-                        console.log('City extracted:', cityName);
-                    } else {
-                        alert('Could not detect city from this location. Please select a more specific address.');
-                        document.getElementById('submit-btn').disabled = true;
-                        return;
-                    }
-                    
-                    document.getElementById('submit-btn').disabled = false;
-                } else {
-                    alert('Cannot get address: ' + status);
+                        if (component.types.includes('sublocality_level_1') || 
+                            component.types.includes('administrative_area_level_3')) {
+                            subdistrictName = component.long_name;
+                        }
+                    });
+
+                    // Trigger Alpine.js to update
+                    const event = new CustomEvent('map-location-selected', {
+                        detail: {
+                            cityName: cityName || subdistrictName,
+                            formattedAddress: formattedAddress
+                        }
+                    });
+                    window.dispatchEvent(event);
                 }
             });
+        }
+
+        function addressForm() {
+            return {
+                // Map data
+                mapLocationSelected: false,
+                mapLocationName: '',
+                addressDetail: '',
+
+                // Komerce data
+                komerceQuery: '',
+                komerceResults: [],
+                komerceOpen: false,
+                komerceSelected: false,
+                selectedSubdistrictId: null,
+                selectedLocationName: '',
+
+                init() {
+                    // Listen to map selection
+                    window.addEventListener('map-location-selected', (e) => {
+                        this.mapLocationSelected = true;
+                        this.mapLocationName = e.detail.cityName;
+                        this.addressDetail = e.detail.formattedAddress;
+                        
+                        // Auto-search Komerce with city name
+                        this.komerceQuery = e.detail.cityName;
+                        this.searchKomerce();
+                    });
+                },
+
+                async searchKomerce() {
+                    if (this.komerceQuery.length < 2) {
+                        this.komerceResults = [];
+                        this.komerceOpen = false;
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/cities/search?q=${encodeURIComponent(this.komerceQuery)}`);
+                        const data = await response.json();
+                        this.komerceResults = data.slice(0, 10);
+                        this.komerceOpen = true;
+                    } catch (error) {
+                        console.error('Komerce search error:', error);
+                    }
+                },
+
+                selectKomerce(location) {
+                    this.selectedSubdistrictId = location.subdistrict_id;
+                    this.selectedLocationName = `${location.subdistrict_name}, ${location.district}, ${location.city}, ${location.province}`;
+                    this.komerceSelected = true;
+                    this.komerceOpen = false;
+                }
+            }
         }
     </script>
 @endsection

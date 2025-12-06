@@ -27,10 +27,18 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
+    // ✅ Add default attributes
+    protected $attributes = [
+        'role' => 'guest',
+        'points' => 0,
+    ];
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
+            'member_since' => 'datetime',
+            'points' => 'integer',
         ];
     }
 

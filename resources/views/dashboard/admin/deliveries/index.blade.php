@@ -149,9 +149,7 @@
                                         </span>
                                     @endif
                                     <p class="text-gray-700 leading-relaxed">{{ $address->detail }}</p>
-                                    @if($address->city_name)
-                                        <p class="text-xs text-gray-500 mt-1">📍 {{ $address->city_name }}</p>
-                                    @endif
+                                    <p class="text-xs text-gray-500 mt-2">📍 {{ number_format($address->latitude, 4) }}, {{ number_format($address->longitude, 4) }}</p>
                                 </div>
                             </label>
                         @endforeach
@@ -312,7 +310,6 @@
             loadShippingOptions(defaultAddress.value);
         }
     });
-
-    // Rest of payment script...
+    
     </script>
 @endsection
