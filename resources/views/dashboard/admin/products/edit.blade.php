@@ -119,15 +119,14 @@
             </form>
         </div>
     </x-pages.section>
+@endsection
 
-    <?php
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&libraries=places&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&libraries=places&callback=initMap" async defer></script>
 
     <script>
         let map, marker, geocoder, autocomplete;
 
         function initMap() {
-            // ✅ Use existing coordinates or default
             const existingLat = {{ $address->latitude ?? -6.2088 }};
             const existingLng = {{ $address->longitude ?? 106.8456 }};
             const defaultLocation = { lat: existingLat, lng: existingLng };
@@ -174,7 +173,6 @@
             const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
             const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
 
-            // ✅ Set coordinates
             document.getElementById('latitude').value = lat;
             document.getElementById('longitude').value = lng;
 
@@ -182,12 +180,10 @@
             geocoder.geocode({ location: { lat, lng } }, function(results, status) {
                 if (status === 'OK' && results[0]) {
                     document.getElementById('detail').value = results[0].formatted_address;
-                    console.log('✅ Address updated:', { lat, lng });
                 }
             });
         }
 
-        // ✅ Validate before submit
         document.querySelector('form').addEventListener('submit', function(e) {
             const lat = document.getElementById('latitude').value;
             const lng = document.getElementById('longitude').value;
@@ -199,4 +195,3 @@
             }
         });
     </script>
-@endsection

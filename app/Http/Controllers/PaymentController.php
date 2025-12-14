@@ -379,6 +379,7 @@ class PaymentController extends Controller
 
         try {
             // Get status from Midtrans
+            /** @var object $status */
             $status = \Midtrans\Transaction::status($orderId);
             
             Log::info('Manual Status Check:', [

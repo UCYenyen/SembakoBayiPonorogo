@@ -159,7 +159,7 @@
                         <div id="payment-status" class="mt-4 text-center text-sm"></div>
                     </div>
                 </div>
-            </form> <!-- ✅ Form closes here -->
+            </form> 
         </div>
     </main>
 
@@ -168,7 +168,6 @@ const subtotal = {{ $subtotal }};
 const tax = {{ $tax }};
 let selectedShippingCost = 0;
 
-// Load shipping options when address changes
 function loadShippingOptions(addressId) {
     const container = document.getElementById('shipping-options-container');
     container.innerHTML = `
@@ -219,7 +218,6 @@ function loadShippingOptions(addressId) {
             html += '</div>';
             container.innerHTML = html;
             
-            // ✅ Auto-select and update first option
             if (data.shipping_options[0]) {
                 updateShippingCost(
                     data.shipping_options[0].delivery_id, 
@@ -229,14 +227,12 @@ function loadShippingOptions(addressId) {
             }
         } else {
             container.innerHTML = '<p class="text-red-500 text-center py-4">No shipping options available for this address</p>';
-            // ✅ Reset shipping cost to 0
             updateShippingCost(null, 0, '');
         }
     })
     .catch(error => {
         console.error('Shipping options error:', error);
         container.innerHTML = '<p class="text-red-500 text-center py-4">Failed to load shipping options. Please try again.</p>';
-        // ✅ Reset shipping cost to 0
         updateShippingCost(null, 0, '');
     });
 }
@@ -244,19 +240,15 @@ function loadShippingOptions(addressId) {
 function updateShippingCost(deliveryId, cost, service) {
     console.log('Updating shipping:', { deliveryId, cost, service });
     
-    // ✅ Ensure cost is a valid number
     selectedShippingCost = parseInt(cost) || 0;
     
-    // ✅ Update hidden fields
     if (deliveryId) {
         document.getElementById('delivery_id').value = deliveryId;
     }
     document.getElementById('delivery_price').value = selectedShippingCost;
 
-    // ✅ Update display
     document.getElementById('shipping-cost-display').textContent = 'Rp' + formatNumber(selectedShippingCost);
     
-    // ✅ Calculate total correctly
     const total = subtotal + tax + selectedShippingCost;
     document.getElementById('total-display').textContent = 'Rp' + formatNumber(total);
     
@@ -269,7 +261,6 @@ function updateShippingCost(deliveryId, cost, service) {
 }
 
 function formatNumber(num) {
-    // ✅ Ensure num is a valid number
     const number = parseInt(num) || 0;
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
@@ -313,7 +304,7 @@ document.getElementById('pay-button').addEventListener('click', function() {
         address_id: selectedAddress.value,
         payment_id: selectedPayment.value,
         delivery_id: deliveryId,
-        delivery_price: selectedShippingCost, // ✅ Use variable value
+        delivery_price: selectedShippingCost,
         _token: '{{ csrf_token() }}'
     };
     
@@ -337,7 +328,6 @@ document.getElementById('pay-button').addEventListener('click', function() {
                 onSuccess: function(result) {
                     console.log('Payment success:', result);
                     
-                    // ✅ Manual update status via API
                     fetch('{{ route("payment.check-status") }}?order_id=' + result.order_id)
                         .then(response => response.json())
                         .then(statusData => {

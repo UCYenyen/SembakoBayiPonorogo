@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CompleteProfileController extends Controller
 {
@@ -20,7 +21,8 @@ class CompleteProfileController extends Controller
 
         $phoneNumber = '+62' . str_replace(' ', '', $request->phone_number);
 
-        $user = auth()->user();
+        /** @var User $user */
+       $user = Auth::user();
         $user->update([
             'phone_number' => $phoneNumber,
         ]);

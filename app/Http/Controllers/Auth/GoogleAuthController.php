@@ -25,7 +25,7 @@ class GoogleAuthController extends Controller
     {
         try {
             // ✅ Stateless() prevents session issues
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            $googleUser = Socialite::driver('google')->user();
             
             Log::info('Google OAuth Callback', [
                 'google_id' => $googleUser->id,
