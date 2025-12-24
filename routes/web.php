@@ -12,6 +12,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\VoucherController;
 use App\Http\Middleware\AdminPageGuard;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
@@ -92,6 +93,18 @@ Route::middleware(['auth', 'profile.complete', 'admin'])->group(function () {
         ->name('admin.products.toggle');
     Route::delete('/dashboard/admin/products/{product}', [ProductController::class, 'destroy'])
         ->name('admin.products.delete');
+
+    Route::get('/dashboard/admin/vouchers', [AdminController::class, 'vouchers'])->name('admin.vouchers.index');
+    Route::get('/dashboard/admin/vouchers/create', [AdminController::class, 'createVoucher'])->name('admin.vouchers.create');
+    Route::post('/dashboard/admin/vouchers', [VoucherController::class, 'store'])->name('admin.vouchers.store');
+    Route::get('/dashboard/admin/vouchers/{baseVoucher}/edit', [AdminController::class, 'editVoucher'])->name('admin.vouchers.edit');
+    Route::put('/dashboard/admin/vouchers/{baseVoucher}', [VoucherController::class, 'update'])->name('admin.vouchers.update');
+    Route::delete('/dashboard/admin/vouchers/{baseVoucher}', [VoucherController::class, 'destroy'])->name('admin.vouchers.delete');
+
+    // Transaction Management Routes
+    Route::get('/dashboard/admin/transactions', [AdminController::class, 'transactions'])->name('admin.transactions.index');
+    Route::get('/dashboard/admin/transactions/{transaction}', [AdminController::class, 'showTransaction'])->name('admin.transactions.show');
+    Route::patch('/dashboard/admin/transactions/{transaction}/edit', [AdminController::class, 'updateTransactionStatus'])->name('admin.transactions.update-status');
 });
 
 require __DIR__ . '/auth.php';

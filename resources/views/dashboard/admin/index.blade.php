@@ -6,12 +6,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 w-[80%] h-full gap-8">
                 <x-admin-menu-chooser
                     extraClasses="flex flex-col justify-center items-center w-full h-full p-4 gap-4 bg-white shadow-lg rounded-lg"
-                    link="/" title="Atur Event" description="Tambah atau ubah event seperti broadcast atau promo">
+                    link="/dashboard/admin/vouchers" title="Atur Event" description="Tambah atau ubah event seperti broadcast atau promo">
                     <x-gmdi-event class="text-xl max-w-[84px]" />
                 </x-admin-menu-chooser>
                 <x-admin-menu-chooser
                     extraClasses="flex flex-col justify-center items-center w-full h-full p-4 gap-4 bg-white shadow-lg rounded-lg"
-                    link="/" title="Atur Layanan" description="Tambah atau ubah layanan pengiriman">
+                    link="/dashboard/admin" title="Atur Layanan" description="Tambah atau ubah layanan pengiriman">
                     <x-eos-service class="text-xl max-w-[84px]" />
                 </x-admin-menu-chooser>
                 <x-admin-menu-chooser
@@ -21,7 +21,7 @@
                 </x-admin-menu-chooser>
                 <x-admin-menu-chooser
                     extraClasses="flex flex-col justify-center items-center w-full h-full p-4 gap-4 bg-white shadow-lg rounded-lg"
-                    link="/" title="Lihat Penjualan"
+                    link="/dashboard/admin/transactions" title="Lihat Penjualan"
                     description="Pantau dan proses pesanan pelanggan dengan efisien.">
                     <x-ri-money-dollar-circle-fill class="text-xl max-w-[84px]" />
                 </x-admin-menu-chooser>

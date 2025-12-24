@@ -9,9 +9,15 @@ class BaseVoucher extends Model
 {
     /** @use HasFactory<\Database\Factories\BaseVoucherFactory> */
     use HasFactory;
+    
     protected $fillable = [
         'name',
-        'discount_amount',
+        'disc_amt',
         'points_required',
     ];
+
+    public function vouchers()
+    {
+        return $this->hasMany(Voucher::class);
+    }
 }
