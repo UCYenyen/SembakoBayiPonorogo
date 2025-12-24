@@ -388,7 +388,6 @@ class PaymentController extends Controller
                 'fraud_status' => $status->fraud_status ?? 'N/A'
             ]);
 
-            // Extract transaction ID from order_id (ORDER-1-1765003598 -> 1)
             preg_match('/ORDER-(\d+)-/', $orderId, $matches);
             $transactionId = $matches[1] ?? null;
             

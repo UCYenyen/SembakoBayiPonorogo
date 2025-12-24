@@ -32,27 +32,19 @@ class AddressController extends Controller
         ]);
     }
 
-    /**
-     * Show create address form
-     */
     public function create()
     {
         return view('dashboard.user.addresses.create');
     }
 
-    /**
-     * Store new address
-     */
     public function store(Request $request)
     {
         $request->validate([
             'detail' => 'required|string|max:1000',
-            'subdistrict_id' => 'required|string', // ✅ Changed to string
+            'subdistrict_id' => 'required|string',
         ]);
 
         $user = Auth::user();
-
-        // ✅ Get subdistrict details from Komerce
         $subdistrictDetails = $this->rajaOngkir->getCityById($request->subdistrict_id);
 
         if (!$subdistrictDetails) {
@@ -82,12 +74,8 @@ class AddressController extends Controller
             ->with('success', 'Address added successfully!');
     }
 
-    /**
-     * Show edit address form
-     */
     public function edit(Address $address)
     {
-        // Check if user owns this address
         if ($address->user_id !== Auth::id()) {
             abort(403);
         }
@@ -97,12 +85,8 @@ class AddressController extends Controller
         ]);
     }
 
-    /**
-     * Update address
-     */
     public function update(Request $request, Address $address)
     {
-        // Check if user owns this address
         if ($address->user_id !== Auth::id()) {
             abort(403);
         }
@@ -112,7 +96,6 @@ class AddressController extends Controller
             'city_id' => 'required|integer',
         ]);
 
-        // Get city details
         $cityDetails = $this->rajaOngkir->getCityById($request->city_id);
 
         if (!$cityDetails) {
@@ -132,12 +115,8 @@ class AddressController extends Controller
             ->with('success', 'Address updated successfully!');
     }
 
-    /**
-     * Set address as default
-     */
     public function setDefault(Address $address)
     {
-        // Check if user owns this address
         if ($address->user_id !== Auth::id()) {
             abort(403);
         }
@@ -147,12 +126,8 @@ class AddressController extends Controller
         return back()->with('success', 'Default address updated!');
     }
 
-    /**
-     * Delete address
-     */
     public function destroy(Address $address)
     {
-        // Check if user owns this address
         if ($address->user_id !== Auth::id()) {
             abort(403);
         }
@@ -173,7 +148,6 @@ class AddressController extends Controller
             ->with('success', 'Address deleted successfully!');
     }
 
-    // ✅ API endpoint for city search
     public function searchCities(Request $request)
     {
         $query = $request->get('q', '');
