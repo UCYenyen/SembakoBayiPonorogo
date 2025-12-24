@@ -11,7 +11,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $latestProducts = Product::latest()->take(6)->get();
+        $latestProducts = ProductController::getLatestProducts(8);
         return view('welcome')->with('latestProducts', $latestProducts);
     }
 }
