@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             PaymentSeeder::class,
             DeliverySeeder::class,
-            AddressSeeder::class,
         ]);
     }
 }

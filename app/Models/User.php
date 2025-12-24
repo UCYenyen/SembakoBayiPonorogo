@@ -14,7 +14,6 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
-        'google_id',
         'avatar',
         'phone_number',
         'role',
@@ -27,7 +26,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-    // ✅ Add default attributes
     protected $attributes = [
         'role' => 'guest',
         'points' => 0,
@@ -40,11 +38,6 @@ class User extends Authenticatable implements MustVerifyEmail
             'member_since' => 'datetime',
             'points' => 'integer',
         ];
-    }
-
-    public function hasCompletedProfile(): bool
-    {
-        return !is_null($this->phone_number);
     }
 
     public function isAdmin(): bool

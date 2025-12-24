@@ -67,13 +67,7 @@
                         class="w-full bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E] px-4 py-2">
                         Register
                     </button>
-
-                    <div class="flex items-center justify-end mt-4">
-                        <a href="{{route('auth.google')}}">
-                            <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" alt="">
-                        </a>
-                    </div>
-
+                    
                     <p class="text-center text-sm text-gray-600">
                        Already have an account?
                         <a href="/login"

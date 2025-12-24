@@ -9,5 +9,9 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    
+    public function index()
+    {
+        $latestProducts = Product::latest()->take(6)->get();
+        return view('welcome')->with('latestProducts', $latestProducts);
+    }
 }
