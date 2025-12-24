@@ -10,32 +10,16 @@ class Address extends Model
     use HasFactory;
     
     protected $fillable = [
-        'detail',
-        'subdistrict_id',   // ✅ Komerce Subdistrict ID
-        'subdistrict_name', // ✅ Full location name
-        'city_name',        // ✅ City
-        'province',         // ✅ Province
         'is_default',
+        'name',
+        'detail',
+        'latitude',
+        'longitude',
         'user_id',
-    ];
-
-    protected $casts = [
-        'is_default' => 'boolean',
-        'latitude' => 'decimal:8',
-        'longitude' => 'decimal:8',
     ];
     
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function setAsDefault()
-    {
-        self::where('user_id', $this->user_id)
-            ->where('id', '!=', $this->id)
-            ->update(['is_default' => false]);
-
-        $this->update(['is_default' => true]);
     }
 }

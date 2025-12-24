@@ -173,21 +173,4 @@
             </div>
         </div>
     </main>
-
-    <script>
-        // Show/hide tracking number field based on status
-        const statusSelect = document.getElementById('status');
-        const resiField = document.getElementById('resi-field');
-
-        function toggleResiField() {
-            if (statusSelect.value === 'shipped') {
-                resiField.style.display = 'block';
-            } else {
-                resiField.style.display = 'none';
-            }
-        }
-
-        statusSelect.addEventListener('change', toggleResiField);
-        toggleResiField(); // Initial check
-    </script>
 @endsection

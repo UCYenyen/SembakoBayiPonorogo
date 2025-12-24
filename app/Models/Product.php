@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     use HasFactory;
-    protected $with = ['category', 'brand'];
 
     protected $fillable = [
         'name',
@@ -23,13 +22,6 @@ class Product extends Model
         'category_id',
         'brand_id',
     ];
-
-    // public function resolveRouteBinding($value, $field = null)
-    // {
-    //     return $this->with(['category', 'brand'])
-    //         ->where($field ?? 'id', $value)
-    //         ->firstOrFail();
-    // }
     
     public function category()
     {

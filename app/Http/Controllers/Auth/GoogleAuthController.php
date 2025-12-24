@@ -10,21 +10,14 @@ use Laravel\Socialite\Facades\Socialite;
 
 class GoogleAuthController extends Controller
 {
-    /**
-     * Redirect to Google OAuth
-     */
     public function redirect()
     {
         return Socialite::driver('google')->redirect();
     }
 
-    /**
-     * Handle Google OAuth callback
-     */
     public function callback()
     {
         try {
-            // ✅ Stateless() prevents session issues
             $googleUser = Socialite::driver('google')->user();
             
             Log::info('Google OAuth Callback', [
@@ -33,13 +26,11 @@ class GoogleAuthController extends Controller
                 'name' => $googleUser->name
             ]);
 
-            // ✅ Check if user exists first
             $existingUser = User::where('google_id', $googleUser->id)
                 ->orWhere('email', $googleUser->email)
                 ->first();
 
             if ($existingUser) {
-                // ✅ Update existing user
                 $existingUser->update([
                     'google_id' => $googleUser->id,
                     'name' => $googleUser->name,
@@ -50,23 +41,20 @@ class GoogleAuthController extends Controller
                 $user = $existingUser;
                 Log::info('Existing user logged in', ['user_id' => $user->id]);
             } else {
-                // ✅ Create new user
                 $user = User::create([
                     'name' => $googleUser->name,
                     'email' => $googleUser->email,
                     'google_id' => $googleUser->id,
                     'avatar' => $googleUser->avatar,
                     'email_verified_at' => now(),
-                    'role' => 'guest', // ✅ Set default role
+                    'role' => 'guest', 
                 ]);
                 
                 Log::info('New user created', ['user_id' => $user->id]);
             }
 
-            // ✅ Login user with remember token
             Auth::login($user, true);
             
-            // ✅ Regenerate session to prevent fixation
             request()->session()->regenerate();
             
             Log::info('User authenticated', [
@@ -74,7 +62,6 @@ class GoogleAuthController extends Controller
                 'session_id' => session()->getId()
             ]);
 
-            // ✅ Check profile completion
             if (!$user->hasCompletedProfile()) {
                 Log::info('Redirecting to complete profile', ['user_id' => $user->id]);
                 return redirect()->route('profile.complete');

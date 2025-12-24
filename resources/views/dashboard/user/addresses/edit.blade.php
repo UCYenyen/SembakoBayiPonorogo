@@ -80,37 +80,4 @@
             </div>
         </div>
     </main>
-
-    <script>
-        function addressEditForm(initialId, initialName) {
-            return {
-                komerceQuery: initialName || '',
-                komerceResults: [],
-                komerceOpen: false,
-                selectedSubdistrictId: initialId || null,
-                selectedLocationName: initialName || '',
-                komerceSelected: !!initialId,
-
-                async searchKomerce() {
-                    if (this.komerceQuery.length < 2) return;
-
-                    try {
-                        const response = await fetch(`/api/cities/search?q=${encodeURIComponent(this.komerceQuery)}`);
-                        const data = await response.json();
-                        this.komerceResults = data.slice(0, 10);
-                        this.komerceOpen = true;
-                    } catch (error) {
-                        console.error(error);
-                    }
-                },
-
-                selectKomerce(location) {
-                    this.selectedSubdistrictId = location.subdistrict_id;
-                    this.selectedLocationName = `${location.subdistrict_name}, ${location.city}, ${location.province}`;
-                    this.komerceSelected = true;
-                    this.komerceOpen = false;
-                }
-            }
-        }
-    </script>
 @endsection
