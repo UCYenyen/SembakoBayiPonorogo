@@ -14,8 +14,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
-        'google_id',
-        'avatar',
+        'password',
         'phone_number',
         'role',
         'member_since',
@@ -27,7 +26,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-    // ✅ Add default attributes
     protected $attributes = [
         'role' => 'guest',
         'points' => 0,

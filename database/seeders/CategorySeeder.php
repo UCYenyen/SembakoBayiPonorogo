@@ -20,26 +20,8 @@ class CategorySeeder extends Seeder
             'parent_id' => null,
         ]);
 
-        $clothing = Category::create([
-            'name' => 'Clothing',
-            'level' => '1',
-            'parent_id' => null,
-        ]);
-
-        $toys = Category::create([
-            'name' => 'Toys',
-            'level' => '1',
-            'parent_id' => null,
-        ]);
-
-        $healthcare = Category::create([
-            'name' => 'Healthcare',
-            'level' => '1',
-            'parent_id' => null,
-        ]);
-
-        $nursery = Category::create([
-            'name' => 'Nursery',
+        $tools = Category::create([
+            'name' => 'Tools',
             'level' => '1',
             'parent_id' => null,
         ]);
@@ -69,86 +51,23 @@ class CategorySeeder extends Seeder
             'parent_id' => $food->id,
         ]);
 
-        // Level 2 Categories (Sub Categories for Clothing)
+        // Level 2 Categories (Sub Categories for tools)
         Category::create([
-            'name' => 'Bodysuits',
+            'name' => 'Obeng',
             'level' => '2',
-            'parent_id' => $clothing->id,
+            'parent_id' => $tools->id,
         ]);
 
         Category::create([
-            'name' => 'Sleepwear',
+            'name' => 'Palu',
             'level' => '2',
-            'parent_id' => $clothing->id,
+            'parent_id' => $tools->id,
         ]);
 
         Category::create([
-            'name' => 'Outerwear',
+            'name' => 'Penenang',
             'level' => '2',
-            'parent_id' => $clothing->id,
-        ]);
-
-        // Level 2 Categories (Sub Categories for Healthcare)
-        Category::create([
-            'name' => 'Diapers',
-            'level' => '2',
-            'parent_id' => $healthcare->id,
-        ]);
-
-        Category::create([
-            'name' => 'Wipes',
-            'level' => '2',
-            'parent_id' => $healthcare->id,
-        ]);
-
-        Category::create([
-            'name' => 'Bath & Skincare',
-            'level' => '2',
-            'parent_id' => $healthcare->id,
-        ]);
-
-        Category::create([
-            'name' => 'Medicine & Vitamins',
-            'level' => '2',
-            'parent_id' => $healthcare->id,
-        ]);
-
-        // Level 2 Categories (Sub Categories for Toys)
-        Category::create([
-            'name' => 'Soft Toys',
-            'level' => '2',
-            'parent_id' => $toys->id,
-        ]);
-
-        Category::create([
-            'name' => 'Educational Toys',
-            'level' => '2',
-            'parent_id' => $toys->id,
-        ]);
-
-        Category::create([
-            'name' => 'Activity Toys',
-            'level' => '2',
-            'parent_id' => $toys->id,
-        ]);
-
-        // Level 2 Categories (Sub Categories for Nursery)
-        Category::create([
-            'name' => 'Cribs & Bedding',
-            'level' => '2',
-            'parent_id' => $nursery->id,
-        ]);
-
-        Category::create([
-            'name' => 'Baby Monitors',
-            'level' => '2',
-            'parent_id' => $nursery->id,
-        ]);
-
-        Category::create([
-            'name' => 'Feeding Accessories',
-            'level' => '2',
-            'parent_id' => $nursery->id,
+            'parent_id' => $tools->id,
         ]);
     }
 }

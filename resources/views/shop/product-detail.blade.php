@@ -3,33 +3,16 @@
 @section('content')
     <main class="bg-[#FFF3F3] text-[#3F3142] min-h-screen py-8">
         <div class="w-[90%] lg:w-[80%] mx-auto">
-            <!-- Breadcrumb -->
-            <nav class="flex mb-6 text-sm">
-                <a href="/" class="text-gray-600 hover:text-[#3F3142]">Home</a>
-                <span class="mx-2">/</span>
-                <a href="/shop" class="text-gray-600 hover:text-[#3F3142]">Shop</a>
-                <span class="mx-2">/</span>
-                <a href="/shop?category={{ $product->category_id }}" class="text-gray-600 hover:text-[#3F3142]">
-                    {{ $product->category->name }}
-                </a>
-                <span class="mx-2">/</span>
-                <span class="text-[#3F3142] font-semibold">{{ $product->name }}</span>
-            </nav>
-
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Left Column: Product Details -->
                 <div class="lg:col-span-2 space-y-6">
-                    <!-- Product Image & Info -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Product Image -->
                             <div
                                 class="aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                                 <img src="{{ asset('storage/' . $product->image_url) }}" alt="{{ $product->name }}"
                                     class="w-full h-full object-cover">
                             </div>
 
-                            <!-- Product Info -->
                             <div class="space-y-4">
                                 <div>
                                     <h1 class="text-3xl font-bold mb-2">{{ $product->name }}</h1>
@@ -41,7 +24,6 @@
                                     </p>
                                 </div>
 
-                                <!-- Rating -->
                                 <div class="flex items-center gap-2">
                                     <div class="flex">
                                         @for ($i = 1; $i <= 5; $i++)
@@ -52,7 +34,6 @@
                                     <span class="text-gray-600">(127 reviews)</span>
                                 </div>
 
-                                <!-- Price -->
                                 <div class="border-t border-b py-4">
                                     <p class="text-4xl font-bold text-[#3F3142]">
                                         Rp{{ number_format($product->price, 0, ',', '.') }}
@@ -67,7 +48,6 @@
                                     @endif
                                 </div>
 
-                                <!-- Stock -->
                                 <div>
                                     <p class="text-gray-600">Availability:</p>
                                     @if ($product->stocks > 10)
@@ -81,7 +61,6 @@
                                     @endif
                                 </div>
 
-                                <!-- Add to Cart -->
                                 <form method="POST" action="{{ route('cart.add') }}" class="space-y-4">
                                     @csrf
                                     <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -105,17 +84,14 @@
                         </div>
                     </div>
 
-                    <!-- Product Description -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-2xl font-bold mb-4">Product Description</h2>
                         <p class="text-gray-700 leading-relaxed">{{ $product->description }}</p>
                     </div>
 
-                    <!-- Product Reviews -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-2xl font-bold mb-6">Customer Reviews</h2>
 
-                        <!-- Overall Rating -->
                         <div class="flex items-center gap-8 mb-8 pb-6 border-b">
                             <div class="text-center">
                                 <p class="text-5xl font-bold text-[#3F3142]">4.5</p>
@@ -141,7 +117,6 @@
                             </div>
                         </div>
 
-                        <!-- Individual Reviews -->
                         <div class="space-y-6">
                             @for ($i = 1; $i <= 3; $i++)
                                 <div class="border-b pb-6 last:border-b-0">
@@ -170,7 +145,6 @@
                             @endfor
                         </div>
 
-                        <!-- Load More Button -->
                         <button
                             class="w-full mt-6 py-3 border-2 border-[#3F3142] text-[#3F3142] rounded-lg font-semibold hover:bg-[#3F3142] hover:text-white transition-colors">
                             Load More Reviews
@@ -178,7 +152,6 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Similar Products -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
                         <h2 class="text-2xl font-bold mb-6">Similar Products</h2>

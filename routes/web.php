@@ -59,11 +59,11 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/api/shipping-options', [PaymentController::class, 'getShippingOptions'])
         ->name('api.shipping.options');
-        Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+    
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
-});
 
-Route::middleware(['auth', 'admin'])->group(function () {
+
     Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/dashboard/admin/products', [AdminController::class, 'products'])->name('admin.products');
     Route::get('/dashboard/admin/products/create', [AdminController::class, 'createProduct'])
