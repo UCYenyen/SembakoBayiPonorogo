@@ -15,8 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('google_id')->unique()->nullable();
-            $table->string('avatar')->nullable(); // ✅ Tambah kolom avatar
+            $table->string('password');
             $table->string('phone_number')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->enum('role', ['guest', 'member', 'admin'])->default('guest');
@@ -42,7 +41,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
-        // Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }
 };
