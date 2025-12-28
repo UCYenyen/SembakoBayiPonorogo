@@ -12,6 +12,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Middleware\AdminPageGuard;
 use App\Models\Transaction;
@@ -23,21 +24,11 @@ Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/products/{product}', [ProductController::class, 'showDetails'])->name('product.show');
 
 // Google Auth (no middleware)
-Route::get('/auth/google', [GoogleAuthController::class, 'redirect'])->name('auth.google');
-Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::get('/register', [AuthController::class, 'register'])->name('register');
 
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-    ->name('logout')
-    ->middleware('auth');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/complete-profile', [CompleteProfileController::class, 'show'])
-        ->name('profile.complete');
-    Route::post('/complete-profile', [CompleteProfileController::class, 'store'])
-        ->name('profile.complete.store');
-});
-
-Route::middleware(['auth', 'profile.complete'])->group(function () {
     Route::get('/dashboard/user', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/user/transactions/{transaction}', [UserDashboardController::class, 'show'])
         ->name('user.transaction.show');
@@ -69,8 +60,9 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
 
     Route::post('/api/shipping-options', [PaymentController::class, 'getShippingOptions'])
         ->name('api.shipping.options');
+        Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->name('logout');
 });
-
 // Midtrans Notification (public - no middleware)
 Route::post('/payment/notification', [PaymentController::class, 'notificationHandler'])
     ->name('payment.notification');
