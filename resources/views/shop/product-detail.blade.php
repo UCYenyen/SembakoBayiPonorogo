@@ -2,7 +2,7 @@
 @section('title', $product->name)
 @section('content')
     <main class="bg-[#FFF3F3] text-[#3F3142] min-h-screen py-8">
-        <div class="w-[90%] lg:w-[80%] mx-auto">
+        <div class="w-[80%] mx-auto">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="lg:col-span-2 space-y-6">
                     <div class="bg-white rounded-lg shadow-lg p-6">

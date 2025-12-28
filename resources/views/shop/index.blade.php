@@ -2,9 +2,29 @@
 @section('title', 'Shop')
 @section('content')
     <main class="bg-[#FFF3F3] text-[#3F3142] min-h-screen py-8">
-        <div class="w-[90%] lg:w-[80%] mx-auto">
+        <div class="w-[80%] mx-auto">
+            <div class="lg:hidden mb-6">
+                <div class="mb-4">
+                    <x-pages.search-bar route="/shop" placeholder="Search products..." extraClasses="w-full" />
+                </div>
+                <button onclick="toggleMobileFilter()"
+                    class="w-full flex items-center justify-between bg-white px-4 py-3 rounded-lg shadow-md border border-gray-200">
+                    <span class="font-bold flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        Filters & Sorting
+                    </span>
+                    <svg id="filterArrow" class="w-5 h-5 transition-transform duration-300" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                <div class="lg:col-span-1">
+                <div id="filterContainer" class="hidden lg:block lg:col-span-1">
                     <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
                         <h2 class="text-2xl font-bold mb-6">Filters</h2>
 
@@ -14,8 +34,7 @@
                                 <div class="space-y-2 max-h-64 overflow-y-auto">
                                     @foreach ($categories as $category)
                                         <div>
-                                            <label
-                                                class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
                                                 <input type="checkbox" name="categories[]" value="{{ $category->id }}"
                                                     {{ in_array($category->id, request('categories', [])) ? 'checked' : '' }}
                                                     onchange="document.getElementById('filterForm').submit()"
@@ -26,15 +45,12 @@
                                             @if ($category->children->count() > 0)
                                                 <div class="ml-6 mt-1 space-y-1">
                                                     @foreach ($category->children as $subCategory)
-                                                        <label
-                                                            class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                                                            <input type="checkbox" name="categories[]"
-                                                                value="{{ $subCategory->id }}"
+                                                        <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                                                            <input type="checkbox" name="categories[]" value="{{ $subCategory->id }}"
                                                                 {{ in_array($subCategory->id, request('categories', [])) ? 'checked' : '' }}
                                                                 onchange="document.getElementById('filterForm').submit()"
                                                                 class="w-3 h-3 text-[#3F3142] border-gray-300 rounded focus:ring-[#3F3142]">
-                                                            <span
-                                                                class="text-xs text-gray-600">{{ $subCategory->name }}</span>
+                                                            <span class="text-xs text-gray-600">{{ $subCategory->name }}</span>
                                                         </label>
                                                     @endforeach
                                                 </div>
@@ -61,11 +77,13 @@
 
                             <div class="mb-6 pb-6 border-b">
                                 <h3 class="font-semibold text-lg mb-4">Price Range</h3>
-                                <div class="flex items-center gap-2 w-full">
-                                    <select name="sort" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142]" onchange="updateSort(this.value)">
-                                        <option value="" {{ request('sort') == null ? 'selected' : '' }}>None</option>
-                                        <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Low to High</option>
-                                        <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>High to Low</option>
+                                <div class="mb-4">
+                                    <select name="sort"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142]"
+                                        onchange="updateSort(this.value)">
+                                        <option value="" {{ request('sort') == '' ? 'selected' : '' }}>Sort By</option>
+                                        <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
+                                        <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
                                     </select>
                                 </div>
                                 <div class="space-y-3">
@@ -97,8 +115,12 @@
                 </div>
 
                 <div class="lg:col-span-3">
+                    @if (isset($searchQuery) && $searchQuery)
+                        <h2 class="text-2xl font-bold mb-6">Search Results for "{{ $searchQuery }}"</h2>
+                    @endif
+
                     @if ($products->count() > 0)
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
                             @foreach ($products as $product)
                                 <x-pages.product-card :product="$product" productImage="{{ $product->image_url }}"
                                     productName="{{ $product->name }}" rating="4.5"
@@ -106,8 +128,8 @@
                             @endforeach
                         </div>
 
-                        <div class="mt-8">
-                            {{ $products->links() }}
+                        <div class="w-full flex justify-end items-center mt-8">
+                            {{ $products->links('vendor.pagination.simple') }}
                         </div>
                     @else
                         <div class="bg-white rounded-lg shadow-md p-12 text-center">
@@ -118,7 +140,9 @@
                                 </path>
                             </svg>
                             <h3 class="text-2xl font-semibold text-gray-700 mb-2">No Products Found</h3>
-                            <p class="text-gray-500 mb-4">Try adjusting your filters</p>
+                            <p class="text-gray-500 mb-4">
+                                {{ isset($searchQuery) ? 'No products matching "' . $searchQuery . '"' : 'Try adjusting your filters' }}
+                            </p>
                             <a href="/shop"
                                 class="inline-block px-6 py-3 bg-[#3F3142] text-white rounded-lg hover:bg-[#5C4B5E] transition-colors">
                                 Clear Filters
@@ -131,6 +155,18 @@
     </main>
 
     <script>
+        function toggleMobileFilter() {
+            const container = document.getElementById('filterContainer');
+            const arrow = document.getElementById('filterArrow');
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                container.classList.add('hidden');
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
         function updateSort(value) {
             const url = new URL(window.location.href);
             url.searchParams.set('sort', value);

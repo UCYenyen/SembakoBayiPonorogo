@@ -19,7 +19,7 @@ Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/unauthorized', [AdminController::class, 'unauthorized']);
 
-Route::get('/api/products/search', [ProductController::class, 'search'])->name('api.products.search');
+Route::get('/api/products/search', [ProductController::class, 'liveSearch'])->name('api.products.search');
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/products/{product}', [ProductController::class, 'showDetails'])->name('product.show');

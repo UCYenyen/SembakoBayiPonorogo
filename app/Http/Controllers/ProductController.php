@@ -119,7 +119,7 @@ class ProductController extends Controller
     {
         $product->is_hidden = !$product->is_hidden;
         $product->save();
-        
+
         $status = $product->is_hidden ? 'hidden' : 'visible';
         return redirect()->route('admin.products.index')->with('success', "Product is now {$status}!");
     }
@@ -130,9 +130,9 @@ class ProductController extends Controller
         if ($product->image_url) {
             Storage::disk('public')->delete($product->image_url);
         }
-        
+
         $product->delete();
-        
+
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
     }
 
@@ -165,12 +165,12 @@ class ProductController extends Controller
             return response()->json([]);
         }
 
-        $products = Product::select(['id', 'name', 'price', 'stocks', 'image_url', 'category_id', 'brand_id'])
+        $products = Product::select('id', 'name', 'price', 'stocks', 'image_url', 'category_id', 'brand_id')
             ->with(['category:id,name', 'brand:id,name'])
             ->where('is_hidden', false)
-            ->where(function($q) use ($query) {
+            ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('description', 'like', "%{$query}%");
+                    ->orWhere('description', 'like', "%{$query}%");
             })
             ->orderBy('name', 'asc')
             ->limit(10)

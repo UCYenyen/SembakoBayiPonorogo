@@ -4,7 +4,7 @@
             <h1 class="text-2xl font-bold">SBP</h1>
         </a>
         
-        <x-pages.search-bar route="/" placeholder="Search products..." extraClasses="hidden md:block flex-1"/>
+        <x-pages.search-bar route="/shop" placeholder="Search products..." extraClasses="hidden md:block flex-1"/>
         
         <div class="flex gap-4 justify-center items-center text-xl">
             <a href="/shop"><x-heroicon-o-shopping-bag class="w-6 h-6 text-[#3F3142]"/></a>

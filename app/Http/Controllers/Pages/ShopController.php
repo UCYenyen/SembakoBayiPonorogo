@@ -12,29 +12,34 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
+        $search = $request->input('search');
+        
         $query = Product::with(['category', 'brand'])
             ->where('is_hidden', false);
 
-        // Filter by categories (multiple selection)
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
         if ($request->has('categories') && !empty($request->categories)) {
             $query->whereIn('category_id', $request->categories);
         }
 
-        // Filter by brands (multiple selection)
         if ($request->has('brands') && !empty($request->brands)) {
             $query->whereIn('brand_id', $request->brands);
         }
 
-        // Filter by price range
-        if ($request->has('min_price') && $request->min_price !== null) {
+        if ($request->filled('min_price')) {
             $query->where('price', '>=', $request->min_price);
         }
 
-        if ($request->has('max_price') && $request->max_price !== null) {
+        if ($request->filled('max_price')) {
             $query->where('price', '<=', $request->max_price);
         }
 
-        // Sort
         $sortBy = $request->get('sort', 'latest');
         switch ($sortBy) {
             case 'price_asc':
@@ -50,10 +55,8 @@ class ShopController extends Controller
                 $query->latest();
         }
 
-        // Pagination
         $products = $query->paginate(12)->withQueryString();
 
-        // Get all categories and brands for filter
         $categories = Category::where('level', '1')->with('children')->get();
         $brands = Brand::all();
 
@@ -61,6 +64,7 @@ class ShopController extends Controller
             'products' => $products,
             'categories' => $categories,
             'brands' => $brands,
+            'searchQuery' => $search
         ]);
     }
 }
