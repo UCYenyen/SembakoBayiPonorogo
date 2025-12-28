@@ -3,7 +3,7 @@
 @section('content')
     <main class="bg-[#FFF3F3] text-[#3F3142] min-h-screen py-8">
         <div class="w-[90%] lg:w-[80%] mx-auto">
-            <h1 class="text-4xl font-bold mb-8">Checkout</h1>
+            <h1 class="text-4xl font-bold mb-8">Bayar</h1>
 
             @if(session('error'))
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
@@ -18,7 +18,7 @@
                 <div class="lg:col-span-2 space-y-6">
                     <!-- Shipping Address -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-2xl font-bold mb-4">Shipping Address</h2>
+                        <h2 class="text-2xl font-bold mb-4">Alamat Pengiriman</h2>
                         
                         @if($addresses->count() > 0)
                             <div class="space-y-3">
@@ -44,20 +44,20 @@
                             </div>
                             <a href="{{ route('user.addresses.create') }}" 
                                class="inline-block mt-4 text-[#3F3142] font-semibold hover:underline">
-                                + Add New Address
+                                + Tambah Alamat Baru
                             </a>
                         @else
-                            <p class="text-gray-500">No address found. Please add an address first.</p>
+                            <p class="text-gray-500">Anda belum mengisi alamat anda, mohon diisi terlebih dahulu!</p>
                             <a href="{{ route('user.addresses.create') }}" 
                                class="inline-block mt-4 px-6 py-2 bg-[#3F3142] text-white rounded-lg hover:bg-[#5C4B5E]">
-                                Add Address
+                                Tambah Alamat
                             </a>
                         @endif
                     </div>
 
                     <!-- ✅ Delivery Method - Dynamic from RajaOngkir -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-2xl font-bold mb-4">Delivery Method</h2>
+                        <h2 class="text-2xl font-bold mb-4">Metode Pengiriman</h2>
                         
                         <div id="shipping-options-container">
                             <p class="text-gray-500 text-center py-4">
@@ -65,7 +65,7 @@
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                Select an address to see shipping options
+                               Pilih alamat untuk melihat opsi pengiriman
                             </p>
                         </div>
                         
@@ -75,7 +75,7 @@
 
                     <!-- Payment Method -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-2xl font-bold mb-4">Payment Method</h2>
+                        <h2 class="text-2xl font-bold mb-4">Metode Pembayaran</h2>
                         <div class="space-y-3">
                             @foreach($payments as $payment)
                                 <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {{ $loop->first ? 'border-[#3F3142] bg-[#FFF3F3]' : '' }}">
@@ -96,7 +96,7 @@
 
                     <!-- Order Items -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-2xl font-bold mb-4">Order Items</h2>
+                        <h2 class="text-2xl font-bold mb-4">Item yang dipesan</h2>
                         <div class="space-y-4">
                             @foreach($cart->items as $item)
                                 <div class="flex gap-4">
@@ -119,7 +119,7 @@
                 <!-- Right Column: Order Summary -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
-                        <h2 class="text-2xl font-bold mb-6">Order Summary</h2>
+                        <h2 class="text-2xl font-bold mb-6">Ringkasan Pesanan</h2>
 
                         <div class="space-y-3 mb-6">
                             <div class="flex justify-between">
@@ -127,11 +127,11 @@
                                 <span class="font-semibold">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Tax (11%)</span>
+                                <span class="text-gray-600">Pajak (11%)</span>
                                 <span class="font-semibold">Rp{{ number_format($tax, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Shipping</span>
+                                <span class="text-gray-600">Pengiriman</span>
                                 <span class="font-semibold" id="shipping-cost-display">Rp0</span>
                             </div>
                         </div>
@@ -148,12 +148,12 @@
                         <button type="button"
                                 id="pay-button"
                                 class="w-full bg-[#3F3142] text-white py-4 rounded-lg font-bold text-lg hover:bg-[#5C4B5E] transition-colors">
-                            Proceed to Payment
+                            Bayar
                         </button>
 
                         <a href="{{ route('cart.index') }}" 
                            class="block w-full text-center py-3 border-2 border-[#3F3142] text-[#3F3142] rounded-lg font-semibold hover:bg-[#3F3142] hover:text-white transition-colors mt-4">
-                            Back to Cart
+                            Kembali ke Keranjang
                         </a>
 
                         <div id="payment-status" class="mt-4 text-center text-sm"></div>

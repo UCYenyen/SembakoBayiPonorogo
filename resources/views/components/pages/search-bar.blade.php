@@ -52,14 +52,14 @@
                 {{-- View All Results --}}
                 <button type="submit" @click="open = false"
                     class="w-full p-3 text-center text-sm font-semibold text-[#3F3142] hover:bg-gray-50 transition-colors">
-                    View All Results →
+                    Lihat Semua →
                 </button>
             </div>
 
             {{-- No Results Message --}}
             <div x-show="open && query.length > 0 && results.length === 0 && !loading" x-transition
                 class="absolute z-50 w-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 text-center">
-                <p class="text-gray-500 text-sm">No products found for "<span x-text="query"></span>"</p>
+                <p class="text-gray-500 text-sm">Tidak ada produk ditemukan untuk "<span x-text="query"></span>"</p>
             </div>
         </div>
 

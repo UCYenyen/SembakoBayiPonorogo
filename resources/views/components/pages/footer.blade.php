@@ -9,11 +9,11 @@
         <div class="w-[80%] grid grid-cols-1 md:grid-cols-5 gap-12 items-start text-center md:text-left">
             <div class="flex flex-col gap-2 md:col-span-3 items-center md:items-start">
                 <h3 class="text-3xl font-bold">SBP</h3>
-                <p class="text-gray-300 text-lg">Get The Best For Your Baby</p>
+                <p class="text-gray-300 text-lg">Dapatkan yang terbaik untuk bayimu</p>
             </div>
             <div class="flex flex-col gap-4 items-center md:items-end"> 
                 <div class="w-full md:w-fit flex flex-col items-center md:items-start">
-                    <h3 class="text-xl font-bold border-b border-gray-600 pb-2 w-full md:w-fit md:border-none mb-2">Contacts</h3>
+                    <h3 class="text-xl font-bold border-b border-gray-600 pb-2 w-full md:w-fit md:border-none mb-2">Kontak</h3>
                     <div class="flex flex-col gap-3">
                         <a class="hover:underline text-lg transition-colors" href="tel:+6281231847161">+62 812 3184 7161</a>
                         <a class="hover:underline text-lg transition-colors break-all" href="mailto:sembakobayi2@gmail.com">sembakobayi2@gmail.com</a>
@@ -22,7 +22,7 @@
             </div>
             <div class="flex flex-col gap-4 items-center md:items-end">
                 <div class="w-full md:w-fit flex flex-col items-center md:items-start">
-                    <h3 class="text-xl font-bold border-b border-gray-600 pb-2 w-full md:w-fit md:border-none mb-2">Quick Links</h3>
+                    <h3 class="text-xl font-bold border-b border-gray-600 pb-2 w-full md:w-fit md:border-none mb-2">Tautan Cepat</h3>
                     <nav class="flex flex-col gap-3">
                         <a href="/" class="hover:underline text-lg transition-colors">Home</a>
                         <a href="/shop" class="hover:underline text-lg transition-colors">Shop</a>
@@ -33,6 +33,6 @@
         </div>
     </div>
     <div class="w-full border-t-2 border-[#445664] bg-[#334553] text-center py-4 text-gray-400">
-        &copy; 2024 SBP. All rights reserved.
+        &copy; 2024 SBP. Semua hak dilindungi.
     </div>
 </footer>

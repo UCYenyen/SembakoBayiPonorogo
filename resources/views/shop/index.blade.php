@@ -14,7 +14,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                         </svg>
-                        Filters & Sorting
+                        Filter dan Urutkan
                     </span>
                     <svg id="filterArrow" class="w-5 h-5 transition-transform duration-300" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
@@ -26,11 +26,11 @@
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <div id="filterContainer" class="hidden lg:block lg:col-span-1">
                     <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
-                        <h2 class="text-2xl font-bold mb-6">Filters</h2>
+                        <h2 class="text-2xl font-bold mb-6">Filter</h2>
 
                         <form method="GET" action="/shop" id="filterForm">
                             <div class="mb-6 pb-6 border-b">
-                                <h3 class="font-semibold text-lg mb-4">Categories</h3>
+                                <h3 class="font-semibold text-lg mb-4">Kategori</h3>
                                 <div class="space-y-2 max-h-64 overflow-y-auto">
                                     @foreach ($categories as $category)
                                         <div>
@@ -61,7 +61,7 @@
                             </div>
 
                             <div class="mb-6 pb-6 border-b">
-                                <h3 class="font-semibold text-lg mb-4">Brands</h3>
+                                <h3 class="font-semibold text-lg mb-4">Brand</h3>
                                 <div class="space-y-2 max-h-48 overflow-y-auto">
                                     @foreach ($brands as $brand)
                                         <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
@@ -76,39 +76,39 @@
                             </div>
 
                             <div class="mb-6 pb-6 border-b">
-                                <h3 class="font-semibold text-lg mb-4">Price Range</h3>
+                                <h3 class="font-semibold text-lg mb-4">Jangkauan Harga</h3>
                                 <div class="mb-4">
                                     <select name="sort"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142]"
                                         onchange="updateSort(this.value)">
-                                        <option value="" {{ request('sort') == '' ? 'selected' : '' }}>Sort By</option>
-                                        <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
-                                        <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
+                                        <option value="" {{ request('sort') == '' ? 'selected' : '' }}>Urutkan</option>
+                                        <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Harga: Rendah ke Tinggi</option>
+                                        <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Harga: Tinggi ke Rendah</option>
                                     </select>
                                 </div>
                                 <div class="space-y-3">
                                     <div>
-                                        <label class="text-sm text-gray-600">Min Price</label>
+                                        <label class="text-sm text-gray-600">Harga Minimum</label>
                                         <input type="number" name="min_price" value="{{ request('min_price') }}"
                                             placeholder="0"
                                             class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142]">
                                     </div>
                                     <div>
-                                        <label class="text-sm text-gray-600">Max Price</label>
+                                        <label class="text-sm text-gray-600">Harga Maximum</label>
                                         <input type="number" name="max_price" value="{{ request('max_price') }}"
                                             placeholder="1000000"
                                             class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142]">
                                     </div>
                                     <button type="submit"
                                         class="w-full bg-[#3F3142] text-white py-2 rounded-lg hover:bg-[#5C4B5E] transition-colors">
-                                        Apply Price
+                                        Terapkan
                                     </button>
                                 </div>
                             </div>
 
                             <a href="/shop"
                                 class="block w-full text-center py-2 border-2 border-[#3F3142] text-[#3F3142] rounded-lg hover:bg-[#3F3142] hover:text-white transition-colors">
-                                Clear All Filters
+                                Hapus Semua Filter
                             </a>
                         </form>
                     </div>
@@ -116,7 +116,7 @@
 
                 <div class="lg:col-span-3">
                     @if (isset($searchQuery) && $searchQuery)
-                        <h2 class="text-2xl font-bold mb-6">Search Results for "{{ $searchQuery }}"</h2>
+                        <h2 class="text-2xl font-bold mb-6">Hasil Pencarian untuk "{{ $searchQuery }}"</h2>
                     @endif
 
                     @if ($products->count() > 0)
@@ -139,13 +139,13 @@
                                     d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
                                 </path>
                             </svg>
-                            <h3 class="text-2xl font-semibold text-gray-700 mb-2">No Products Found</h3>
+                            <h3 class="text-2xl font-semibold text-gray-700 mb-2">Tidak Ada Produk Ditemukan</h3>
                             <p class="text-gray-500 mb-4">
-                                {{ isset($searchQuery) ? 'No products matching "' . $searchQuery . '"' : 'Try adjusting your filters' }}
+                                {{ isset($searchQuery) ? 'Tidak ada produk yang cocok dengan "' . $searchQuery . '"' : 'Coba sesuaikan filter Anda' }}
                             </p>
                             <a href="/shop"
                                 class="inline-block px-6 py-3 bg-[#3F3142] text-white rounded-lg hover:bg-[#5C4B5E] transition-colors">
-                                Clear Filters
+                                Hapus Semua Filter
                             </a>
                         </div>
                     @endif

@@ -33,6 +33,9 @@ Route::middleware('auth')->group(function () {
         ->name('user.transaction.show');
 
     Route::prefix('dashboard/user/addresses')->name('user.addresses.')->group(function () {
+        Route::get('/cities/{provinceId}', [AddressController::class, 'getCities'])->name('cities');
+        Route::get('/districts/{cityId}', [AddressController::class, 'getDistricts'])->name('districts');
+        Route::get('/sub-districts/{districtId}', [AddressController::class, 'getSubDistricts'])->name('sub-districts');
         Route::get('/', [AddressController::class, 'index'])->name('index');
         Route::get('/create', [AddressController::class, 'create'])->name('create');
         Route::post('/', [AddressController::class, 'store'])->name('store');
@@ -59,9 +62,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/api/shipping-options', [PaymentController::class, 'getShippingOptions'])
         ->name('api.shipping.options');
-    
+
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-    ->name('logout');
+        ->name('logout');
 
 
     Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('admin.dashboard');

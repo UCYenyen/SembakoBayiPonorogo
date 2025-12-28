@@ -19,7 +19,7 @@
                                     <p class="text-gray-600">Brand:
                                         <span class="font-semibold text-[#3F3142]">{{ $product->brand->name }}</span>
                                     </p>
-                                    <p class="text-gray-600">Category:
+                                    <p class="text-gray-600">Kategori:
                                         <span class="font-semibold text-[#3F3142]">{{ $product->category->name }}</span>
                                     </p>
                                 </div>
@@ -43,21 +43,21 @@
                                             Rp{{ number_format($product->price + $product->discount_amount, 0, ',', '.') }}
                                         </p>
                                         <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                                            Save Rp{{ number_format($product->discount_amount, 0, ',', '.') }}
+                                            Hemat Rp{{ number_format($product->discount_amount, 0, ',', '.') }}
                                         </span>
                                     @endif
                                 </div>
 
                                 <div>
-                                    <p class="text-gray-600">Availability:</p>
+                                    <p class="text-gray-600">Ketersediaan:</p>
                                     @if ($product->stocks > 10)
-                                        <span class="text-green-600 font-semibold">In Stock ({{ $product->stocks }}
+                                        <span class="text-green-600 font-semibold">({{ $product->stocks }}
                                             items)</span>
                                     @elseif($product->stocks > 0)
-                                        <span class="text-yellow-600 font-semibold">Low Stock ({{ $product->stocks }}
+                                        <span class="text-yellow-600 font-semibold">({{ $product->stocks }}
                                             items)</span>
                                     @else
-                                        <span class="text-red-600 font-semibold">Out of Stock</span>
+                                        <span class="text-red-600 font-semibold">Habis</span>
                                     @endif
                                 </div>
 
@@ -66,7 +66,7 @@
                                     <input type="hidden" name="product_id" value="{{ $product->id }}">
 
                                     <div class="flex items-center gap-4">
-                                        <label class="text-gray-700 font-semibold">Quantity:</label>
+                                        <label class="text-gray-700 font-semibold">Jumlah:</label>
                                         <input type="number" name="quantity" value="1" min="1"
                                             max="{{ $product->stocks }}"
                                             class="w-20 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142]"
@@ -77,7 +77,7 @@
                                         class="w-full bg-[#3F3142] text-white py-3 rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors {{ $product->stocks == 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
                                         {{ $product->stocks == 0 ? 'disabled' : '' }}>
                                         <x-heroicon-o-shopping-cart class="w-5 h-5 inline-block mr-2" />
-                                        Add to Cart
+                                        Tambah ke Keranjang
                                     </button>
                                 </form>
                             </div>
@@ -85,12 +85,12 @@
                     </div>
 
                     <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-2xl font-bold mb-4">Product Description</h2>
+                        <h2 class="text-2xl font-bold mb-4">Deskripsi Produk</h2>
                         <p class="text-gray-700 leading-relaxed">{{ $product->description }}</p>
                     </div>
 
                     <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-2xl font-bold mb-6">Customer Reviews</h2>
+                        <h2 class="text-2xl font-bold mb-6">Ulasan Pelanggan</h2>
 
                         <div class="flex items-center gap-8 mb-8 pb-6 border-b">
                             <div class="text-center">
@@ -128,7 +128,7 @@
                                         <div class="flex-1">
                                             <div class="flex items-center justify-between mb-2">
                                                 <h4 class="font-semibold">User {{ chr(64 + $i) }}</h4>
-                                                <span class="text-sm text-gray-500">{{ rand(1, 30) }} days ago</span>
+                                                <span class="text-sm text-gray-500">{{ rand(1, 30) }} hari yang lalu</span>
                                             </div>
                                             <div class="flex mb-2">
                                                 @for ($j = 1; $j <= 5; $j++)
@@ -136,8 +136,7 @@
                                                 @endfor
                                             </div>
                                             <p class="text-gray-700">
-                                                Great product! My baby loves it. The quality is excellent and delivery was
-                                                fast. Highly recommended!
+                                                Produk yang bagus! Bayi saya menyukainya. Kualitasnya sangat baik dan pengirimannya cepat. Sangat direkomendasikan!
                                             </p>
                                         </div>
                                     </div>
@@ -147,14 +146,14 @@
 
                         <button
                             class="w-full mt-6 py-3 border-2 border-[#3F3142] text-[#3F3142] rounded-lg font-semibold hover:bg-[#3F3142] hover:text-white transition-colors">
-                            Load More Reviews
+                            Lihat lebih banyak ulasan
                         </button>
                     </div>
                 </div>
 
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
-                        <h2 class="text-2xl font-bold mb-6">Similar Products</h2>
+                        <h2 class="text-2xl font-bold mb-6">Produk yang mirip</h2>
                         <div class="space-y-4">
                             @foreach ($similarProducts as $similar)
                                 <a href="{{ route('product.show', $similar) }}"
@@ -176,12 +175,12 @@
                         </div>
 
                         @if ($similarProducts->isEmpty())
-                            <p class="text-gray-500 text-center py-8">No similar products found</p>
+                            <p class="text-gray-500 text-center py-8">Tidak ada produk serupa ditemukan</p>
                         @endif
 
                         <a href="/shop?category={{ $product->category_id }}"
                             class="block w-full mt-6 py-3 bg-[#3F3142] text-white text-center rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors">
-                            View All in {{ $product->category->name }}
+                            Lihat Semua di {{ $product->category->name }}
                         </a>
                     </div>
                 </div>

@@ -9,16 +9,16 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     
-                    <h1 class="text-3xl font-bold mb-4">Payment Pending</h1>
-                    <p class="text-gray-600 mb-6">Your payment is being processed. Please complete the payment.</p>
+                    <h1 class="text-3xl font-bold mb-4">Menunggu Pembayaran</h1>
+                    <p class="text-gray-600 mb-6">Pembayaranmu sedang diproses, mohon segera lakukan pembayaran!</p>
 
                     <div class="bg-gray-50 rounded-lg p-6 mb-6 text-left">
                         <div class="flex justify-between mb-2">
-                            <span class="text-gray-600">Order ID:</span>
+                            <span class="text-gray-600">ID Transaksi:</span>
                             <span class="font-semibold">#{{ $transaction->id }}</span>
                         </div>
                         <div class="flex justify-between mb-2">
-                            <span class="text-gray-600">Total Payment:</span>
+                            <span class="text-gray-600">Total Pembayaran:</span>
                             <span class="font-semibold text-[#3F3142]">
                                 Rp{{ number_format($transaction->total_price + $transaction->delivery_price, 0, ',', '.') }}
                             </span>
@@ -26,7 +26,7 @@
                         <div class="flex justify-between">
                             <span class="text-gray-600">Status:</span>
                             <span class="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800">
-                                Pending Payment
+                                Menunggu Pembayaran
                             </span>
                         </div>
                     </div>
@@ -34,11 +34,11 @@
                     <div class="flex flex-col sm:flex-row gap-4">
                         <a href="{{ route('user.transaction.show', $transaction) }}" 
                            class="flex-1 bg-[#3F3142] text-white py-3 rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors">
-                            View Order Detail
+                            Lihat Detail Pesanan
                         </a>
                         <a href="{{ route('dashboard') }}" 
                            class="flex-1 border-2 border-[#3F3142] text-[#3F3142] py-3 rounded-lg font-semibold hover:bg-[#3F3142] hover:text-white transition-colors">
-                            Go to Dashboard
+                            Kembali ke Dasbor
                         </a>
                     </div>
                 </div>

@@ -3,20 +3,20 @@
         <div class="hidden xl:flex justify-center items-center">
             <div class="flex flex-col gap-8 basis-[40%]">
                 <h1 class="text-7xl font-bold text-[#3F3142]">
-                    Get the best
-                    for your baby
+                    Dapatkan yang terbaik
+                    untuk bayimu
                 </h1>
                 <h2 class="text-2xl">
-                    The cheapest and most complete baby shop in Ponorogo
+                    Toko bayi termurah dan terlengkap di Ponorogo
                 </h2>
                 <div class="flex items-center justify-start gap-4">
                     <x-pages.solid-button link="#"
                         extraClasses="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E]">
-                        Shop Now
+                        Belanja Sekarang
                     </x-pages.solid-button>
                     <x-pages.solid-button link="#"
                         extraClasses="bg-white shadow-lg rounded-lg text-xl text-[#3F3142] hover:bg-gray-100/80">
-                        Contact Us
+                        Hubungi Kami
                     </x-pages.solid-button>
                 </div>
             </div>
@@ -31,18 +31,18 @@
             <img src="/images/home/baby-image.svg" alt="sembako bayi ponorogo baby image"
                 class="w-full max-w-full h-auto object-contain">
             <h1 class="text-5xl font-bold text-[#3F3142]">
-                Get the best
-                for your baby
+                Dapatkan yang terbaik
+                untuk bayimu
             </h1>
             <h2 class="text-xl">
-                The cheapest and most complete baby shop in Ponorogo
+                Toko bayi termurah dan terlengkap di Ponorogo
             </h2>
             <div class="flex items-center justify-start gap-4">
                 <x-pages.solid-button link="#" extraClasses="bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E]">
-                    Shop Now
+                    Belanja Sekarang
                 </x-pages.solid-button>
                 <x-pages.solid-button link="#" extraClasses="bg-white shadow-lg rounded-lg text-xl text-[#3F3142] hover:bg-gray-100/80">
-                    Contact Us
+                    Hubungi Kami
                 </x-pages.solid-button>
             </div>
         </div>

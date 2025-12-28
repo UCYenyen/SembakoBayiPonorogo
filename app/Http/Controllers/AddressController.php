@@ -3,23 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Address;
-use App\Services\RajaOngkirService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class AddressController extends Controller
 {
-    protected $rajaOngkir;
-
-    public function __construct(RajaOngkirService $rajaOngkir)
-    {
-        $this->rajaOngkir = $rajaOngkir;
-    }
-
-    /**
-     * Display user's addresses
-     */
     public function index()
     {
         $addresses = Address::where('user_id', Auth::id())
@@ -31,133 +20,86 @@ class AddressController extends Controller
             'addresses' => $addresses,
         ]);
     }
-
     public function create()
     {
-        return view('dashboard.user.addresses.create');
+        // Yang atas ini digunakan untuk ambil secara langsung dari API Raja Ongkir tapi makan request jadi aku hardcode aja (aku ambil sekali terus langsung dari json filenya tak masukin ke config jadi id pasti sama biar ga makan limit)
+        //  $response = Http::withHeaders([
+        //     'Accept' => 'application/json',
+        //     'key' => config('rajaongkir.api_key'),
+
+        // ])->get('https://rajaongkir.komerce.id/api/v1/destination/province');
+
+        // if ($response->successful()) {
+
+        //     $provinces = $response->json()['data'] ?? [];
+        // }
+        // return view('dashboard.user.addresses.create', compact('provinces'));
+
+        $provinces = config('rajaongkir.provinces');
+        $cities = config('rajaongkir.cities');
+
+        return view('dashboard.user.addresses.create', compact('provinces', 'cities'));
     }
 
-    public function store(Request $request)
+    public function getCities($provinceId)
     {
-        $request->validate([
-            'detail' => 'required|string|max:1000',
-            'subdistrict_id' => 'required|string',
-        ]);
+        // Mengambil data dari config yang sudah di-hardcode
+        $cities = collect(config('rajaongkir.cities'));
 
-        $user = Auth::user();
-        $subdistrictDetails = $this->rajaOngkir->getCityById($request->subdistrict_id);
+        // Filter berdasarkan province_id dan kirim sebagai JSON
+        $filtered = $cities->where('province_id', (int) $provinceId)->values();
 
-        if (!$subdistrictDetails) {
-            return back()->withErrors([
-                'subdistrict_id' => 'Invalid location selected.'
-            ])->withInput();
-        }
-
-        $isFirstAddress = Address::where('user_id', $user->id)->count() === 0;
-
-        Address::create([
-            'user_id' => $user->id,
-            'detail' => $request->detail,
-            'subdistrict_id' => $subdistrictDetails['subdistrict_id'],
-            'subdistrict_name' => $subdistrictDetails['subdistrict_name'],
-            'city_name' => $subdistrictDetails['city'],
-            'province' => $subdistrictDetails['province'],
-            'is_default' => $isFirstAddress,
-        ]);
-
-        Log::info('Address created with Komerce:', [
-            'subdistrict_id' => $subdistrictDetails['subdistrict_id'],
-            'location' => $subdistrictDetails['subdistrict_name'],
-        ]);
-
-        return redirect()->route('user.addresses.index')
-            ->with('success', 'Address added successfully!');
+        return response()->json($filtered);
     }
 
-    public function edit(Address $address)
+    public function getDistricts($cityId)
     {
-        if ($address->user_id !== Auth::id()) {
-            abort(403);
-        }
+        // Nama kunci unik per kota, misal: districts_city_152
+        $cacheKey = "global_districts_city_" . $cityId;
 
-        return view('dashboard.user.addresses.edit', [
-            'address' => $address,
-        ]);
-    }
+        // rememberForever akan menyimpan data di server (bukan di browser user)
+        // Jadi jika User A sudah akses, User B, C, dan D akan mengambil dari Cache yang sama.
+        $districts = Cache::rememberForever($cacheKey, function () use ($cityId) {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'key' => config('rajaongkir.api_key'),
+            ])->get("https://rajaongkir.komerce.id/api/v1/destination/district/{$cityId}");
 
-    public function update(Request $request, Address $address)
-    {
-        if ($address->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $request->validate([
-            'detail' => 'required|string|max:1000',
-            'city_id' => 'required|integer',
-        ]);
-
-        $cityDetails = $this->rajaOngkir->getCityById($request->city_id);
-
-        if (!$cityDetails) {
-            return back()->withErrors([
-                'city_id' => 'Invalid city selected.'
-            ])->withInput();
-        }
-
-        $address->update([
-            'detail' => $request->detail,
-            'city_id' => $cityDetails['city_id'],
-            'city_name' => $cityDetails['type'] . ' ' . $cityDetails['city_name'],
-            'province' => $cityDetails['province'],
-        ]);
-
-        return redirect()->route('user.addresses.index')
-            ->with('success', 'Address updated successfully!');
-    }
-
-    public function setDefault(Address $address)
-    {
-        if ($address->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $address->setAsDefault();
-
-        return back()->with('success', 'Default address updated!');
-    }
-
-    public function destroy(Address $address)
-    {
-        if ($address->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        if ($address->is_default && Address::where('user_id', Auth::id())->count() > 1) {
-            $nextAddress = Address::where('user_id', Auth::id())
-                ->where('id', '!=', $address->id)
-                ->first();
-            
-            if ($nextAddress) {
-                $nextAddress->setAsDefault();
+            if ($response->successful()) {
+                return $response->json()['data'] ?? [];
             }
+
+            return null;
+        });
+
+        if (!$districts) {
+            return response()->json(['error' => 'Gagal mengambil data atau Limit API habis'], 500);
         }
 
-        $address->delete();
-
-        return redirect()->route('user.addresses.index')
-            ->with('success', 'Address deleted successfully!');
+        return response()->json($districts);
     }
-
-    public function searchCities(Request $request)
+     
+    public function getSubDistricts($districtId)
     {
-        $query = $request->get('q', '');
-        
-        if (strlen($query) < 2) {
-            return response()->json([]);
+        $cacheKey = "global_sub_districts_district_" . $districtId;
+
+        $subDistricts = Cache::rememberForever($cacheKey, function () use ($districtId) {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'key' => config('rajaongkir.api_key'),
+            ])->get("https://rajaongkir.komerce.id/api/v1/destination/sub-district/{$districtId}");
+
+            if ($response->successful()) {
+                return $response->json()['data'] ?? [];
+            }
+
+            return null;
+        });
+
+        if (!$subDistricts) {
+            return response()->json(['error' => 'Gagal mengambil data atau Limit API habis'], 500);
         }
 
-        $cities = $this->rajaOngkir->searchCity($query);
-        
-        return response()->json($cities);
+        return response()->json($subDistricts);
     }
 }

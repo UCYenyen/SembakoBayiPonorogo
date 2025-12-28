@@ -9,16 +9,16 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     
-                    <h1 class="text-3xl font-bold mb-4">Payment Received!</h1>
-                    <p class="text-gray-600 mb-6">Thank you for your order. We're processing it now.</p>
+                    <h1 class="text-3xl font-bold mb-4">Pembayaran Diterima!</h1>
+                    <p class="text-gray-600 mb-6">Terimakasih sudah memesan! kami sedang memprosesnya sekarang!</p>
 
                     <div class="bg-gray-50 rounded-lg p-6 mb-6 text-left">
                         <div class="flex justify-between mb-2">
-                            <span class="text-gray-600">Order ID:</span>
+                            <span class="text-gray-600">ID Transaksi:</span>
                             <span class="font-semibold">#{{ $transaction->id }}</span>
                         </div>
                         <div class="flex justify-between mb-2">
-                            <span class="text-gray-600">Total Payment:</span>
+                            <span class="text-gray-600">Total Pembayaran:</span>
                             <span class="font-semibold text-[#3F3142]">
                                 Rp{{ number_format($transaction->total_price + $transaction->delivery_price, 0, ',', '.') }}
                             </span>
@@ -34,11 +34,11 @@
                     <div class="flex flex-col sm:flex-row gap-4">
                         <a href="{{ route('user.transaction.show', $transaction) }}" 
                            class="flex-1 bg-[#3F3142] text-white py-3 rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors">
-                            View Order Detail
+                            Lihat Detail Pesanan
                         </a>
                         <a href="/shop" 
                            class="flex-1 border-2 border-[#3F3142] text-[#3F3142] py-3 rounded-lg font-semibold hover:bg-[#3F3142] hover:text-white transition-colors">
-                            Continue Shopping
+                            Lanjut Belanja
                         </a>
                     </div>
                 </div>

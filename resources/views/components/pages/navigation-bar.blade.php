@@ -63,36 +63,36 @@
 
                         @if (Auth::user()->role === 'admin')
                             <a href="/dashboard/user" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                Dashboard
+                                Dasbor Pengguna
                             </a>
                             <a href="/dashboard/admin" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                Admin Dashboard
+                                Dasbor Admin
                             </a>
                         @else
                             <a href="/dashboard/user" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                Dashboard
+                                Dasbor
                             </a>
                         @endif
 
                         <a href="/cart" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            My Cart
+                            Keranjang Saya
                         </a>
 
                         <a href="/dashboard/user/addresses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            My Addresses
+                            Alamat Saya
                         </a>
 
                         <form method="POST" action="/logout" class="block">
                             @csrf
                             <button type="submit"
                                 class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                                Logout
+                                Keluar
                             </button>
                         </form>
                     </div>
                 </div>
             @else
-                <a href="{{route("login")}}" class="flex items-center gap-2 hover:bg-[#3F3142]/80 border-2 border-[#3F3142] shadow-lg rounded-lg text-sm bg-[#3F3142] text-white px-4 py-2 transition-all duration-200 group font-bold">Sign in</a>
+                <a href="{{route("login")}}" class="flex items-center gap-2 hover:bg-[#3F3142]/80 border-2 border-[#3F3142] shadow-lg rounded-lg text-sm bg-[#3F3142] text-white px-4 py-2 transition-all duration-200 group font-bold">Masuk</a>
             @endif
         </div>
     </nav>

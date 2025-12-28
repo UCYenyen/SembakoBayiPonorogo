@@ -4,10 +4,10 @@
     <main class="bg-[#FFF3F3] text-[#3F3142] min-h-screen py-8">
         <div class="w-[90%] lg:w-[80%] mx-auto">
             <div class="flex justify-between items-center mb-8">
-                <h1 class="text-4xl font-bold">My Addresses</h1>
+                <h1 class="text-4xl font-bold">Alamatku</h1>
                 <a href="{{ route('user.addresses.create') }}" 
                    class="bg-[#3F3142] text-white px-6 py-3 rounded-lg hover:bg-[#5C4B5E] transition-colors font-semibold">
-                    + Add New Address
+                    + Tambah Alamat Baru
                 </a>
             </div>
 
@@ -31,10 +31,10 @@
                                 <div class="flex-1">
                                     @if($address->is_default)
                                         <span class="inline-block px-3 py-1 bg-[#3F3142] text-white text-xs font-semibold rounded-full mb-2">
-                                            Default Address
+                                            Alamat Default
                                         </span>
                                     @endif
-                                    <h3 class="text-lg font-bold mb-2">Address #{{ $address->id }}</h3>
+                                    <h3 class="text-lg font-bold mb-2">Alamat #{{ $address->id }}</h3>
                                     <p class="text-gray-700 leading-relaxed">{{ $address->detail }}</p>
                                     <p class="text-sm text-gray-600 mt-2">
                                         📍 {{ $address->city_name }}, {{ $address->province }}
@@ -49,14 +49,14 @@
                                         @method('PATCH')
                                         <button type="submit" 
                                                 class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-semibold">
-                                            Set as Default
+                                           Jadikan Default
                                         </button>
                                     </form>
                                 @endif
 
                                 <a href="{{ route('user.addresses.edit', $address) }}" 
                                    class="px-4 py-2 border-2 border-[#3F3142] text-[#3F3142] rounded-lg hover:bg-[#3F3142] hover:text-white transition-colors text-sm font-semibold">
-                                    Edit
+                                    Ubah
                                 </a>
 
                                 @if($addresses->count() > 1)
@@ -66,7 +66,7 @@
                                         @method('DELETE')
                                         <button type="submit" 
                                                 class="px-4 py-2 border-2 border-red-500 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors text-sm font-semibold">
-                                            Delete
+                                            Hapus
                                         </button>
                                     </form>
                                 @endif
@@ -80,11 +80,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
-                    <h2 class="text-2xl font-bold text-gray-700 mb-4">No Addresses Yet</h2>
-                    <p class="text-gray-500 mb-6">Add your first shipping address to start shopping!</p>
+                    <h2 class="text-2xl font-bold text-gray-700 mb-4">Masih belum ada alamat</h2>
+                    <p class="text-gray-500 mb-6">Tambah alamatmu agar produk dapat dikirim ke tujuan!</p>
                     <a href="{{ route('user.addresses.create') }}" 
                        class="inline-block px-8 py-4 bg-[#3F3142] text-white rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors">
-                        Add Address
+                        Tambah Alamat
                     </a>
                 </div>
             @endif

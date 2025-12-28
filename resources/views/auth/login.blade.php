@@ -54,9 +54,9 @@
                     @endif --}}
 
                     <p class="text-center text-sm text-gray-600">
-                        Don't have an account?
+                       Tidak punya akun?
                         <a href="/register" class="font-semibold text-[#3F3142] hover:underline">
-                            Sign up here
+                            Daftar disini
                         </a>
                     </p>
                 </div>

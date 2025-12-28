@@ -9,10 +9,10 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
-                Back to Orders
+                Kembali ke pesanan
             </a>
 
-            <h1 class="text-4xl font-bold mb-8">Order Detail</h1>
+            <h1 class="text-4xl font-bold mb-8">Detail Transaksi</h1>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Left Column: Order Items & Status -->
@@ -21,7 +21,7 @@
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <div class="flex justify-between items-center mb-6">
                             <div>
-                                <h2 class="text-2xl font-bold">Order #{{ $transaction->id }}</h2>
+                                <h2 class="text-2xl font-bold">Transaksi #{{ $transaction->id }}</h2>
                                 <p class="text-gray-600">{{ $transaction->created_at->format('d F Y, H:i') }}</p>
                             </div>
                             <span class="px-4 py-2 rounded-full text-sm font-semibold {{ $transaction->getStatusBadgeClass() }}">
@@ -39,7 +39,7 @@
                                     <div class="w-0.5 h-12 {{ $transaction->isPaid() || $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }}"></div>
                                 </div>
                                 <div class="flex-1 pb-4">
-                                    <h3 class="font-semibold">Order Placed</h3>
+                                    <h3 class="font-semibold">Memesan</h3>
                                     <p class="text-sm text-gray-600">{{ $transaction->created_at->format('d M Y, H:i') }}</p>
                                 </div>
                             </div>
@@ -52,7 +52,7 @@
                                     <div class="w-0.5 h-12 {{ $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }}"></div>
                                 </div>
                                 <div class="flex-1 pb-4">
-                                    <h3 class="font-semibold">Payment Confirmed</h3>
+                                    <h3 class="font-semibold">Pesanan Dikonfirmasi</h3>
                                     <p class="text-sm text-gray-600">{{ $transaction->isPaid() || $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? $transaction->updated_at->format('d M Y, H:i') : '-' }}</p>
                                 </div>
                             </div>
@@ -65,7 +65,7 @@
                                     <div class="w-0.5 h-12 {{ $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }}"></div>
                                 </div>
                                 <div class="flex-1 pb-4">
-                                    <h3 class="font-semibold">Package Shipped</h3>
+                                    <h3 class="font-semibold">Pesanan Dikirim</h3>
                                     <p class="text-sm text-gray-600">
                                         @if($transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted())
                                             {{ $transaction->updated_at->format('d M Y, H:i') }}
@@ -86,7 +86,7 @@
                                     </div>
                                 </div>
                                 <div class="flex-1">
-                                    <h3 class="font-semibold">Order Completed</h3>
+                                    <h3 class="font-semibold">Pesanan Selesai</h3>
                                     <p class="text-sm text-gray-600">{{ $transaction->isDelivered() || $transaction->isCompleted() ? $transaction->updated_at->format('d M Y, H:i') : '-' }}</p>
                                 </div>
                             </div>
@@ -95,7 +95,7 @@
 
                     <!-- Order Items -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-2xl font-bold mb-6">Order Items</h2>
+                        <h2 class="text-2xl font-bold mb-6">Item yang dibeli</h2>
                         <div class="space-y-4">
                             @foreach($transaction->transaction_items as $item)
                                 <div class="flex gap-4 pb-4 border-b last:border-b-0">
@@ -121,11 +121,11 @@
                 <!-- Right Column: Order Summary -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
-                        <h2 class="text-2xl font-bold mb-6">Order Summary</h2>
+                        <h2 class="text-2xl font-bold mb-6">Ringkasan Pesanan</h2>
 
                         <!-- Shipping Address -->
                         <div class="mb-6 pb-6 border-b">
-                            <h3 class="font-semibold mb-2">Shipping Address</h3>
+                            <h3 class="font-semibold mb-2">Alamat Pengiriman</h3>
                             <p class="text-sm text-gray-700">
                                 {{ $transaction->address->street }}<br>
                                 {{ $transaction->address->city }}, {{ $transaction->address->province }}<br>
@@ -136,11 +136,11 @@
                         <!-- Payment & Delivery -->
                         <div class="mb-6 pb-6 border-b">
                             <div class="flex justify-between mb-2">
-                                <span class="text-gray-600">Payment Method</span>
+                                <span class="text-gray-600">Metode Pembayaran</span>
                                 <span class="font-semibold">{{ $transaction->payment->method }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Delivery</span>
+                                <span class="text-gray-600">Pengiriman</span>
                                 <span class="font-semibold">{{ $transaction->delivery->name }}</span>
                             </div>
                         </div>
@@ -170,29 +170,29 @@
                         <!-- Action Buttons -->
                         @if($transaction->isPendingPayment())
                             <button class="w-full bg-[#3F3142] text-white py-3 rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors mb-3">
-                                Pay Now
+                                Bayar
                             </button>
                             <button class="w-full border-2 border-red-500 text-red-500 py-3 rounded-lg font-semibold hover:bg-red-500 hover:text-white transition-colors">
-                                Cancel Order
+                                Batalkan
                             </button>
                         @elseif($transaction->isShipped())
                             <button class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors mb-3">
-                                Track Package
+                                Lacak
                             </button>
                         @elseif($transaction->isDelivered())
                             <button class="w-full bg-[#3F3142] text-white py-3 rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors mb-3">
-                                Confirm Received
+                                Selesai
                             </button>
                         @elseif($transaction->isCompleted())
                             <button class="w-full bg-yellow-500 text-white py-3 rounded-lg font-semibold hover:bg-yellow-600 transition-colors">
-                                Leave a Review
+                                Ulas
                             </button>
                         @endif
 
                         <!-- Help -->
                         <div class="mt-6 pt-6 border-t text-center">
-                            <p class="text-sm text-gray-600 mb-2">Need Help?</p>
-                            <a href="#" class="text-[#3F3142] font-semibold hover:underline">Contact Support</a>
+                            <p class="text-sm text-gray-600 mb-2">Butuh Bantuan?</p>
+                            <a href="#" class="text-[#3F3142] font-semibold hover:underline">Kontak Support</a>
                         </div>
                     </div>
                 </div>
