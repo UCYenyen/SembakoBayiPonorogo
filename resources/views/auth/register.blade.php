@@ -64,21 +64,15 @@
                 <!-- Submit Button -->
                 <div class="flex flex-col items-center gap-4 mt-6">
                     <button type="submit"
-                        class="w-full bg-[#3F3142] shadow-lg rounded-lg text-xl text-white hover:bg-[#5C4B5E] px-4 py-2">
-                        Register
+                        class="w-full bg-[#3F3142] shadow-lg rounded-lg text-lg text-white hover:bg-[#5C4B5E] px-4 py-2">
+                        Sign up
                     </button>
-
-                    <div class="flex items-center justify-end mt-4">
-                        <a href="{{route('auth.google')}}">
-                            <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" alt="">
-                        </a>
-                    </div>
-
+                    
                     <p class="text-center text-sm text-gray-600">
                        Already have an account?
                         <a href="/login"
                             class="font-semibold text-[#3F3142] hover:underline">
-                           Login here
+                           Sign in here
                         </a>
                     </p>
                 </div>
@@ -157,7 +151,6 @@
             }
         });
 
-        // ✅ Prevent selection ke dalam prefix area
         phoneInput.addEventListener('mousedown', function(e) {
             if (this.selectionStart < 0) {
                 setTimeout(() => {
@@ -166,7 +159,6 @@
             }
         });
 
-        // ✅ Clear validation saat user mengetik
         phoneInput.addEventListener('input', function() {
             this.setCustomValidity('');
         });
