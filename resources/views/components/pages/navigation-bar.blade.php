@@ -7,8 +7,8 @@
         <x-pages.search-bar route="/" placeholder="Search products..." extraClasses="hidden md:block flex-1"/>
         
         <div class="flex gap-4 justify-center items-center text-xl">
-            <a href="#"><x-heroicon-o-shopping-bag class="w-6 h-6 text-[#3F3142]"/></a>
-            <a href="#"><x-heroicon-o-shopping-cart class="w-6 h-6 text-[#3F3142]" /></a>
+            <a href="/shop"><x-heroicon-o-shopping-bag class="w-6 h-6 text-[#3F3142]"/></a>
+            <a href="/cart"><x-heroicon-o-shopping-cart class="w-6 h-6 text-[#3F3142]" /></a>
             
             @if (Auth::check())
                 <div x-data="{ open: false }" @click.away="open = false" class="relative">
@@ -30,12 +30,10 @@
                         @endif
                     </button>
 
-                    {{-- Dropdown Menu --}}
                     <div x-show="open" x-transition
                         class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl py-2 z-50">
                         
                         <div class="px-4 py-3 border-b border-gray-200">
-                            {{-- ✅ Avatar di Dropdown dengan info lengkap --}}
                             <div class="flex items-center gap-3">
                                 @if(Auth::user()->avatar)
                                     <img src="{{ Auth::user()->avatar }}" 
@@ -76,12 +74,11 @@
                             </a>
                         @endif
 
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <a href="/cart" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             My Cart
                         </a>
 
-                        {{-- ✅ Add Address Link --}}
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <a href="/dashboard/user/addresses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             My Addresses
                         </a>
 

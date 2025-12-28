@@ -4,9 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\ShopController;
 use App\Http\Controllers\Pages\AdminController;
-use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\CompleteProfileController;
 use App\Http\Controllers\Pages\UserDashboardController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
@@ -14,18 +12,19 @@ use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\VoucherController;
-use App\Http\Middleware\AdminPageGuard;
-use App\Models\Transaction;
-use Illuminate\Support\Facades\Auth;
 
 Route::get('/', [HomeController::class, 'index']);
-Route::get('/unauthorized', [AdminController::class, 'unauthorized']);
-Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
-Route::get('/shop/products/{product}', [ProductController::class, 'showDetails'])->name('product.show');
 
-// Google Auth (no middleware)
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/register', [AuthController::class, 'register'])->name('register');
+Route::get('/unauthorized', [AdminController::class, 'unauthorized']);
+
+Route::get('/api/products/search', [ProductController::class, 'search'])->name('api.products.search');
+
+Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+Route::get('/shop/products/{product}', [ProductController::class, 'showDetails'])->name('product.show');
+Route::post('/payment/notification', [PaymentController::class, 'notificationHandler'])
+    ->name('payment.notification');
 
 
 Route::middleware('auth')->group(function () {
@@ -63,15 +62,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 });
-// Midtrans Notification (public - no middleware)
-Route::post('/payment/notification', [PaymentController::class, 'notificationHandler'])
-    ->name('payment.notification');
 
-// Product Search API (public)
-Route::get('/api/products/search', [ProductController::class, 'search'])->name('api.products.search');
-
-// ✅ Admin Routes (require auth + admin role + completed profile)
-Route::middleware(['auth', 'profile.complete', 'admin'])->group(function () {
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/dashboard/admin/products', [AdminController::class, 'products'])->name('admin.products');
     Route::get('/dashboard/admin/products/create', [AdminController::class, 'createProduct'])
@@ -93,7 +85,6 @@ Route::middleware(['auth', 'profile.complete', 'admin'])->group(function () {
     Route::put('/dashboard/admin/vouchers/{baseVoucher}', [VoucherController::class, 'update'])->name('admin.vouchers.update');
     Route::delete('/dashboard/admin/vouchers/{baseVoucher}', [VoucherController::class, 'destroy'])->name('admin.vouchers.delete');
 
-    // Transaction Management Routes
     Route::get('/dashboard/admin/transactions', [AdminController::class, 'transactions'])->name('admin.transactions.index');
     Route::get('/dashboard/admin/transactions/{transaction}', [AdminController::class, 'showTransaction'])->name('admin.transactions.show');
     Route::patch('/dashboard/admin/transactions/{transaction}/edit', [AdminController::class, 'updateTransactionStatus'])->name('admin.transactions.update-status');

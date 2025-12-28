@@ -5,7 +5,6 @@
         <x-pages.home.hero-section />
         
         @if(isset($searchQuery) && $searchQuery)
-            <!-- Search Results Section -->
             <section class="w-full py-12">
                 <div class="w-[80%] mx-auto">
                     <h2 class="text-3xl font-bold mb-6">Search Results for "{{ $searchQuery }}"</h2>
