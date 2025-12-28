@@ -1,4 +1,4 @@
-<x-pages.section title="Testimonials" extraClasses="bg-[#FFF3F3] relative justify-center items-center pb-[50%] sm:pb-[25%]">
+<x-pages.section title="Testimonials" extraClasses="bg-[#FFF3F3] relative justify-center items-center pb-[50%] sm:pb-[10%]">
 
     <div class="w-[80%] flex justify-center items-center">
         <div class="w-full relative hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
@@ -56,9 +56,4 @@
         <div
             class="sm:hidden inline-block bg-gradient-to-b from-[#FFF3F3]/0 via-[90%] via-[#FFF3F3]/95 to-[#FFF3F3] w-full h-full absolute bottom-0">
         </div>
-
-        <img draggable="false" src="/images/misc/dark-pink-waves.svg" alt="background waves"
-            class="h-auto absolute z-1 bottom-8 md:bottom-14 left-0 w-full">
-        <img draggable="false" src="/images/misc/slate-waves.svg" alt="front waves"
-            class="h-auto absolute z-2 bottom-0 left-0 w-full">
 </x-pages.section>
