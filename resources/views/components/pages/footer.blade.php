@@ -7,12 +7,10 @@
 
     <div class="w-full flex justify-center items-center bg-[#334553] py-12">
         <div class="w-[80%] grid grid-cols-1 md:grid-cols-5 gap-12 items-start text-center md:text-left">
-            
             <div class="flex flex-col gap-2 md:col-span-3 items-center md:items-start">
                 <h3 class="text-3xl font-bold">SBP</h3>
                 <p class="text-gray-300 text-lg">Get The Best For Your Baby</p>
             </div>
-
             <div class="flex flex-col gap-4 items-center md:items-end"> 
                 <div class="w-full md:w-fit flex flex-col items-center md:items-start">
                     <h3 class="text-xl font-bold border-b border-gray-600 pb-2 w-full md:w-fit md:border-none mb-2">Contacts</h3>
@@ -22,7 +20,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="flex flex-col gap-4 items-center md:items-end">
                 <div class="w-full md:w-fit flex flex-col items-center md:items-start">
                     <h3 class="text-xl font-bold border-b border-gray-600 pb-2 w-full md:w-fit md:border-none mb-2">Quick Links</h3>
@@ -33,7 +30,9 @@
                     </nav>
                 </div>
             </div>
-
         </div>
+    </div>
+    <div class="w-full border-t-2 border-[#445664] bg-[#334553] text-center py-4 text-gray-400">
+        &copy; 2024 SBP. All rights reserved.
     </div>
 </footer>
