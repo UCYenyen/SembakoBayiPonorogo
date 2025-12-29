@@ -12,7 +12,6 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             BrandsSeeder::class,
             ProductSeeder::class,
-            PaymentSeeder::class,
             DeliverySeeder::class,
             AddressSeeder::class,
         ]);

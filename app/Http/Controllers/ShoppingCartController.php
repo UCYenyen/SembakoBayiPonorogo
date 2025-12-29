@@ -17,13 +17,14 @@ class ShoppingCartController extends Controller
     {
         $user = Auth::user();
         
-        // Get or create active shopping cart
+        // Get or create ACTIVE shopping cart (bukan checked_out atau ordered)
         $cart = ShoppingCart::firstOrCreate(
-            ['user_id' => $user->id, 'status' => 'active'],
-            ['user_id' => $user->id, 'status' => 'active']
+            ['user_id' => $user->id, 'status' => ShoppingCart::STATUS_ACTIVE],
+            ['user_id' => $user->id, 'status' => ShoppingCart::STATUS_ACTIVE]
         );
 
-        // Get cart items with product details
+        // Get cart items dengan product details
+        // Hanya tampilkan item dari cart yang status 'active'
         $cartItems = ShoppingCartItem::where('shopping_cart_id', $cart->id)
             ->with('product.category', 'product.brand')
             ->get();
@@ -64,13 +65,13 @@ class ShoppingCartController extends Controller
             return back()->with('error', 'Not enough stock available');
         }
 
-        // Get or create cart
+        // Get atau create ACTIVE cart saja
         $cart = ShoppingCart::firstOrCreate(
-            ['user_id' => $user->id, 'status' => 'active'],
-            ['user_id' => $user->id, 'status' => 'active']
+            ['user_id' => $user->id, 'status' => ShoppingCart::STATUS_ACTIVE],
+            ['user_id' => $user->id, 'status' => ShoppingCart::STATUS_ACTIVE]
         );
 
-        // Check if item already exists in cart
+        // Check if item already exists in active cart
         $cartItem = ShoppingCartItem::where('shopping_cart_id', $cart->id)
             ->where('product_id', $product->id)
             ->first();
@@ -101,6 +102,8 @@ class ShoppingCartController extends Controller
      */
     public function updateQuantity(Request $request, ShoppingCartItem $cartItem)
     {
+        $this->validateCartItemOwnership($cartItem);
+
         $request->validate([
             'quantity' => 'required|integer|min:1',
         ]);
@@ -121,18 +124,34 @@ class ShoppingCartController extends Controller
      */
     public function removeItem(ShoppingCartItem $cartItem)
     {
+        $this->validateCartItemOwnership($cartItem);
+        
         $cartItem->delete();
         return back()->with('success', 'Item removed from cart!');
     }
 
     /**
-     * Clear entire cart
+     * Validate cart item belongs to user's active cart
+     */
+    private function validateCartItemOwnership(ShoppingCartItem $cartItem)
+    {
+        $activeCart = ShoppingCart::where('user_id', Auth::id())
+            ->where('status', ShoppingCart::STATUS_ACTIVE)
+            ->first();
+
+        if (!$activeCart || $cartItem->shopping_cart_id !== $activeCart->id) {
+            abort(403, 'Cannot perform action on item from inactive cart');
+        }
+    }
+
+    /**
+     * Clear entire active cart
      */
     public function clearCart()
     {
         $user = Auth::user();
         $cart = ShoppingCart::where('user_id', $user->id)
-            ->where('status', 'active')
+            ->where('status', ShoppingCart::STATUS_ACTIVE)
             ->first();
 
         if ($cart) {

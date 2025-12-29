@@ -89,7 +89,8 @@
                                         Lihat Detail
                                     </a>
                                     @if($transaction->isPendingPayment())
-                                        <button class="px-6 py-2 bg-[#3F3142] text-white rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors">
+                                        <button class="pay-btn px-6 py-2 bg-[#3F3142] text-white rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors"
+                                                data-transaction="{{ $transaction->id }}">
                                             Bayar Sekarang
                                         </button>
                                     @elseif($transaction->isShipped())
@@ -127,4 +128,53 @@
             @endif
         </div>
     </main>
+
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+    <script>
+        document.querySelectorAll('.pay-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const transactionId = this.dataset.transaction;
+                const originalText = this.textContent;
+                this.disabled = true;
+                this.textContent = 'Loading...';
+
+                fetch(`/payment/retry/${transactionId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.snap_token) {
+                        window.snap.pay(data.snap_token, {
+                            onSuccess: (result) => window.location.href = `/payment/finish/${transactionId}`,
+                            onPending: (result) => window.location.href = `/payment/unfinish/${transactionId}`,
+                            onError: () => {
+                                alert('Pembayaran gagal');
+                                this.disabled = false;
+                                this.textContent = originalText;
+                            },
+                            onClose: () => {
+                                this.disabled = false;
+                                this.textContent = originalText;
+                            }
+                        });
+                    } else {
+                        alert(data.error || 'Terjadi kesalahan');
+                        this.disabled = false;
+                        this.textContent = originalText;
+                    }
+                })
+                .catch(() => {
+                    alert('Kesalahan sistem');
+                    this.disabled = false;
+                    this.textContent = originalText;
+                });
+            });
+        });
+    </script>
 @endsection

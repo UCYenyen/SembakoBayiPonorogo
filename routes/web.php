@@ -24,7 +24,9 @@ Route::get('/api/products/search', [ProductController::class, 'liveSearch'])->na
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/products/{product}', [ProductController::class, 'showDetails'])->name('product.show');
-Route::post('/payment/webhook', [PaymentController::class, 'notificationHandler'])->name('payment.webhook');
+Route::post('/webhook/midtrans', [\App\Http\Controllers\TransactionController::class, 'midtransNotification'])
+    ->withoutMiddleware(['web', 'auth'])
+    ->name('webhook.midtrans');
 
 
 Route::middleware('auth')->group(function () {
@@ -55,11 +57,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/payment', [PaymentController::class, 'index'])->name('payment.checkout');
     Route::post('/payment/process', [PaymentController::class, 'processPayment'])->name('payment.process');
-    Route::get('/payment/finish', [PaymentController::class, 'finish'])->name('payment.finish');
-    Route::get('/payment/unfinish', [PaymentController::class, 'unfinish'])->name('payment.unfinish');
+    Route::get('/payment/finish/{transaction}', [PaymentController::class, 'finish'])->name('payment.finish');
+    Route::get('/payment/unfinish/{transaction}', [PaymentController::class, 'unfinish'])->name('payment.unfinish');
+    Route::post('/payment/retry/{transaction}', [PaymentController::class, 'retryPayment'])->name('payment.retry');
     Route::get('/payment/check-status', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
 
-    Route::get('/check-ongkir/{address}', [App\Http\Controllers\DeliveryController::class, 'checkOngkir']);
+    Route::get('/check-ongkir/{address}', [DeliveryController::class, 'checkOngkir']);
 
     Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/dashboard/admin/products', [AdminController::class, 'products'])->name('admin.products');

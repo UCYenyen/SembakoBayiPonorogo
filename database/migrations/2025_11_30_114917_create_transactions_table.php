@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->string('no_resi')->nullable();
-            $table->string('snap_token')->nullable(); // ✅ Add this
+            $table->string('payment_method')->nullable();
+            $table->string('snap_token')->nullable();
             $table->bigInteger('delivery_price')->default(0);
             $table->bigInteger('total_price')->default(0);
 
@@ -31,7 +32,6 @@ return new class extends Migration
 
             // Foreign keys
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('payment_id')->constrained('payments')->onDelete('cascade');
             $table->foreignId('delivery_id')->constrained('deliveries')->onDelete('cascade');
             $table->foreignId('shopping_cart_id')->constrained('shopping_carts')->onDelete('cascade');
             $table->foreignId('address_id')->constrained('addresses')->onDelete('cascade');
@@ -47,7 +47,6 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
-            $table->dropForeign(['payment_id']);
             $table->dropForeign(['delivery_id']);
             $table->dropForeign(['address_id']);
             $table->dropForeign(['shopping_cart_id']);

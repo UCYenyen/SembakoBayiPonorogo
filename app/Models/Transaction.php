@@ -11,7 +11,7 @@ class Transaction extends Model
     
     protected $fillable = [
         'user_id',
-        'payment_id',
+        'payment_method',
         'delivery_id',
         'shopping_cart_id',
         'address_id',
@@ -19,10 +19,9 @@ class Transaction extends Model
         'delivery_price',
         'no_resi',
         'status',
-        'snap_token', // ✅ Add this
+        'snap_token',
     ];
-
-    // ✅ Status constants
+    
     const STATUS_PENDING_PAYMENT = 'pending_payment';
     const STATUS_PAID = 'paid';
     const STATUS_PROCESSING = 'processing';
@@ -35,11 +34,6 @@ class Transaction extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function payment()
-    {
-        return $this->belongsTo(Payment::class);
     }
 
     public function delivery()

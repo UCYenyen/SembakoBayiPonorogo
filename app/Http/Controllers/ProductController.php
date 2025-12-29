@@ -10,7 +10,6 @@ use Intervention\Image\Encoders\WebpEncoder;
 
 class ProductController extends Controller
 {
-    //
     public static function getAllProducts()
     {
         $products = Product::all();
@@ -23,13 +22,22 @@ class ProductController extends Controller
         return $products;
     }
 
-    public function getProductById($id)
+    public function showDetails(Product $product)
     {
-        $product = Product::findOrFail($id);
-        return view('product-details', ['product' => $product]);
+        $similarProducts = Product::where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->where('is_hidden', false)
+            ->with(['category', 'brand'])
+            ->limit(4)
+            ->get();
+
+        return view('shop.product-detail', [
+            'product' => $product,
+            'similarProducts' => $similarProducts,
+        ]);
     }
 
-    public function create(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -54,7 +62,6 @@ class ProductController extends Controller
             return back()->withErrors('Image upload failed: ' . $e->getMessage());
         }
 
-        // 🔹 Save product
         Product::create([
             'name' => $request->name,
             'description' => $request->description,
@@ -69,7 +76,7 @@ class ProductController extends Controller
         return redirect('/dashboard/admin/products/create')->with('success', 'Product created successfully!');
     }
 
-    public function editProduct(Request $request, Product $product)
+    public function update(Request $request, Product $product)
     {
         $request->validate([
             'name' => 'sometimes|required|string',
@@ -87,7 +94,6 @@ class ProductController extends Controller
             $path = 'images/' . $imageName;
 
             try {
-                // Delete old image if it exists
                 if ($product->image_url) {
                     Storage::disk('public')->delete($product->image_url);
                 }
@@ -124,9 +130,8 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', "Product is now {$status}!");
     }
 
-    public function delete(Product $product)
+    public function destroy(Product $product)
     {
-        // Delete image from storage
         if ($product->image_url) {
             Storage::disk('public')->delete($product->image_url);
         }
@@ -134,27 +139,6 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
-    }
-
-    public function hideProduct($id)
-    {
-        $product = Product::findOrFail($id);
-        $product->is_hidden = true;
-        $product->save();
-        return redirect('/dashboard/admin/products')->with('success', 'Product hidden successfully!');
-    }
-
-    public function setProductOnSale(Request $request, $id)
-    {
-        $request->validate([
-            'discount_amount' => 'required|numeric|min:0|max:100',
-        ]);
-
-        $product = Product::findOrFail($id);
-        $product->is_on_sale = true;
-        $product->discount_amount = $request->discount_amount;
-        $product->save();
-        return redirect('/dashboard/admin/products')->with('success', 'Product set on sale!');
     }
 
     public function liveSearch(Request $request)
@@ -177,21 +161,5 @@ class ProductController extends Controller
             ->get();
 
         return response()->json($products);
-    }
-
-    public function showDetails(Product $product)
-    {
-        $similarProducts = Product::where('category_id', $product->category_id)
-            ->where('id', '!=', $product->id)
-            ->where('is_hidden', false)
-            ->with(['category', 'brand'])
-            ->limit(4)
-            ->get();
-
-
-        return view('shop.product-detail', [
-            'product' => $product,
-            'similarProducts' => $similarProducts,
-        ]);
     }
 }

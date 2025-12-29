@@ -90,21 +90,6 @@
                     </div>
 
                     <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-2xl font-bold mb-4">Metode Pembayaran</h2>
-                        <div class="space-y-3">
-                            @foreach ($payments as $payment)
-                                <label
-                                    class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                                    <input type="radio" name="payment_id" value="{{ $payment->id }}" required>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-semibold">{{ $payment->method }}</span>
-                                    </div>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-2xl font-bold mb-4">Item yang dipesan</h2>
                         <div class="space-y-4">
                             @foreach ($cart->items as $item)
@@ -159,12 +144,11 @@
         </div>
     </main>
 
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
     <script>
         const subtotal = {{ $subtotal }};
         const tax = {{ $tax }};
-        // Pastikan berat minimal 1000gr jika data di database kosong
-        const totalWeight = {{ $cart->items->sum(fn($item) => ($item->product->weight ?? 1000) * $item->quantity) }} ||
-            1000;
+        const totalWeight = {{ $cart->items->sum(fn($item) => ($item->product->weight ?? 1000) * $item->quantity) }} || 1000;
         let selectedShippingCost = 0;
 
         function formatNumber(num) {
@@ -186,14 +170,9 @@
             fetch(`/check-ongkir/${addressId}?weight=${totalWeight}&courier=${courier}`)
                 .then(response => response.json())
                 .then(result => {
-                    // DEBUG: Lihat di F12 Console untuk memastikan harga ada
-                    console.log("Data API:", result.data);
-
                     if (result.success && result.data.length > 0) {
                         let html = '';
                         result.data.forEach(option => {
-
-                            // CARA AMBIL HARGA (Mencoba semua kemungkinan field)
                             let costValue = 0;
                             if (option.price) {
                                 costValue = parseInt(option.price);
@@ -226,7 +205,6 @@
                     }
                 })
                 .catch(err => {
-                    console.error("Fetch Error:", err);
                     container.innerHTML = '<p class="text-red-500 p-4">Gagal memuat ongkir.</p>';
                 });
         }
@@ -244,11 +222,11 @@
 
         document.getElementById('pay-button').addEventListener('click', function() {
             const selectedAddress = document.querySelector('.address-radio:checked');
-            const selectedPayment = document.querySelector('input[name="payment_id"]:checked');
             const selectedShipping = document.querySelector('input[name="shipping_option"]:checked');
+            const selectedCourier = document.querySelector('input[name="courier_brand"]:checked');
 
-            if (!selectedAddress || !selectedPayment || !selectedShipping) {
-                alert('Mohon lengkapi Alamat, Kurir, dan Metode Pembayaran!');
+            if (!selectedAddress || !selectedShipping || !selectedCourier) {
+                alert('Mohon lengkapi Alamat dan Kurir terlebih dahulu!');
                 return;
             }
 
@@ -263,19 +241,16 @@
                     },
                     body: JSON.stringify({
                         address_id: selectedAddress.value,
-                        payment_id: selectedPayment.value,
                         delivery_price: selectedShippingCost,
-                        courier: document.querySelector('input[name="courier_brand"]:checked').value
+                        courier: selectedCourier.value
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.snap_token) {
+                    if (data.snap_token && data.transaction_id) {
                         window.snap.pay(data.snap_token, {
-                            onSuccess: (result) => window.location.href = '/payment/finish?order_id=' +
-                                result.order_id,
-                            onPending: (result) => window.location.href =
-                                '/payment/unfinish?order_id=' + result.order_id,
+                            onSuccess: (result) => window.location.href = `/payment/finish/${data.transaction_id}`,
+                            onPending: (result) => window.location.href = `/payment/unfinish/${data.transaction_id}`,
                             onError: () => {
                                 alert('Pembayaran gagal');
                                 this.disabled = false;

@@ -8,11 +8,10 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\ShoppingCart;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
-use App\Models\Payment;
 use App\Models\Address;
 use App\Models\Delivery;
+use App\Models\ShoppingCartItem;
 use Midtrans\Config;
-use Midtrans\Notification;
 use Midtrans\Snap;
 
 class PaymentController extends Controller
@@ -38,7 +37,6 @@ class PaymentController extends Controller
         }
 
         $addresses = Address::where('user_id', Auth::id())->get();
-        $payments = Payment::all();
 
         $subtotal = $cart->items->sum(function ($item) {
             return $item->product->price * $item->quantity;
@@ -50,7 +48,6 @@ class PaymentController extends Controller
         return view('shop.payment.index', [
             'cart' => $cart,
             'addresses' => $addresses,
-            'payments' => $payments,
             'subtotal' => $subtotal,
             'tax' => $tax,
             'total' => $total,
@@ -61,7 +58,6 @@ class PaymentController extends Controller
     {
         $request->validate([
             'address_id' => 'required|exists:addresses,id',
-            'payment_id' => 'required|exists:payments,id',
             'delivery_price' => 'required|numeric|min:0',
             'courier' => 'required|string'
         ]);
@@ -87,7 +83,7 @@ class PaymentController extends Controller
             'address_id' => $request->address_id,
             'shopping_cart_id' => $cart->id,
             'delivery_id' => $delivery->id,
-            'payment_id' => $request->payment_id,
+            'payment_method' => 'Pending',
             'delivery_price' => $deliveryPrice,
             'total_price' => $totalPrice,
             'status' => Transaction::STATUS_PENDING_PAYMENT,
@@ -114,9 +110,11 @@ class PaymentController extends Controller
         $item_details[] = ['id' => 'TAX-11', 'price' => (int) $tax, 'quantity' => 1, 'name' => 'Pajak PPN (11%)'];
         $item_details[] = ['id' => 'SHIPPING', 'price' => (int) $deliveryPrice, 'quantity' => 1, 'name' => 'Ongkos Kirim (' . strtoupper($request->courier) . ')'];
 
+        $orderId = 'ORDER-' . $transaction->id . '-' . time();
+
         $params = [
             'transaction_details' => [
-                'order_id' => 'ORDER-' . $transaction->id . '-' . time(),
+                'order_id' => $orderId,
                 'gross_amount' => (int) $totalPrice,
             ],
             'customer_details' => [
@@ -130,6 +128,13 @@ class PaymentController extends Controller
         try {
             $snapToken = Snap::getSnapToken($params);
             $transaction->update(['snap_token' => $snapToken]);
+            $cart->update(['status' => ShoppingCart::STATUS_CHECKED_OUT]);
+
+            Log::info('Snap token generated', [
+                'transaction_id' => $transaction->id,
+                'order_id' => $orderId,
+                'gross_amount' => $totalPrice
+            ]);
 
             return response()->json([
                 'snap_token' => $snapToken,
@@ -137,123 +142,205 @@ class PaymentController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Midtrans Snap Error: ' . $e->getMessage());
+            $transaction->update(['status' => Transaction::STATUS_FAILED]);
             return response()->json(['error' => 'Payment processing failed'], 500);
         }
     }
 
-    public function notificationHandler(Request $request)
+    public function finish(Transaction $transaction)
     {
-        try {
-            $notification = new Notification();
-            $transactionStatus = $notification->transaction_status;
-            $orderId = $notification->order_id;
-            $fraudStatus = $notification->fraud_status;
-
-            Log::info("Webhook Midtrans Masuk: Order ID $orderId | Status: $transactionStatus");
-
-            // Perbaikan pengambilan ID: ORDER-{ID}-{TIMESTAMP}
-            $parts = explode('-', $orderId);
-            $transactionId = $parts[1] ?? null;
-
-            if (!$transactionId) {
-                return response()->json(['status' => 'error', 'message' => 'Format ID salah'], 400);
-            }
-
-            $transaction = Transaction::find($transactionId);
-
-            if (!$transaction) {
-                return response()->json(['status' => 'error', 'message' => 'Transaksi tidak ditemukan'], 404);
-            }
-
-            // Logika Update Status
-            switch ($transactionStatus) {
-                case 'capture':
-                    if ($fraudStatus == 'challenge') {
-                        $transaction->update(['status' => Transaction::STATUS_PENDING_PAYMENT]);
-                    } else if ($fraudStatus == 'accept') {
-                        $transaction->update(['status' => Transaction::STATUS_PAID]);
-                    }
-                    break;
-                case 'settlement':
-                    $transaction->update(['status' => Transaction::STATUS_PAID]);
-                    break;
-                case 'pending':
-                    $transaction->update(['status' => Transaction::STATUS_PENDING_PAYMENT]);
-                    break;
-                case 'deny':
-                case 'expire':
-                    $transaction->update(['status' => Transaction::STATUS_FAILED]);
-                    break;
-                case 'cancel':
-                    $transaction->update(['status' => Transaction::STATUS_CANCELLED]);
-                    break;
-            }
-
-            return response()->json(['status' => 'success']);
-        } catch (\Exception $e) {
-            Log::error('Webhook Error: ' . $e->getMessage());
-            return response()->json(['status' => 'error'], 500);
-        }
-    }
-
-    public function finish(Request $request)
-    {
-        $orderId = $request->get('order_id');
-
-        if (!$orderId) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Invalid order ID');
-        }
-
-        // Extract transaction ID from order_id (ORDER-1-1765003598 -> 1)
-        preg_match('/ORDER-(\d+)-/', $orderId, $matches);
-        $transactionId = $matches[1] ?? null;
-
-        if (!$transactionId) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Invalid order ID format');
-        }
-
-        $transaction = Transaction::with(['transaction_items.product', 'payment', 'delivery'])
-            ->find($transactionId);
-
-        if (!$transaction) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Transaction not found');
-        }
-
         if ($transaction->user_id !== Auth::id()) {
             abort(403);
         }
 
-        return view('shop.payment.finish', ['transaction' => $transaction]);
+        try {
+            // PERBAIKAN: Cek status menggunakan transaction ID dari database
+            $midtransStatus = \Midtrans\Transaction::status($transaction->id);
+            
+            Log::info('Midtrans Status Response', [
+                'transaction_id' => $transaction->id,
+                'midtrans_response' => json_encode($midtransStatus)
+            ]);
+
+            if ($midtransStatus) {
+                $paymentType = $midtransStatus->payment_type ?? null;
+                $transactionStatus = $midtransStatus->transaction_status ?? null;
+                
+                // PERBAIKAN: Extract payment type dengan lebih detail
+                $paymentMethod = 'Midtrans';
+                
+                if ($paymentType) {
+                    $paymentMethod = $this->formatPaymentMethod($paymentType);
+                    Log::info('Payment type extracted from Midtrans', [
+                        'raw_payment_type' => $paymentType,
+                        'formatted_method' => $paymentMethod
+                    ]);
+                } else {
+                    // Jika payment_type kosong tapi ada settlement_time, coba ambil dari field lain
+                    if (isset($midtransStatus->settlement_time)) {
+                        Log::warning('Payment type empty but settlement_time exists', [
+                            'full_response' => (array) $midtransStatus
+                        ]);
+                        // Fallback: gunakan transaction_status untuk hint
+                        if ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
+                            $paymentMethod = 'Midtrans Payment';
+                        }
+                    }
+                }
+                
+                // Update transaction dengan status dan payment method
+                $transaction->update([
+                    'status' => Transaction::STATUS_PAID,
+                    'payment_method' => $paymentMethod
+                ]);
+
+                Log::info('Transaction updated', [
+                    'transaction_id' => $transaction->id,
+                    'status' => Transaction::STATUS_PAID,
+                    'payment_method' => $paymentMethod
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::warning('Midtrans status check error', [
+                'transaction_id' => $transaction->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // PERBAIKAN: Jika masih pending dan ada snap_token, update jadi paid dengan fallback method
+            if ($transaction->isPendingPayment() && $transaction->snap_token) {
+                $transaction->update([
+                    'status' => Transaction::STATUS_PAID,
+                    'payment_method' => 'Midtrans'
+                ]);
+                
+                Log::info('Transaction updated with fallback', [
+                    'transaction_id' => $transaction->id,
+                    'reason' => 'Could not fetch Midtrans status but has snap_token'
+                ]);
+            }
+        }
+
+        // Clear shopping cart
+        if ($transaction->shopping_cart_id) {
+            ShoppingCartItem::where('shopping_cart_id', $transaction->shopping_cart_id)->delete();
+            $transaction->shopping_cart->update(['status' => ShoppingCart::STATUS_ORDERED]);
+        }
+
+        return view('shop.payment.finish', [
+            'transaction' => $transaction->load(['transaction_items.product', 'delivery'])
+        ]);
     }
 
-    public function unfinish(Request $request)
+    public function unfinish(Transaction $transaction)
     {
-        $orderId = $request->get('order_id');
-
-        if (!$orderId) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Invalid order ID');
+        if ($transaction->user_id !== Auth::id()) {
+            abort(403);
         }
 
-        preg_match('/ORDER-(\d+)-/', $orderId, $matches);
-        $transactionId = $matches[1] ?? null;
+        return view('shop.payment.unfinish', ['transaction' => $transaction->load(['transaction_items.product'])]);
+    }
 
-        if (!$transactionId) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Invalid order ID format');
+    public function retryPayment(Transaction $transaction)
+    {
+        if ($transaction->user_id !== Auth::id()) {
+            abort(403);
         }
 
-        $transaction = Transaction::with(['transaction_items.product'])
-            ->find($transactionId);
-
-        if (!$transaction || $transaction->user_id !== Auth::id()) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Transaction not found');
+        if (!$transaction->snap_token) {
+            return $this->generateSnapToken($transaction);
         }
 
-        return view('shop.payment.unfinish', ['transaction' => $transaction]);
+        return response()->json([
+            'snap_token' => $transaction->snap_token,
+            'transaction_id' => $transaction->id
+        ]);
+    }
+
+    private function generateSnapToken(Transaction $transaction)
+    {
+        $transaction->load(['transaction_items.product']);
+        $subtotal = $transaction->transaction_items->sum(fn($item) => $item->price * $item->quantity);
+        $tax = $subtotal * 0.11;
+
+        $item_details = $transaction->transaction_items->map(function ($item) {
+            return [
+                'id' => 'PRD-' . $item->product_id,
+                'price' => (int) $item->price,
+                'quantity' => (int) $item->quantity,
+                'name' => substr($item->product->name, 0, 50),
+            ];
+        })->toArray();
+
+        $item_details[] = ['id' => 'TAX-11', 'price' => (int) $tax, 'quantity' => 1, 'name' => 'Pajak PPN (11%)'];
+        $item_details[] = ['id' => 'SHIPPING', 'price' => (int) $transaction->delivery_price, 'quantity' => 1, 'name' => 'Ongkos Kirim'];
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => 'ORDER-' . $transaction->id . '-' . time(),
+                'gross_amount' => (int) $transaction->total_price,
+            ],
+            'customer_details' => [
+                'first_name' => Auth::user()->name,
+                'email' => Auth::user()->email,
+                'phone' => Auth::user()->phone_number ?? '08123456789',
+            ],
+            'item_details' => $item_details,
+        ];
+
+        try {
+            $snapToken = Snap::getSnapToken($params);
+            $transaction->update(['snap_token' => $snapToken]);
+            return response()->json(['snap_token' => $snapToken, 'transaction_id' => $transaction->id]);
+        } catch (\Exception $e) {
+            Log::error('Midtrans Snap Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Payment processing failed'], 500);
+        }
+    }
+
+    /**
+     * Format payment method dari Midtrans response
+     * @param mixed $paymentType
+     * @return string
+     */
+    private function formatPaymentMethod($paymentType): string
+    {
+        $paymentMethods = [
+            'credit_card' => 'Credit Card',
+            'debit_card' => 'Debit Card',
+            'gcg_payment' => 'GCG Payment',
+            'bank_transfer' => 'Bank Transfer',
+            'akulaku' => 'Akulaku',
+            'buy_now_pay_later' => 'Buy Now Pay Later',
+            'cimb_clicks' => 'CIMB Clicks',
+            'danamon_online' => 'Danamon Online',
+            'epay_bri' => 'E-Pay BRI',
+            'gopay' => 'GoPay',
+            'go_pay' => 'GoPay',
+            'klik_bca' => 'Klik BCA',
+            'klik_ksei' => 'Klik KSEI',
+            'mandiri_clickpay' => 'Mandiri ClickPay',
+            'maybank' => 'Maybank',
+            'mobile_legends' => 'Mobile Legends',
+            'ovo' => 'OVO',
+            'permata_va' => 'Permata VA',
+            'bca_va' => 'BCA VA',
+            'bni_va' => 'BNI VA',
+            'bri_va' => 'BRI VA',
+            'qris' => 'QRIS',
+            'shopeepay' => 'ShopeePay',
+            'spay_later' => 'SPayLater',
+            'telkomsel_cashback' => 'Telkomsel Cashback',
+            'uob_click' => 'UOB Click',
+            'other_va' => 'Virtual Account',
+            'e_wallet' => 'E-Wallet',
+            'bank_account' => 'Bank Account',
+            'pay_later' => 'Pay Later',
+            'other_qris' => 'QRIS',
+        ];
+
+        $key = strtolower(str_replace(' ', '_', (string) $paymentType));
+        
+        return (string) ($paymentMethods[$key] ?? ucfirst(str_replace('_', ' ', $key)));
     }
 }

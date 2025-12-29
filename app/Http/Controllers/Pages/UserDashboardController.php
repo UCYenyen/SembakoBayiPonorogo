@@ -14,20 +14,20 @@ class UserDashboardController extends Controller
         $user = Auth::user();
         $status = $request->get('status', 'all');
 
-        // Base query
-        $query = Transaction::with(['transaction_items.product', 'payment', 'delivery', 'address'])
+        $query = Transaction::with(['transaction_items.product', 'delivery', 'address'])
             ->where('user_id', $user->id)
             ->latest();
 
-        // Filter by status
         if ($status !== 'all') {
-            $query->where('status', $status);
+            if ($status === 'completed') {
+                $query->whereIn('status', [Transaction::STATUS_DELIVERED, Transaction::STATUS_COMPLETED]);
+            } else {
+                $query->where('status', $status);
+            }
         }
 
-        // Get transactions
         $transactions = $query->paginate(10);
 
-        // Count by status for tabs
         $statusCounts = [
             'all' => Transaction::where('user_id', $user->id)->count(),
             'pending_payment' => Transaction::where('user_id', $user->id)->where('status', Transaction::STATUS_PENDING_PAYMENT)->count(),
@@ -46,12 +46,11 @@ class UserDashboardController extends Controller
 
     public function show(Transaction $transaction)
     {
-        // Check if user owns this transaction
         if ($transaction->user_id !== Auth::id()) {
             abort(403);
         }
 
-        $transaction->load(['transaction_items.product', 'payment', 'delivery', 'address']);
+        $transaction->load(['transaction_items.product', 'delivery', 'address']);
 
         return view('dashboard.user.transaction-detail', [
             'transaction' => $transaction,
