@@ -1,4 +1,4 @@
-<x-pages.section title="Latest Products" extraClasses="bg-white">
+<x-pages.section title="Produk Terbaru" extraClasses="bg-white">
     <div class="relative w-full flex flex-col gap-24 justify-center items-center">
         <div class="w-[80%] grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             @foreach($products as $product)

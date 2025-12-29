@@ -48,11 +48,12 @@ class ProductFactory extends Factory
             'name' => fake()->randomElement($productNames) . ' ' . fake()->numberBetween(1, 999),
             'description' => fake()->randomElement($descriptions) . '. ' . fake()->sentence(10),
             'price' => fake()->numberBetween(10000, 500000),
+            'weight' => fake()->numberBetween(200, 2000),
             'stocks' => fake()->numberBetween(0, 200),
-            'is_hidden' => fake()->boolean(20), // 20% chance hidden
+            'is_hidden' => fake()->boolean(20),
             'discount_amount' => fake()->numberBetween(0, 50000),
-            'is_on_sale' => fake()->boolean(30), // 30% chance on sale
-            'image_url' => 'images/1764958064-69331f706a035.webp', // You'll need to create this
+            'is_on_sale' => fake()->boolean(30), 
+            'image_url' => 'images/1764958064-69331f706a035.webp',
             'category_id' => Category::inRandomOrder()->first()->id,
             'brand_id' => Brand::inRandomOrder()->first()->id,
         ];

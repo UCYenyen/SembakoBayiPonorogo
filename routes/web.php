@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\VoucherController;
 
 Route::get('/', [HomeController::class, 'index']);
@@ -38,7 +39,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/sub-districts/{districtId}', [AddressController::class, 'getSubDistricts'])->name('sub-districts');
         Route::get('/', [AddressController::class, 'index'])->name('index');
         Route::get('/create', [AddressController::class, 'create'])->name('create');
-        Route::post('/', [AddressController::class, 'store'])->name('store');
+        Route::post('/create', [AddressController::class, 'store'])->name('store');
         Route::get('/{address}/edit', [AddressController::class, 'edit'])->name('edit');
         Route::put('/{address}', [AddressController::class, 'update'])->name('update');
         Route::delete('/{address}', [AddressController::class, 'destroy'])->name('destroy');
@@ -46,7 +47,6 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/api/cities/search', [AddressController::class, 'searchCities'])->name('api.cities.search');
-    Route::get('/api/cities/{subdistrictId}', [AddressController::class, 'getCityById'])->name('api.cities.show');
 
     Route::get('/cart', [ShoppingCartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [ShoppingCartController::class, 'addToCart'])->name('cart.add');
@@ -60,12 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/payment/unfinish', [PaymentController::class, 'unfinish'])->name('payment.unfinish');
     Route::get('/payment/check-status', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
 
-    Route::post('/api/shipping-options', [PaymentController::class, 'getShippingOptions'])
-        ->name('api.shipping.options');
-
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('logout');
-
+    Route::get('/check-ongkir/{address}', [App\Http\Controllers\DeliveryController::class, 'checkOngkir']);
 
     Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/dashboard/admin/products', [AdminController::class, 'products'])->name('admin.products');
@@ -91,6 +86,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/admin/transactions', [AdminController::class, 'transactions'])->name('admin.transactions.index');
     Route::get('/dashboard/admin/transactions/{transaction}', [AdminController::class, 'showTransaction'])->name('admin.transactions.show');
     Route::patch('/dashboard/admin/transactions/{transaction}/edit', [AdminController::class, 'updateTransactionStatus'])->name('admin.transactions.update-status');
+
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });
 
 require __DIR__ . '/auth.php';

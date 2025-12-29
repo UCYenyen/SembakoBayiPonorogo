@@ -9,16 +9,14 @@ use App\Models\ShoppingCart;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
 use App\Models\Payment;
-use App\Models\Delivery;
 use App\Models\Address;
-use App\Services\RajaOngkirService;
+use App\Models\Delivery;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
 
 class PaymentController extends Controller
 {
-
     public function __construct()
     {
         Config::$serverKey = config('midtrans.server_key');
@@ -42,7 +40,6 @@ class PaymentController extends Controller
         $addresses = Address::where('user_id', Auth::id())->get();
         $payments = Payment::all();
 
-        // Calculate totals
         $subtotal = $cart->items->sum(function($item) {
             return $item->product->price * $item->quantity;
         });
@@ -60,18 +57,13 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function getShippingOptions(Request $request)
-    {
-        
-    }
-
-    public function processPayment(Request $request)
+   public function processPayment(Request $request)
     {
         $request->validate([
             'address_id' => 'required|exists:addresses,id',
-            'delivery_id' => 'required|exists:deliveries,id',
             'payment_id' => 'required|exists:payments,id',
             'delivery_price' => 'required|numeric|min:0',
+            'courier' => 'required|string'
         ]);
 
         $cart = ShoppingCart::where('user_id', Auth::id())
@@ -80,23 +72,24 @@ class PaymentController extends Controller
             ->first();
 
         if (!$cart || $cart->items->isEmpty()) {
-            return response()->json([
-                'error' => 'Your cart is empty'
-            ], 400);
+            return response()->json(['error' => 'Your cart is empty'], 400);
         }
 
-        $cartTotal = $cart->items->sum(function($item) {
+        $delivery = Delivery::where('courier_code', $request->courier)->first() ?? Delivery::first();
+
+        $subtotal = $cart->items->sum(function($item) {
             return $item->product->price * $item->quantity;
         });
 
-        $deliveryPrice = $request->delivery_price;
-        $totalPrice = $cartTotal + $deliveryPrice;
+        $tax = $subtotal * 0.11;
+        $deliveryPrice = (int) $request->delivery_price;
+        $totalPrice = $subtotal + $tax + $deliveryPrice;
 
         $transaction = Transaction::create([
             'user_id' => Auth::id(),
             'address_id' => $request->address_id,
             'shopping_cart_id' => $cart->id,
-            'delivery_id' => $request->delivery_id,
+            'delivery_id' => $delivery->id,
             'payment_id' => $request->payment_id,
             'delivery_price' => $deliveryPrice,
             'total_price' => $totalPrice,
@@ -112,6 +105,29 @@ class PaymentController extends Controller
             ]);
         }
 
+        $item_details = $cart->items->map(function($item) {
+            return [
+                'id' => 'PRD-' . $item->product_id,
+                'price' => (int) $item->product->price,
+                'quantity' => (int) $item->quantity,
+                'name' => substr($item->product->name, 0, 50),
+            ];
+        })->toArray();
+
+        $item_details[] = [
+            'id' => 'TAX-11',
+            'price' => (int) $tax,
+            'quantity' => 1,
+            'name' => 'Pajak PPN (11%)',
+        ];
+
+        $item_details[] = [
+            'id' => 'SHIPPING',
+            'price' => (int) $deliveryPrice,
+            'quantity' => 1,
+            'name' => 'Ongkos Kirim (' . strtoupper($request->courier) . ')',
+        ];
+
         $params = [
             'transaction_details' => [
                 'order_id' => 'ORDER-' . $transaction->id . '-' . time(),
@@ -122,28 +138,12 @@ class PaymentController extends Controller
                 'email' => Auth::user()->email,
                 'phone' => Auth::user()->phone_number ?? '08123456789',
             ],
-            'item_details' => $cart->items->map(function($item) {
-                return [
-                    'id' => $item->product_id,
-                    'price' => (int) $item->product->price,
-                    'quantity' => $item->quantity,
-                    'name' => $item->product->name,
-                ];
-            })->toArray(),
-        ];
-
-        $params['item_details'][] = [
-            'id' => 'DELIVERY',
-            'price' => (int) $deliveryPrice,
-            'quantity' => 1,
-            'name' => 'Shipping Cost',
+            'item_details' => $item_details,
         ];
 
         try {
             $snapToken = Snap::getSnapToken($params);
             $transaction->update(['snap_token' => $snapToken]);
-
-            $cart->update(['status' => ShoppingCart::STATUS_CHECKED_OUT]);
 
             return response()->json([
                 'snap_token' => $snapToken,
@@ -151,14 +151,8 @@ class PaymentController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Midtrans Snap Error:', [
-                'message' => $e->getMessage(),
-                'transaction_id' => $transaction->id
-            ]);
-
-            return response()->json([
-                'error' => 'Payment processing failed: ' . $e->getMessage()
-            ], 500);
+            Log::error('Midtrans Snap Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Payment processing failed'], 500);
         }
     }
 
@@ -166,95 +160,56 @@ class PaymentController extends Controller
     {
         try {
             $notification = new Notification();
-
             $transactionStatus = $notification->transaction_status;
+            $type = $notification->payment_type;
             $orderId = $notification->order_id;
             $fraudStatus = $notification->fraud_status;
-
-            Log::info('Midtrans Notification Received:', [
-                'order_id' => $orderId,
-                'transaction_status' => $transactionStatus,
-                'fraud_status' => $fraudStatus ?? 'N/A'
-            ]);
 
             preg_match('/ORDER-(\d+)-/', $orderId, $matches);
             $transactionId = $matches[1] ?? null;
 
-            if (!$transactionId) {
-                Log::error('Invalid order_id format: ' . $orderId);
-                return response()->json(['status' => 'error', 'message' => 'Invalid order ID'], 400);
-            }
-
             $transaction = Transaction::find($transactionId);
+            if (!$transaction) return response()->json(['message' => 'Not found'], 404);
 
-            if (!$transaction) {
-                Log::error('Transaction not found: ' . $transactionId);
-                return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
-            }
-
-            // Update status based on Midtrans response
             if ($transactionStatus == 'capture') {
-                if ($fraudStatus == 'accept') {
-                    $transaction->update(['status' => Transaction::STATUS_PAID]);
-                    Log::info('Transaction marked as PAID (capture accepted)', ['transaction_id' => $transactionId]);
+                if ($type == 'credit_card') {
+                    if ($fraudStatus == 'challenge') {
+                        $transaction->update(['status' => Transaction::STATUS_PENDING_PAYMENT]);
+                    } else {
+                        $transaction->update(['status' => Transaction::STATUS_PAID]);
+                        $transaction->shoppingCart->update(['status' => ShoppingCart::STATUS_CHECKED_OUT]);
+                    }
                 }
             } elseif ($transactionStatus == 'settlement') {
                 $transaction->update(['status' => Transaction::STATUS_PAID]);
-                Log::info('Transaction marked as PAID (settlement)', ['transaction_id' => $transactionId]);
-            } elseif ($transactionStatus == 'pending') {
+                if ($transaction->shoppingCart) {
+                    $transaction->shoppingCart->update(['status' => ShoppingCart::STATUS_CHECKED_OUT]);
+                }
+            } elseif (in_array($transactionStatus, ['pending'])) {
                 $transaction->update(['status' => Transaction::STATUS_PENDING_PAYMENT]);
-                Log::info('Transaction marked as PENDING_PAYMENT', ['transaction_id' => $transactionId]);
-            } elseif ($transactionStatus == 'deny') {
+            } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
                 $transaction->update(['status' => Transaction::STATUS_FAILED]);
-                Log::info('Transaction marked as FAILED (denied)', ['transaction_id' => $transactionId]);
-            } elseif ($transactionStatus == 'expire') {
-                $transaction->update(['status' => Transaction::STATUS_FAILED]);
-                Log::info('Transaction marked as FAILED (expired)', ['transaction_id' => $transactionId]);
-            } elseif ($transactionStatus == 'cancel') {
-                $transaction->update(['status' => Transaction::STATUS_CANCELLED]);
-                Log::info('Transaction marked as CANCELLED', ['transaction_id' => $transactionId]);
             }
 
             return response()->json(['status' => 'success']);
-
         } catch (\Exception $e) {
-            Log::error('Midtrans Notification Error:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            Log::error('Notification Error: ' . $e->getMessage());
+            return response()->json(['message' => 'Error'], 500);
         }
     }
-    
+
     public function finish(Request $request)
     {
         $orderId = $request->get('order_id');
+        if (!$orderId) return redirect()->route('dashboard');
         
-        if (!$orderId) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Invalid order ID');
-        }
-        
-        // Extract transaction ID from order_id (ORDER-1-1765003598 -> 1)
         preg_match('/ORDER-(\d+)-/', $orderId, $matches);
         $transactionId = $matches[1] ?? null;
-        
-        if (!$transactionId) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Invalid order ID format');
-        }
         
         $transaction = Transaction::with(['transaction_items.product', 'payment', 'delivery'])
             ->find($transactionId);
         
-        if (!$transaction) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Transaction not found');
-        }
-        
-        if ($transaction->user_id !== Auth::id()) {
-            abort(403);
-        }
+        if (!$transaction || $transaction->user_id !== Auth::id()) abort(403);
         
         return view('shop.payment.finish', ['transaction' => $transaction]);
     }
@@ -262,27 +217,15 @@ class PaymentController extends Controller
     public function unfinish(Request $request)
     {
         $orderId = $request->get('order_id');
-        
-        if (!$orderId) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Invalid order ID');
-        }
+        if (!$orderId) return redirect()->route('dashboard');
         
         preg_match('/ORDER-(\d+)-/', $orderId, $matches);
         $transactionId = $matches[1] ?? null;
         
-        if (!$transactionId) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Invalid order ID format');
-        }
-        
         $transaction = Transaction::with(['transaction_items.product'])
             ->find($transactionId);
         
-        if (!$transaction || $transaction->user_id !== Auth::id()) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Transaction not found');
-        }
+        if (!$transaction || $transaction->user_id !== Auth::id()) return redirect()->route('dashboard');
         
         return view('shop.payment.unfinish', ['transaction' => $transaction]);
     }

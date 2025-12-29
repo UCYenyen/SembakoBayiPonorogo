@@ -19,7 +19,7 @@
                 <div>
                     <x-input-label for="email" :value="__('Email')" />
                     <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')"
-                        required autofocus autocomplete="username" placeholder="example@example.com" />
+                        required autofocus autocomplete="username" placeholder="contoh@contoh.com" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
 
@@ -36,14 +36,14 @@
                     <label for="remember_me" class="inline-flex items-center">
                         <input id="remember_me" type="checkbox"
                             class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                        <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+                        <span class="ms-2 text-sm text-gray-600">{{ __('Ingat saya') }}</span>
                     </label>
                 </div>
 
                 <div class="flex flex-col items-center gap-4 mt-6">
                     <button type="submit"
                         class="w-full bg-[#3F3142] shadow-lg rounded-lg text-lg text-white hover:bg-[#5C4B5E] px-4 py-2">
-                        Sign in
+                        Masuk
                     </button>
 
                     {{-- @if (Route::has('password.request'))

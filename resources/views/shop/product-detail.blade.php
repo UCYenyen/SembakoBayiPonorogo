@@ -22,6 +22,9 @@
                                     <p class="text-gray-600">Kategori:
                                         <span class="font-semibold text-[#3F3142]">{{ $product->category->name }}</span>
                                     </p>
+                                    <p class="text-gray-600">Berat:
+                                        <span class="font-semibold text-[#3F3142]">{{ $product->weight }}g</span>
+                                    </p>
                                 </div>
 
                                 <div class="flex items-center gap-2">

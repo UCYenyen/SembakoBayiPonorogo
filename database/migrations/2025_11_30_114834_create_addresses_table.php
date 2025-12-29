@@ -14,11 +14,17 @@ return new class extends Migration
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('detail', 1000);
-            $table->string('subdistrict_id')->nullable();  // ✅ Komerce Subdistrict ID
-            $table->string('subdistrict_name')->nullable(); // ✅ For display
-            $table->string('city_name')->nullable();        // ✅ City name
-            $table->string('province')->nullable();         // ✅ Province name
+            $table->string('name');             
+            $table->string('province_id');
+            $table->string('province_name');
+            $table->string('city_id');
+            $table->string('city_name');
+            $table->string('district_id');
+            $table->string('district_name');
+            $table->string('subdistrict_id');
+            $table->string('subdistrict_name');
+            $table->string('postal_code');
+            $table->string('extra_detail');
             $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
