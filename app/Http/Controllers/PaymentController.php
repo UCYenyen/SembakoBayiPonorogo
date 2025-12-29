@@ -77,10 +77,7 @@ class PaymentController extends Controller
 
         $delivery = Delivery::where('courier_code', $request->courier)->first() ?? Delivery::first();
 
-        $subtotal = $cart->items->sum(function ($item) {
-            return $item->product->price * $item->quantity;
-        });
-
+        $subtotal = $cart->items->sum(fn($item) => $item->product->price * $item->quantity);
         $tax = $subtotal * 0.11;
         $deliveryPrice = (int) $request->delivery_price;
         $totalPrice = $subtotal + $tax + $deliveryPrice;
@@ -114,19 +111,8 @@ class PaymentController extends Controller
             ];
         })->toArray();
 
-        $item_details[] = [
-            'id' => 'TAX-11',
-            'price' => (int) $tax,
-            'quantity' => 1,
-            'name' => 'Pajak PPN (11%)',
-        ];
-
-        $item_details[] = [
-            'id' => 'SHIPPING',
-            'price' => (int) $deliveryPrice,
-            'quantity' => 1,
-            'name' => 'Ongkos Kirim (' . strtoupper($request->courier) . ')',
-        ];
+        $item_details[] = ['id' => 'TAX-11', 'price' => (int) $tax, 'quantity' => 1, 'name' => 'Pajak PPN (11%)'];
+        $item_details[] = ['id' => 'SHIPPING', 'price' => (int) $deliveryPrice, 'quantity' => 1, 'name' => 'Ongkos Kirim (' . strtoupper($request->courier) . ')'];
 
         $params = [
             'transaction_details' => [
@@ -159,124 +145,115 @@ class PaymentController extends Controller
     {
         try {
             $notification = new Notification();
-
             $transactionStatus = $notification->transaction_status;
             $orderId = $notification->order_id;
             $fraudStatus = $notification->fraud_status;
 
-            Log::info('Midtrans Notification Received:', [
-                'order_id' => $orderId,
-                'transaction_status' => $transactionStatus,
-                'fraud_status' => $fraudStatus ?? 'N/A'
-            ]);
+            Log::info("Webhook Midtrans Masuk: Order ID $orderId | Status: $transactionStatus");
 
-            preg_match('/ORDER-(\d+)-/', $orderId, $matches);
-            $transactionId = $matches[1] ?? null;
+            // Perbaikan pengambilan ID: ORDER-{ID}-{TIMESTAMP}
+            $parts = explode('-', $orderId);
+            $transactionId = $parts[1] ?? null;
 
             if (!$transactionId) {
-                Log::error('Invalid order_id format: ' . $orderId);
-                return response()->json(['status' => 'error', 'message' => 'Invalid order ID'], 400);
+                return response()->json(['status' => 'error', 'message' => 'Format ID salah'], 400);
             }
 
             $transaction = Transaction::find($transactionId);
 
             if (!$transaction) {
-                Log::error('Transaction not found: ' . $transactionId);
-                return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
+                return response()->json(['status' => 'error', 'message' => 'Transaksi tidak ditemukan'], 404);
             }
 
-            // Update status based on Midtrans response
-            if ($transactionStatus == 'capture') {
-                if ($fraudStatus == 'accept') {
+            // Logika Update Status
+            switch ($transactionStatus) {
+                case 'capture':
+                    if ($fraudStatus == 'challenge') {
+                        $transaction->update(['status' => Transaction::STATUS_PENDING_PAYMENT]);
+                    } else if ($fraudStatus == 'accept') {
+                        $transaction->update(['status' => Transaction::STATUS_PAID]);
+                    }
+                    break;
+                case 'settlement':
                     $transaction->update(['status' => Transaction::STATUS_PAID]);
-                    Log::info('Transaction marked as PAID (capture accepted)', ['transaction_id' => $transactionId]);
-                }
-            } elseif ($transactionStatus == 'settlement') {
-                $transaction->update(['status' => Transaction::STATUS_PAID]);
-                Log::info('Transaction marked as PAID (settlement)', ['transaction_id' => $transactionId]);
-            } elseif ($transactionStatus == 'pending') {
-                $transaction->update(['status' => Transaction::STATUS_PENDING_PAYMENT]);
-                Log::info('Transaction marked as PENDING_PAYMENT', ['transaction_id' => $transactionId]);
-            } elseif ($transactionStatus == 'deny') {
-                $transaction->update(['status' => Transaction::STATUS_FAILED]);
-                Log::info('Transaction marked as FAILED (denied)', ['transaction_id' => $transactionId]);
-            } elseif ($transactionStatus == 'expire') {
-                $transaction->update(['status' => Transaction::STATUS_FAILED]);
-                Log::info('Transaction marked as FAILED (expired)', ['transaction_id' => $transactionId]);
-            } elseif ($transactionStatus == 'cancel') {
-                $transaction->update(['status' => Transaction::STATUS_CANCELLED]);
-                Log::info('Transaction marked as CANCELLED', ['transaction_id' => $transactionId]);
+                    break;
+                case 'pending':
+                    $transaction->update(['status' => Transaction::STATUS_PENDING_PAYMENT]);
+                    break;
+                case 'deny':
+                case 'expire':
+                    $transaction->update(['status' => Transaction::STATUS_FAILED]);
+                    break;
+                case 'cancel':
+                    $transaction->update(['status' => Transaction::STATUS_CANCELLED]);
+                    break;
             }
 
             return response()->json(['status' => 'success']);
-
         } catch (\Exception $e) {
-            Log::error('Midtrans Notification Error:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            Log::error('Webhook Error: ' . $e->getMessage());
+            return response()->json(['status' => 'error'], 500);
         }
     }
-    
+
     public function finish(Request $request)
     {
         $orderId = $request->get('order_id');
-        
+
         if (!$orderId) {
             return redirect()->route('dashboard')
                 ->with('error', 'Invalid order ID');
         }
-        
+
         // Extract transaction ID from order_id (ORDER-1-1765003598 -> 1)
         preg_match('/ORDER-(\d+)-/', $orderId, $matches);
         $transactionId = $matches[1] ?? null;
-        
+
         if (!$transactionId) {
             return redirect()->route('dashboard')
                 ->with('error', 'Invalid order ID format');
         }
-        
+
         $transaction = Transaction::with(['transaction_items.product', 'payment', 'delivery'])
             ->find($transactionId);
-        
+
         if (!$transaction) {
             return redirect()->route('dashboard')
                 ->with('error', 'Transaction not found');
         }
-        
+
         if ($transaction->user_id !== Auth::id()) {
             abort(403);
         }
-        
+
         return view('shop.payment.finish', ['transaction' => $transaction]);
     }
 
     public function unfinish(Request $request)
     {
         $orderId = $request->get('order_id');
-        
+
         if (!$orderId) {
             return redirect()->route('dashboard')
                 ->with('error', 'Invalid order ID');
         }
-        
+
         preg_match('/ORDER-(\d+)-/', $orderId, $matches);
         $transactionId = $matches[1] ?? null;
-        
+
         if (!$transactionId) {
             return redirect()->route('dashboard')
                 ->with('error', 'Invalid order ID format');
         }
-        
+
         $transaction = Transaction::with(['transaction_items.product'])
             ->find($transactionId);
-        
+
         if (!$transaction || $transaction->user_id !== Auth::id()) {
             return redirect()->route('dashboard')
                 ->with('error', 'Transaction not found');
         }
-        
+
         return view('shop.payment.unfinish', ['transaction' => $transaction]);
     }
 }
