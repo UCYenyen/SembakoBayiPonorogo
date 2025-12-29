@@ -13,7 +13,6 @@ use App\Models\Address;
 use App\Models\Delivery;
 use Midtrans\Config;
 use Midtrans\Snap;
-use Midtrans\Notification;
 
 class PaymentController extends Controller
 {
@@ -40,7 +39,7 @@ class PaymentController extends Controller
         $addresses = Address::where('user_id', Auth::id())->get();
         $payments = Payment::all();
 
-        $subtotal = $cart->items->sum(function($item) {
+        $subtotal = $cart->items->sum(function ($item) {
             return $item->product->price * $item->quantity;
         });
 
@@ -57,7 +56,7 @@ class PaymentController extends Controller
         ]);
     }
 
-   public function processPayment(Request $request)
+    public function processPayment(Request $request)
     {
         $request->validate([
             'address_id' => 'required|exists:addresses,id',
@@ -77,7 +76,7 @@ class PaymentController extends Controller
 
         $delivery = Delivery::where('courier_code', $request->courier)->first() ?? Delivery::first();
 
-        $subtotal = $cart->items->sum(function($item) {
+        $subtotal = $cart->items->sum(function ($item) {
             return $item->product->price * $item->quantity;
         });
 
@@ -105,7 +104,7 @@ class PaymentController extends Controller
             ]);
         }
 
-        $item_details = $cart->items->map(function($item) {
+        $item_details = $cart->items->map(function ($item) {
             return [
                 'id' => 'PRD-' . $item->product_id,
                 'price' => (int) $item->product->price,
@@ -149,68 +148,54 @@ class PaymentController extends Controller
                 'snap_token' => $snapToken,
                 'transaction_id' => $transaction->id
             ]);
-
         } catch (\Exception $e) {
             Log::error('Midtrans Snap Error: ' . $e->getMessage());
             return response()->json(['error' => 'Payment processing failed'], 500);
         }
     }
 
-    public function notificationHandler(Request $request)
+    public function handleWebhook(Request $request)
     {
-        try {
-            $notification = new Notification();
-            $transactionStatus = $notification->transaction_status;
-            $type = $notification->payment_type;
-            $orderId = $notification->order_id;
-            $fraudStatus = $notification->fraud_status;
-
-            preg_match('/ORDER-(\d+)-/', $orderId, $matches);
-            $transactionId = $matches[1] ?? null;
-
-            $transaction = Transaction::find($transactionId);
-            if (!$transaction) return response()->json(['message' => 'Not found'], 404);
-
-            if ($transactionStatus == 'capture') {
-                if ($type == 'credit_card') {
-                    if ($fraudStatus == 'challenge') {
-                        $transaction->update(['status' => Transaction::STATUS_PENDING_PAYMENT]);
-                    } else {
-                        $transaction->update(['status' => Transaction::STATUS_PAID]);
-                        $transaction->shoppingCart->update(['status' => ShoppingCart::STATUS_CHECKED_OUT]);
-                    }
-                }
-            } elseif ($transactionStatus == 'settlement') {
-                $transaction->update(['status' => Transaction::STATUS_PAID]);
-                if ($transaction->shoppingCart) {
-                    $transaction->shoppingCart->update(['status' => ShoppingCart::STATUS_CHECKED_OUT]);
-                }
-            } elseif (in_array($transactionStatus, ['pending'])) {
-                $transaction->update(['status' => Transaction::STATUS_PENDING_PAYMENT]);
-            } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
-                $transaction->update(['status' => Transaction::STATUS_FAILED]);
-            }
-
-            return response()->json(['status' => 'success']);
-        } catch (\Exception $e) {
-            Log::error('Notification Error: ' . $e->getMessage());
-            return response()->json(['message' => 'Error'], 500);
+        $serverKey = config('midtrans.server_key');
+        $signatureKey = hash(
+            "sha512",
+            $request->order_id .
+                $request->status_code .
+                $request->gross_amount .
+                $serverKey
+        );
+        if ($signatureKey !== $request->signature_key) {
+            return response()->json(['message' => 'Invalid signature key'], 403);
         }
+        $transaction = \App\Models\Transaction::find($request->order_id);
+        if (!$transaction) {
+            return response()->json(['message' => 'Transaction not found'], 404);
+        }
+        // Update status berdasarkan notifikasi
+        if (in_array($request->transaction_status, ['settlement', 'capture'])) {
+            $transaction->status = 'paid';
+        } elseif (in_array($request->transaction_status, ['cancel', 'expire'])) {
+            $transaction->status = 'failed';
+        } elseif ($request->transaction_status == 'pending') {
+            $transaction->status = 'pending';
+        }
+        $transaction->save();
+        return response()->json(['message' => 'Webhook processed successfully']);
     }
 
     public function finish(Request $request)
     {
         $orderId = $request->get('order_id');
         if (!$orderId) return redirect()->route('dashboard');
-        
+
         preg_match('/ORDER-(\d+)-/', $orderId, $matches);
         $transactionId = $matches[1] ?? null;
-        
+
         $transaction = Transaction::with(['transaction_items.product', 'payment', 'delivery'])
             ->find($transactionId);
-        
+
         if (!$transaction || $transaction->user_id !== Auth::id()) abort(403);
-        
+
         return view('shop.payment.finish', ['transaction' => $transaction]);
     }
 
@@ -218,15 +203,15 @@ class PaymentController extends Controller
     {
         $orderId = $request->get('order_id');
         if (!$orderId) return redirect()->route('dashboard');
-        
+
         preg_match('/ORDER-(\d+)-/', $orderId, $matches);
         $transactionId = $matches[1] ?? null;
-        
+
         $transaction = Transaction::with(['transaction_items.product'])
             ->find($transactionId);
-        
+
         if (!$transaction || $transaction->user_id !== Auth::id()) return redirect()->route('dashboard');
-        
+
         return view('shop.payment.unfinish', ['transaction' => $transaction]);
     }
 }

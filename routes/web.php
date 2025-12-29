@@ -24,8 +24,7 @@ Route::get('/api/products/search', [ProductController::class, 'liveSearch'])->na
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/products/{product}', [ProductController::class, 'showDetails'])->name('product.show');
-Route::post('/payment/notification', [PaymentController::class, 'notificationHandler'])
-    ->name('payment.notification');
+Route::post('/payment/webhook', [PaymentController::class, 'handleWebhook']);
 
 
 Route::middleware('auth')->group(function () {
