@@ -118,10 +118,6 @@
                                 <span class="font-semibold">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Pajak (11%)</span>
-                                <span class="font-semibold">Rp{{ number_format($tax, 0, ',', '.') }}</span>
-                            </div>
-                            <div class="flex justify-between">
                                 <span class="text-gray-600">Pengiriman</span>
                                 <span class="font-semibold" id="shipping-cost-display">Rp0</span>
                             </div>
@@ -147,7 +143,6 @@
     <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
     <script>
         const subtotal = {{ $subtotal }};
-        const tax = {{ $tax }};
         const totalWeight = {{ $cart->items->sum(fn($item) => ($item->product->weight ?? 1000) * $item->quantity) }} || 1000;
         let selectedShippingCost = 0;
 
@@ -216,7 +211,7 @@
 
             document.getElementById('shipping-cost-display').textContent = 'Rp' + formatNumber(selectedShippingCost);
 
-            const grandTotal = subtotal + tax + selectedShippingCost;
+            const grandTotal = subtotal + selectedShippingCost;
             document.getElementById('total-display').textContent = 'Rp' + formatNumber(grandTotal);
         }
 

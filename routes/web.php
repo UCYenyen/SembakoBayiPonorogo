@@ -13,6 +13,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\TransactionController;
 
 Route::get('/', [HomeController::class, 'index']);
 
@@ -24,7 +25,7 @@ Route::get('/api/products/search', [ProductController::class, 'liveSearch'])->na
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/products/{product}', [ProductController::class, 'showDetails'])->name('product.show');
-Route::post('/webhook/midtrans', [\App\Http\Controllers\TransactionController::class, 'midtransNotification'])
+Route::post('/webhook/midtrans', [TransactionController::class, 'midtransNotification'])
     ->withoutMiddleware(['web', 'auth'])
     ->name('webhook.midtrans');
 
