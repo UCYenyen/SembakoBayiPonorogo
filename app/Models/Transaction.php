@@ -31,6 +31,16 @@ class Transaction extends Model
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_FAILED = 'failed';
 
+    public function getSubtotalAttribute()
+    {
+        return $this->transaction_items->sum(fn($item) => $item->price * $item->quantity);
+    }
+
+    public function getTotalBillAttribute()
+    {
+        return $this->subtotal + $this->delivery_price;
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

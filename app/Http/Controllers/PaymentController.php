@@ -46,7 +46,6 @@ class PaymentController extends Controller
             'cart' => $cart,
             'addresses' => $addresses,
             'subtotal' => $subtotal,
-            'tax' => 0,
             'total' => $subtotal,
         ]);
     }
@@ -68,7 +67,7 @@ class PaymentController extends Controller
             return response()->json(['error' => 'Your cart is empty'], 400);
         }
 
-        $delivery = Delivery::where('courier_code', $request->courier)->first() ?? Delivery::first();
+        $delivery = Delivery::where('courier_code', $request->courier)->first();
 
         $subtotal = $cart->items->sum(fn($item) => $item->product->price * $item->quantity);
         $deliveryPrice = (int) $request->delivery_price;

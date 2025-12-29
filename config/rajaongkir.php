@@ -2,6 +2,7 @@
 
 return [
     'api_key' => env('RAJAONGKIR_API_KEY', ''),
+    'api_shipping_delivery_key' => env('RAJAONGKIR_API_SHIPPING_DELIVERY_KEY', ''),
     
     'provinces' => [
         ['id' => 1, 'name' => 'NUSA TENGGARA BARAT (NTB)'],

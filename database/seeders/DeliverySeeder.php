@@ -10,10 +10,9 @@ class DeliverySeeder extends Seeder
     public function run(): void
     {
         $deliveries = [
-            ['name' => 'JNE Regular'],
-            ['name' => 'JNE YES'],
-            ['name' => 'J&T Express'],
-            ['name' => 'SiCepat Regular'],
+            ['name' => 'jne', 'courier_code' => 'jne'],
+            ['name' => 'jnt',  'coruier_code => jnt'],
+            ['name' => 'gosend', 'courier_code => gosend'],
         ];
 
         foreach ($deliveries as $delivery) {

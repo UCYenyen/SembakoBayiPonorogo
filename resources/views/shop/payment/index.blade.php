@@ -80,6 +80,11 @@
                                         onchange="loadShippingOptions()">
                                     <span class="ml-2 text-sm font-medium text-gray-900">J&T</span>
                                 </label>
+                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="courier_brand" value="gosend" class="h-4 w-4 text-[#3F3142]"
+                                        onchange="loadShippingOptions()">
+                                    <span class="ml-2 text-sm font-medium text-gray-900">GOSEND</span>
+                                </label>
                             </div>
                         </div>
 
@@ -160,53 +165,43 @@
 
             const addressId = addressRadio.value;
             const courier = courierRadio.value;
+            const itemValue = typeof subtotal !== 'undefined' ? subtotal : 50000;
 
-            container.innerHTML = '<div class="text-center p-4">Menghitung...</div>';
+            container.innerHTML = '<div class="text-center p-4 text-gray-500 italic">Mengecek tarif...</div>';
 
-            fetch(`/check-ongkir/${addressId}?weight=${totalWeight}&courier=${courier}`)
+            let url = `/check-ongkir/${addressId}?weight=${totalWeight}&courier=${courier}&item_value=${itemValue}`;
+
+            fetch(url)
                 .then(response => response.json())
                 .then(result => {
                     if (result.success && result.data.length > 0) {
                         let html = '';
                         result.data.forEach(option => {
-                            let costValue = 0;
-                            if (option.price) {
-                                costValue = parseInt(option.price);
-                            } else if (option.costs && option.costs[0] && option.costs[0].value) {
-                                costValue = parseInt(option.costs[0].value);
-                            } else if (option.cost) {
-                                costValue = parseInt(option.cost);
-                            }
-
-                            const serviceName = option.service || 'Reguler';
-
+                            let costValue = parseInt(option.cost);
                             html += `
-                        <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 mb-2">
-                            <input type="radio" name="shipping_option" value="${costValue}" 
-                                onchange="updateShippingCost(${costValue}, '${serviceName}')">
-                            <div class="flex-1">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="font-bold">${courier.toUpperCase()} ${serviceName}</p>
-                                        <div class="flex flex-col">
-                                            <span class="text-xs text-gray-500 italic">
-                                                Estimasi tiba: ${option.etd ? option.etd.toLowerCase().replace(/days?|hari/gi, '').trim() : '-'} hari
-                                            </span>
-                                            <span class="text-xs text-gray-400">Berat: ${totalWeight}gr</span>
-                                        </div>
-                                    </div>
-                                    <span class="font-bold text-lg">Rp${formatNumber(costValue)}</span>
-                                </div>
-                            </div>
-                        </label>`;
+        <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 mb-3 border-gray-200">
+            <input type="radio" name="shipping_option" value="${costValue}" 
+                onchange="updateShippingCost(${costValue}, '${option.service}')" class="w-4 h-4">
+            <div class="flex-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-bold text-gray-800 text-sm uppercase">${option.courier} ${option.service}</p>
+                        <p class="text-xs text-gray-500">${option.description}</p>
+                        <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-1 rounded">Estimasi: ${option.etd}</span>
+                    </div>
+                    <span class="font-bold text-base text-[#3F3142]">Rp${formatNumber(costValue)}</span>
+                </div>
+            </div>
+        </label>`;
                         });
                         container.innerHTML = html;
                     } else {
-                        container.innerHTML = '<p class="text-red-500 p-4">Tidak ada layanan kurir tersedia.</p>';
+                        container.innerHTML =
+                            `<div class="p-4 text-center text-red-500">${result.message || 'Layanan tidak tersedia.'}</div>`;
                     }
                 })
-                .catch(err => {
-                    container.innerHTML = '<p class="text-red-500 p-4">Gagal memuat ongkir.</p>';
+                .catch(() => {
+                    container.innerHTML = '<div class="p-4 text-center text-red-500">Gagal memuat data.</div>';
                 });
         }
 

@@ -5,85 +5,96 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class DeliveryController extends Controller
 {
+    private $originLat = -7.8716564;
+    private $originLong = 111.4726568;
+
     public function checkOngkir(Request $request, Address $address)
     {
-        $request->validate([
-            'weight' => 'required|numeric|min:1',
-            'courier' => 'nullable|string'
-        ]);
+        try {
+            // Konversi gram ke kilogram (dibagi 1000)
+            // GoSend biasanya menerima angka desimal (misal 0.5 untuk 500gr)
+            $weightInGram = (int) $request->input('weight', 1000);
+            $weightInKg = $weightInGram / 1000; 
+            
+            $courier = $request->input('courier');
+            $itemValue = (int) $request->input('item_value', 50000);
 
-        $destinationId = $address->subdistrict_id;
-
-        if (!$destinationId) {
-            return response()->json([
-                'success' => false,
-                'message' => "ID Kecamatan tidak ditemukan di database."
-            ], 422);
-        }
-
-        $weight = (int) $request->weight;
-        $couriers = $request->courier ?? 'jne,jnt';
-
-        $cacheKey = "shipping_cost_{$destinationId}_{$weight}_" . str_replace(',', '_', $couriers);
-
-        $shippingData = Cache::remember($cacheKey, now()->addHours(12), function () use ($destinationId, $weight, $couriers) {
-            try {
-                $response = Http::asForm()->withHeaders([
-                    'Accept' => 'application/json',
-                    'key'    => config('rajaongkir.api_key'),
-                ])->post('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', [
-                    'origin'      => 40737,
-                    'destination' => (int) $destinationId,
-                    'weight'      => $weight,
-                    'courier'     => $couriers,
-                ]);
-
-                Log::info('Cek Ongkir:', [
-                    'dest' => $destinationId,
-                    'response' => $response->json()
-                ]);
-
-                if ($response->successful()) {
-                    return $response->json()['data'] ?? [];
+            if ($courier === 'gosend') {
+                // Pastikan alamat tujuan memiliki latitude dan longitude
+                if (!$address->latitude || !$address->longitude) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Koordinat alamat tujuan (Lat/Long) belum diatur.'
+                    ], 422);
                 }
 
-                return null;
-            } catch (\Exception $e) {
-                return null;
+                $response = Http::withHeaders([
+                    'Accept'    => 'application/json',
+                    'x-api-key' => config('rajaongkir.api_shipping_delivery_key'), 
+                ])->get('https://api-sandbox.collaborator.komerce.id/tariff/api/v1/calculate', [
+                    'item_value'            => $itemValue, // Tidak di-hardcode lagi
+                    'origin_pin_point'      => "{$this->originLat},{$this->originLong}",
+                    'destination_pin_point' => "{$address->latitude},{$address->longitude}", // Diambil dari database
+                    'weight'                => $weightInKg, // Sudah dalam Kilogram
+                ]);
+
+                if ($response->failed()) {
+                    Log::error("Komerce Reject: " . $response->body());
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Layanan GoSend gagal dimuat atau lokasi di luar jangkauan.'
+                    ], 422);
+                }
+
+                $res = $response->json();
+                $instantOptions = $res['data']['calculate_instant'] ?? [];
+                
+                $formattedData = [];
+                foreach ($instantOptions as $item) {
+                    $formattedData[] = [
+                        'courier' => 'GOSEND',
+                        'service' => $item['service_name'] ?? 'Instant',
+                        'cost'    => $item['shipping_cost'] ?? 0,
+                        'etd'     => $item['etd'] ?? '1-2 jam',
+                        'description' => 'Layanan Instant Gojek'
+                    ];
+                }
+                return response()->json(['success' => true, 'data' => $formattedData]);
             }
-        });
 
-        if (!$shippingData) {
-            Cache::forget($cacheKey);
-            return response()->json([
-                'success' => false,
-                'message' => "Gagal mendapatkan data dari API Komerce."
-            ], 500);
+            // Logika JNE/JNT tetap pakai GRAM (RajaOngkir standar menggunakan Gram)
+            $response = Http::asForm()->withHeaders([
+                'Accept' => 'application/json',
+                'key'    => config('rajaongkir.api_key'),
+            ])->post('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', [
+                'origin'      => 40737,
+                'destination' => (int) $address->subdistrict_id,
+                'weight'      => $weightInGram, // Tetap Gram untuk JNE/JNT
+                'courier'     => $courier,
+            ]);
+
+            if ($response->successful()) {
+                $shippingData = $response->json()['data'] ?? [];
+                $formattedData = [];
+                foreach ($shippingData as $option) {
+                    if (!str_contains(strtoupper($option['service'] ?? ''), 'JTR')) {
+                        $formattedData[] = [
+                            'courier' => strtoupper($courier),
+                            'service' => $option['service'] ?? '',
+                            'cost'    => $option['cost'] ?? 0,
+                            'etd'     => $option['etd'] ?? '-',
+                            'description' => $option['description'] ?? ''
+                        ];
+                    }
+                }
+                return response()->json(['success' => true, 'data' => $formattedData]);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-
-        $filteredData = array_filter($shippingData, function ($option) {
-            $serviceName = strtoupper($option['service'] ?? '');
-            return !str_contains($serviceName, 'JTR');
-        });
-
-        $formattedData = array_map(function ($option) {
-            return [
-                'courier' => $option['courier'] ?? '',
-                'service' => $option['service'] ?? '',
-                'cost'    => $option['cost'] ?? 0,
-                'etd'     => $option['etd'] ?? '-', // Ini adalah field estimasi hari
-                'description' => $option['description'] ?? ''
-            ];
-        }, array_values($filteredData));
-
-        return response()->json([
-            'success' => true,
-            'data'    => $formattedData
-        ]);
     }
 }
