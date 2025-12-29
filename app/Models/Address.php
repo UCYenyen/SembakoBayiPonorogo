@@ -20,6 +20,8 @@ class Address extends Model
         'district_name',
         'subdistrict_id',
         'subdistrict_name',
+        'latitude',
+        'longitude',
         'postal_code',
         'extra_detail',
         'is_default',

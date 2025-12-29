@@ -64,7 +64,7 @@
                                     @endif
                                 </div>
 
-                                <form method="POST" action="{{ route('cart.add') }}" class="space-y-4">
+                                <form method="POST" action="{{ route('cart.add', $product) }}" class="space-y-4">
                                     @csrf
                                     <input type="hidden" name="product_id" value="{{ $product->id }}">
 
@@ -131,7 +131,8 @@
                                         <div class="flex-1">
                                             <div class="flex items-center justify-between mb-2">
                                                 <h4 class="font-semibold">User {{ chr(64 + $i) }}</h4>
-                                                <span class="text-sm text-gray-500">{{ rand(1, 30) }} hari yang lalu</span>
+                                                <span class="text-sm text-gray-500">{{ rand(1, 30) }} hari yang
+                                                    lalu</span>
                                             </div>
                                             <div class="flex mb-2">
                                                 @for ($j = 1; $j <= 5; $j++)
@@ -139,7 +140,8 @@
                                                 @endfor
                                             </div>
                                             <p class="text-gray-700">
-                                                Produk yang bagus! Bayi saya menyukainya. Kualitasnya sangat baik dan pengirimannya cepat. Sangat direkomendasikan!
+                                                Produk yang bagus! Bayi saya menyukainya. Kualitasnya sangat baik dan
+                                                pengirimannya cepat. Sangat direkomendasikan!
                                             </p>
                                         </div>
                                     </div>

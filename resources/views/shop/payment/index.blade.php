@@ -140,10 +140,11 @@
         </div>
     </main>
 
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}">
+    </script>
     <script>
         const subtotal = {{ $subtotal }};
-        const totalWeight = {{ $cart->items->sum(fn($item) => ($item->product->weight ?? 1000) * $item->quantity) }} || 1000;
+        const totalWeight = {{ $cart->items->sum(fn($item) => ($item->product->weight ?? 0) * $item->quantity) }};
         let selectedShippingCost = 0;
 
         function formatNumber(num) {
@@ -180,19 +181,24 @@
                             const serviceName = option.service || 'Reguler';
 
                             html += `
-                            <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 mb-2">
-                                <input type="radio" name="shipping_option" value="${costValue}" 
-                                    onchange="updateShippingCost(${costValue}, '${serviceName}')">
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-bold">${courier.toUpperCase()} ${serviceName}</p>
-                                            <p class="text-xs text-gray-400">Berat: ${totalWeight}gr</p>
+                        <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 mb-2">
+                            <input type="radio" name="shipping_option" value="${costValue}" 
+                                onchange="updateShippingCost(${costValue}, '${serviceName}')">
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-bold">${courier.toUpperCase()} ${serviceName}</p>
+                                        <div class="flex flex-col">
+                                            <span class="text-xs text-gray-500 italic">
+                                                Estimasi tiba: ${option.etd ? option.etd.toLowerCase().replace(/days?|hari/gi, '').trim() : '-'} hari
+                                            </span>
+                                            <span class="text-xs text-gray-400">Berat: ${totalWeight}gr</span>
                                         </div>
-                                        <span class="font-bold text-lg">Rp${formatNumber(costValue)}</span>
                                     </div>
+                                    <span class="font-bold text-lg">Rp${formatNumber(costValue)}</span>
                                 </div>
-                            </label>`;
+                            </div>
+                        </label>`;
                         });
                         container.innerHTML = html;
                     } else {
@@ -244,8 +250,10 @@
                 .then(data => {
                     if (data.snap_token && data.transaction_id) {
                         window.snap.pay(data.snap_token, {
-                            onSuccess: (result) => window.location.href = `/payment/finish/${data.transaction_id}`,
-                            onPending: (result) => window.location.href = `/payment/unfinish/${data.transaction_id}`,
+                            onSuccess: (result) => window.location.href =
+                                `/payment/finish/${data.transaction_id}`,
+                            onPending: (result) => window.location.href =
+                                `/payment/unfinish/${data.transaction_id}`,
                             onError: () => {
                                 alert('Pembayaran gagal');
                                 this.disabled = false;

@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('subdistrict_name');
             $table->string('postal_code');
             $table->string('extra_detail');
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
             $table->boolean('is_default')->default(false);
             $table->timestamps();
         });

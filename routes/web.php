@@ -51,9 +51,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/cities/search', [AddressController::class, 'searchCities'])->name('api.cities.search');
 
     Route::get('/cart', [ShoppingCartController::class, 'index'])->name('cart.index');
-    Route::post('/cart/add', [ShoppingCartController::class, 'addToCart'])->name('cart.add');
-    Route::patch('/cart/item/{cartItem}', [ShoppingCartController::class, 'updateQuantity'])->name('cart.update');
-    Route::delete('/cart/item/{cartItem}', [ShoppingCartController::class, 'removeItem'])->name('cart.remove');
+    Route::post('/cart/add/{product}', [ShoppingCartController::class, 'addToCart'])->name('cart.add');
+    Route::patch('/cart/update/{cartItem}', [ShoppingCartController::class, 'updateQuantity'])->name('cart.update');
+    Route::delete('/cart/remove/{cartItem}', [ShoppingCartController::class, 'removeItem'])->name('cart.remove');
     Route::delete('/cart/clear', [ShoppingCartController::class, 'clearCart'])->name('cart.clear');
 
     Route::get('/payment', [PaymentController::class, 'index'])->name('payment.checkout');

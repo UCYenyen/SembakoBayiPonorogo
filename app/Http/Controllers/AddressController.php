@@ -42,6 +42,13 @@ class AddressController extends Controller
         $districtData = explode('|', $request->district);
         $subdistrictData = explode('|', $request->subdistrict);
 
+        $geoResult = $this->getGeoLocation(
+            $provinceData[1],
+            $cityData[1],
+            $districtData[1],
+            $subdistrictData[1]
+        );
+
         Address::create([
             'user_id' => Auth::id(),
             'name' => $request->name,
@@ -55,10 +62,43 @@ class AddressController extends Controller
             'subdistrict_name' => $subdistrictData[1],
             'postal_code' => $request->postal_code,
             'extra_detail' => $request->extra_detail,
+            'latitude' => $geoResult['status'] === 'success' ? $geoResult['lat'] : null,
+            'longitude' => $geoResult['status'] === 'success' ? $geoResult['lon'] : null,
             'is_default' => !Address::where('user_id', Auth::id())->exists(),
         ]);
 
         return redirect()->route('user.addresses.index')->with('success', 'Alamat berhasil ditambahkan.');
+    }
+    public function getGeoLocation($province, $city, $district, $subdistrict)
+    {
+        // Menyusun alamat tanpa extra_detail
+        $address = "$subdistrict, $district, $city, $province, Indonesia";
+
+        // Menggunakan Laravel HTTP Client (lebih bersih)
+        $response = Http::withHeaders([
+            'User-Agent' => 'AplikasiTokoSaya (admin@domain.com)' // Wajib diisi untuk Nominatim
+        ])->timeout(10)->get('https://nominatim.openstreetmap.org/search', [
+            'q' => $address,
+            'format' => 'json',
+            'limit' => 1
+        ]);
+
+        if ($response->successful()) {
+            $data = $response->json();
+
+            if (!empty($data)) {
+                return [
+                    'status' => 'success',
+                    'lat'    => $data[0]['lat'],
+                    'lon'    => $data[0]['lon']
+                ];
+            }
+        }
+
+        return [
+            'status' => 'error',
+            'message' => 'Lokasi tidak ditemukan'
+        ];
     }
 
     public function getCities($provinceId)
