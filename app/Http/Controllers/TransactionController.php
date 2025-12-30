@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
 use Midtrans\Config;
 use Illuminate\Support\Facades\Log;
+use App\Services\WhatsappService;
 
 class TransactionController extends Controller
 {
@@ -37,6 +38,29 @@ class TransactionController extends Controller
                     'payment_method' => $this->formatPaymentMethod($paymentType)
                 ]);
                 $this->updateUserPoints($transaction);
+
+                $user = $transaction->user;
+                $orderId = $transaction->order_id;
+                $totalAmount = number_format($transaction->total_bill, 0, ',', '.');
+                $paymentMethod = $this->formatPaymentMethod($paymentType);
+                $date = now()->format('d M Y, H:i');
+
+                $customerMsg = "*SEMBAKO BAYI PONOROGO* 📄\n";
+                $customerMsg .= "PEMBERITAHUAN \n\n";
+                $customerMsg .= "Halo *{$user->name}*,\n";
+                $customerMsg .= "Terima kasih karena sudah mempercayai SEMBAKO BAYI PONOROGO, pembayaran Anda telah kami terima.\n\n";
+
+                $customerMsg .= "*RINCIAN PESANAN:*\n";
+                $customerMsg .= "ID Pesanan: ```{$orderId}```\n";
+                $customerMsg .= "Tanggal: _{$date}_\n";
+                $customerMsg .= "Metode: {$paymentMethod}\n";
+                $customerMsg .= "--------------------------------------------\n";
+                $customerMsg .= "*TOTAL YANG DIBAYAR: Rp {$totalAmount}*\n";
+                $customerMsg .= "--------------------------------------------\n\n";
+
+                $customerMsg .= "Pesanan Anda akan segera kami proses. Mohon ditunggu ya 😊.";
+
+                WhatsAppService::sendMessage($user->phone_number, $customerMsg);
             }
 
             return response()->json(['message' => 'OK']);
@@ -52,10 +76,10 @@ class TransactionController extends Controller
         $pointsToAdd = floor($transaction->total_bill / 100000) * 10;
         $user->points += $pointsToAdd;
 
-        if($user->role == 'guest' && $user->points >= 10) {
+        if ($user->role == 'guest' && $user->points >= 10) {
             $user->role = 'member';
         }
-    
+
         $user->save();
     }
 
