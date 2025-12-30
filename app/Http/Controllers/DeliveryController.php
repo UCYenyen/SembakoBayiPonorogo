@@ -6,74 +6,79 @@ use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\Transaction;
 
 class DeliveryController extends Controller
 {
-    private $originLat = -7.8716564;
-    private $originLong = 111.4726568;
+    public function trackDelivery(Transaction $transaction)
+    {
+        $awb = $transaction->no_resi;
+        $courier = strtolower($transaction->delivery->courier_code ?? 'jne');
+
+        $fullPhone = optional($transaction->user)->phone ?? '';
+        $lastPhone = substr(preg_replace('/[^0-9]/', '', $fullPhone), -5);
+
+        $url = "https://rajaongkir.komerce.id/api/v1/track/waybill?awb={$awb}&courier={$courier}";
+
+        if ($courier === 'jne' && !empty($lastPhone)) {
+            $url .= "&last_phone_number={$lastPhone}";
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'key' => config('rajaongkir.api_key')
+            ])->post($url);
+
+            if ($response->successful()) {
+                $responseData = $response->json();
+
+                if (isset($responseData['meta']) && $responseData['meta']['status'] === 'error') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $responseData['meta']['message']
+                    ], 404);
+                }
+                // Jika status delivery == delivered, update status transaksi jadi done
+                if (
+                    isset($responseData['data']['summary']['status']) &&
+                    strtolower($responseData['data']['summary']['status']) === 'delivered'
+                ) {
+                    $transaction->status = 'delivered';
+                    $transaction->save();
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $responseData['data'] ?? []
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal terhubung ke server kurir'
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error tracking delivery: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem'
+            ], 500);
+        }
+    }
 
     public function checkOngkir(Request $request, Address $address)
     {
         try {
-            // Konversi gram ke kilogram (dibagi 1000)
-            // GoSend biasanya menerima angka desimal (misal 0.5 untuk 500gr)
             $weightInGram = (int) $request->input('weight', 1000);
-            $weightInKg = $weightInGram / 1000; 
-            
             $courier = $request->input('courier');
-            $itemValue = (int) $request->input('item_value', 50000);
 
-            if ($courier === 'gosend') {
-                // Pastikan alamat tujuan memiliki latitude dan longitude
-                if (!$address->latitude || !$address->longitude) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Koordinat alamat tujuan (Lat/Long) belum diatur.'
-                    ], 422);
-                }
-
-                $response = Http::withHeaders([
-                    'Accept'    => 'application/json',
-                    'x-api-key' => config('rajaongkir.api_shipping_delivery_key'), 
-                ])->get('https://api-sandbox.collaborator.komerce.id/tariff/api/v1/calculate', [
-                    'item_value'            => $itemValue, // Tidak di-hardcode lagi
-                    'origin_pin_point'      => "{$this->originLat},{$this->originLong}",
-                    'destination_pin_point' => "{$address->latitude},{$address->longitude}", // Diambil dari database
-                    'weight'                => $weightInKg, // Sudah dalam Kilogram
-                ]);
-
-                if ($response->failed()) {
-                    Log::error("Komerce Reject: " . $response->body());
-                    return response()->json([
-                        'success' => false, 
-                        'message' => 'Layanan GoSend gagal dimuat atau lokasi di luar jangkauan.'
-                    ], 422);
-                }
-
-                $res = $response->json();
-                $instantOptions = $res['data']['calculate_instant'] ?? [];
-                
-                $formattedData = [];
-                foreach ($instantOptions as $item) {
-                    $formattedData[] = [
-                        'courier' => 'GOSEND',
-                        'service' => $item['service_name'] ?? 'Instant',
-                        'cost'    => $item['shipping_cost'] ?? 0,
-                        'etd'     => $item['etd'] ?? '1-2 jam',
-                        'description' => 'Layanan Instant Gojek'
-                    ];
-                }
-                return response()->json(['success' => true, 'data' => $formattedData]);
-            }
-
-            // Logika JNE/JNT tetap pakai GRAM (RajaOngkir standar menggunakan Gram)
             $response = Http::asForm()->withHeaders([
                 'Accept' => 'application/json',
                 'key'    => config('rajaongkir.api_key'),
             ])->post('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', [
                 'origin'      => 40737,
                 'destination' => (int) $address->subdistrict_id,
-                'weight'      => $weightInGram, // Tetap Gram untuk JNE/JNT
+                'weight'      => $weightInGram,
                 'courier'     => $courier,
             ]);
 
@@ -81,15 +86,13 @@ class DeliveryController extends Controller
                 $shippingData = $response->json()['data'] ?? [];
                 $formattedData = [];
                 foreach ($shippingData as $option) {
-                    if (!str_contains(strtoupper($option['service'] ?? ''), 'JTR')) {
-                        $formattedData[] = [
-                            'courier' => strtoupper($courier),
-                            'service' => $option['service'] ?? '',
-                            'cost'    => $option['cost'] ?? 0,
-                            'etd'     => $option['etd'] ?? '-',
-                            'description' => $option['description'] ?? ''
-                        ];
-                    }
+                    $formattedData[] = [
+                        'courier' => strtoupper($courier),
+                        'service' => $option['service'] ?? '',
+                        'cost'    => $option['cost'] ?? 0,
+                        'etd'     => $option['etd'] ?? '-',
+                        'description' => $option['description'] ?? ''
+                    ];
                 }
                 return response()->json(['success' => true, 'data' => $formattedData]);
             }

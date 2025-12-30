@@ -20,7 +20,8 @@
                                 <h2 class="text-2xl font-bold">Transaksi #{{ $transaction->id }}</h2>
                                 <p class="text-gray-600">{{ $transaction->created_at->format('d F Y, H:i') }}</p>
                             </div>
-                            <span class="px-4 py-2 rounded-full text-sm font-semibold {{ $transaction->getStatusBadgeClass() }}">
+                            <span
+                                class="px-4 py-2 rounded-full text-sm font-semibold bg-[#dbdeff] text-black">
                                 {{ $transaction->getStatusLabel() }}
                             </span>
                         </div>
@@ -28,28 +29,40 @@
                         <div class="space-y-4">
                             <div class="flex gap-4">
                                 <div class="flex flex-col items-center">
-                                    <div class="w-10 h-10 rounded-full {{ $transaction->isPendingPayment() || $transaction->isPaid() || $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }} flex items-center justify-center text-white">
+                                    <div
+                                        class="w-10 h-10 rounded-full {{ $transaction->isPendingPayment() || $transaction->isPaid() || $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }} flex items-center justify-center text-white">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                        </svg>
+                                            <path fill-rule="evenodd"
+                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                clip-rule="evenodd"></path>
                                     </div>
-                                    <div class="w-0.5 h-12 {{ $transaction->isPaid() || $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }}"></div>
+                                    <div
+                                        class="w-0.5 h-12 {{ $transaction->isPaid() || $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }}">
+                                    </div>
                                 </div>
                                 <div class="flex-1 pb-4">
-                                    <h3 class="font-semibold">Memesan</h3>
-                                    <p class="text-sm text-gray-600">{{ $transaction->created_at->format('d M Y, H:i') }}</p>
+                                    <h3 class="font-semibold">Pesanan Dipesan</h3>
+                                    <p class="text-sm text-gray-600">{{ $transaction->created_at->format('d M Y, H:i') }}
+                                    </p>
                                 </div>
                             </div>
 
                             <div class="flex gap-4">
                                 <div class="flex flex-col items-center">
-                                    <div class="w-10 h-10 rounded-full {{ $transaction->isPaid() || $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }} flex items-center justify-center text-white">
+                                    <div
+                                        class="w-10 h-10 rounded-full {{ $transaction->isPaid() || $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }} flex items-center justify-center text-white">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
+                                            <path
+                                                d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z">
+                                            </path>
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
+                                                clip-rule="evenodd"></path>
                                         </svg>
                                     </div>
-                                    <div class="w-0.5 h-12 {{ $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }}"></div>
+                                    <div
+                                        class="w-0.5 h-12 {{ $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }}">
+                                    </div>
                                 </div>
                                 <div class="flex-1 pb-4">
                                     <h3 class="font-semibold">Pesanan Dibayar</h3>
@@ -61,13 +74,42 @@
 
                             <div class="flex gap-4">
                                 <div class="flex flex-col items-center">
-                                    <div class="w-10 h-10 rounded-full {{ $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }} flex items-center justify-center text-white">
+                                    <div
+                                        class="w-10 h-10 rounded-full {{ $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }} flex items-center justify-center text-white">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path>
-                                            <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"></path>
+                                            <path
+                                                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0    002-2V5a2 2 0 00-2-2H4zm12 2l.001 2H4V5h12zM4 15V8h12l.001 7H4z">
+                                            </path>
                                         </svg>
                                     </div>
-                                    <div class="w-0.5 h-12 {{ $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }}"></div>
+                                    <div
+                                        class="w-0.5 h-12 {{ $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }}">
+                                    </div>
+                                </div>
+                                <div class="flex-1 pb-4">
+                                    <h3 class="font-semibold">Pesanan Diproses</h3>
+                                    <p class="text-sm text-gray-600">
+                                        {{ $transaction->isProcessing() || $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? $transaction->updated_at->format('d M Y, H:i') : '-' }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="flex flex-col items-center">
+                                    <div
+                                        class="w-10 h-10 rounded-full {{ $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }} flex items-center justify-center text-white">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path
+                                                d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z">
+                                            </path>
+                                            <path
+                                                d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div
+                                        class="w-0.5 h-12 {{ $transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }}">
+                                    </div>
                                 </div>
                                 <div class="flex-1 pb-4">
                                     <h3 class="font-semibold">Pesanan Dikirim</h3>
@@ -75,7 +117,24 @@
                                         @if ($transaction->isShipped() || $transaction->isDelivered() || $transaction->isCompleted())
                                             {{ $transaction->updated_at->format('d M Y, H:i') }}
                                             @if ($transaction->no_resi)
-                                                <br>Resi: <span class="font-mono">{{ $transaction->no_resi }}</span>
+                                                <br>
+                                                <span class="flex items-center gap-2 mt-1">
+                                                    Resi: <span class="font-mono font-bold"
+                                                        id="resiText">{{ $transaction->no_resi }}</span>
+                                                    <button onclick="copyResi()"
+                                                        class="text-gray-500 hover:text-[#3F3142] transition-colors"
+                                                        title="Salin Resi">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
+                                                    <span id="copyMessage"
+                                                        class="text-[10px] text-green-600 hidden font-bold">Tersalin!</span>
+                                                </span>
                                             @endif
                                         @else
                                             -
@@ -86,9 +145,38 @@
 
                             <div class="flex gap-4">
                                 <div class="flex flex-col items-center">
-                                    <div class="w-10 h-10 rounded-full {{ $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }} flex items-center justify-center text-white">
+                                    <div
+                                        class="w-10 h-10 rounded-full {{ $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }} flex items-center justify-center text-white">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            <path
+                                                d="M3 3a1 1 0 000 2h1.22l1.607 6.427-1.528 2.307A2 2 0 004.61 15h10.78a2 2 0 001.711-3.266l-1.528-2.307L15.78 5H17a1 1 0 100-2H3zm3.14 4l1.25 5h7.22l1.25-5H6.14zM5 16a2 2 0 104 0H5zm8 0a2 2 0 104 0h-4z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div
+                                        class="w-0.5 h-12 {{ $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }}">
+                                    </div>
+                                </div>
+                                <div class="flex-1 pb-4">
+                                    <h3 class="font-semibold">Pesanan Diterima</h3>
+                                    <p class="text-sm text-gray-600">
+                                        @if ($transaction->isDelivered() || $transaction->isCompleted())
+                                            {{ $transaction->updated_at->format('d M Y, H:i') }}
+                                        @else
+                                            -
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="flex flex-col items-center">
+                                    <div
+                                        class="w-10 h-10 rounded-full {{ $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }} flex items-center justify-center text-white">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                clip-rule="evenodd"></path>
                                         </svg>
                                     </div>
                                 </div>
@@ -107,7 +195,8 @@
                         <div class="space-y-4">
                             @foreach ($transaction->transaction_items as $item)
                                 <div class="flex gap-4 pb-4 border-b last:border-b-0">
-                                    <img src="{{ asset('storage/' . $item->product->image_url) }}" alt="{{ $item->product->name }}" class="w-24 h-24 object-cover rounded-lg">
+                                    <img src="{{ asset('storage/' . $item->product->image_url) }}"
+                                        alt="{{ $item->product->name }}" class="w-24 h-24 object-cover rounded-lg">
                                     <div class="flex-1">
                                         <h4 class="font-semibold text-lg mb-1">{{ $item->product->name }}</h4>
                                         <p class="text-sm text-gray-600 mb-2">{{ $item->product->category->name }}</p>
@@ -169,11 +258,13 @@
                         <div class="space-y-3 mb-6">
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Subtotal</span>
-                                <span class="font-semibold">Rp{{ number_format($transaction->subtotal, 0, ',', '.') }}</span>
+                                <span
+                                    class="font-semibold">Rp{{ number_format($transaction->subtotal, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Ongkos Kirim</span>
-                                <span class="font-semibold">Rp{{ number_format($transaction->delivery_price, 0, ',', '.') }}</span>
+                                <span
+                                    class="font-semibold">Rp{{ number_format($transaction->delivery_price, 0, ',', '.') }}</span>
                             </div>
                         </div>
 
@@ -185,43 +276,70 @@
                                 </span>
                             </div>
                         </div>
+                        @if ($transaction->isPendingPayment())
+                            <button id="pay-now-btn"
+                                class="w-full bg-[#3F3142] text-white py-3 rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors">
+                                Bayar Sekarang
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
     <script>
         document.getElementById('pay-now-btn')?.addEventListener('click', function() {
             this.disabled = true;
             const btn = this;
             fetch('{{ route('payment.retry', $transaction) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.snap_token) {
-                    window.snap.pay(data.snap_token, {
-                        onSuccess: (result) => window.location.href = `/payment/finish/{{ $transaction->id }}`,
-                        onPending: (result) => window.location.href = `/payment/unfinish/{{ $transaction->id }}`,
-                        onError: () => { alert('Pembayaran gagal'); btn.disabled = false; },
-                        onClose: () => { btn.disabled = false; }
-                    });
-                } else {
-                    alert(data.error || 'Terjadi kesalahan');
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.snap_token) {
+                        window.snap.pay(data.snap_token, {
+                            onSuccess: (result) => window.location.href =
+                                `/payment/finish/{{ $transaction->id }}`,
+                            onPending: (result) => window.location.href =
+                                `/dashboard/user/transactions/{{ $transaction->id }}`,
+                            onError: () => {
+                                alert('Pembayaran gagal');
+                                btn.disabled = false;
+                            },
+                            onClose: () => {
+                                btn.disabled = false;
+                            }
+                        });
+                    } else {
+                        alert(data.error || 'Terjadi kesalahan');
+                        btn.disabled = false;
+                    }
+                })
+                .catch(() => {
+                    alert('Kesalahan sistem');
                     btn.disabled = false;
-                }
-            })
-            .catch(() => {
-                alert('Kesalahan sistem');
-                btn.disabled = false;
-            });
+                });
         });
+
+
+        function copyResi() {
+            const resi = document.getElementById('resiText').innerText;
+            const msg = document.getElementById('copyMessage');
+
+            navigator.clipboard.writeText(resi).then(() => {
+                msg.classList.remove('hidden');
+                setTimeout(() => {
+                    msg.classList.add('hidden');
+                }, 2000);
+            }).catch(err => {
+                console.error('Gagal menyalin: ', err);
+            });
+        }
     </script>
 @endsection

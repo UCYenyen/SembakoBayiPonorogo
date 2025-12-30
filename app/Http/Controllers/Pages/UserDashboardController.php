@@ -34,6 +34,7 @@ class UserDashboardController extends Controller
             'paid' => Transaction::where('user_id', $user->id)->where('status', Transaction::STATUS_PAID)->count(),
             'processing' => Transaction::where('user_id', $user->id)->where('status', Transaction::STATUS_PROCESSING)->count(),
             'shipped' => Transaction::where('user_id', $user->id)->where('status', Transaction::STATUS_SHIPPED)->count(),
+            'delivered' => Transaction::where('user_id', $user->id)->where('status', Transaction::STATUS_DELIVERED)->count(),
             'completed' => Transaction::where('user_id', $user->id)->whereIn('status', [Transaction::STATUS_DELIVERED, Transaction::STATUS_COMPLETED])->count(),
         ];
 

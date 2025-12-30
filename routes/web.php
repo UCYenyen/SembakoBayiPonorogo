@@ -25,9 +25,8 @@ Route::get('/api/products/search', [ProductController::class, 'liveSearch'])->na
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/products/{product}', [ProductController::class, 'showDetails'])->name('product.show');
-Route::post('/webhook/midtrans', [TransactionController::class, 'midtransNotification'])
-    ->withoutMiddleware(['web', 'auth'])
-    ->name('webhook.midtrans');
+Route::post('/webhook/midtrans', [TransactionController::class, 'midtransNotification']);
+Route::put('/webhook/shipping', [DeliveryController::class, 'handleWebhook']);
 
 
 Route::middleware('auth')->group(function () {
@@ -64,6 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/payment/check-status', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
 
     Route::get('/check-ongkir/{address}', [DeliveryController::class, 'checkOngkir']);
+    Route::post('/track-delivery/{transaction}', [DeliveryController::class, 'trackDelivery'])->name('track.package');
 
     Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/dashboard/admin/products', [AdminController::class, 'products'])->name('admin.products');
@@ -87,8 +87,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/dashboard/admin/vouchers/{baseVoucher}', [VoucherController::class, 'destroy'])->name('admin.vouchers.delete');
 
     Route::get('/dashboard/admin/transactions', [AdminController::class, 'transactions'])->name('admin.transactions.index');
-    Route::get('/dashboard/admin/transactions/{transaction}', [AdminController::class, 'showTransaction'])->name('admin.transactions.show');
-    Route::patch('/dashboard/admin/transactions/{transaction}/edit', [AdminController::class, 'updateTransactionStatus'])->name('admin.transactions.update-status');
+    Route::get('/dashboard/admin/transactions/{transaction}/detail', [AdminController::class, 'showTransaction'])->name('admin.transactions.detail');
+    Route::get('/dashboard/admin/transactions/{transaction}/edit', [AdminController::class, 'editTransaction'])
+        ->name('admin.transactions.edit');
+    Route::patch('/dashboard/admin/transactions/{transaction}/update', [AdminController::class, 'updateTransactionStatus'])
+        ->name('admin.transactions.update-status');
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

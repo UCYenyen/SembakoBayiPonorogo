@@ -9,7 +9,6 @@ use App\Models\ShoppingCart;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
 use App\Models\Address;
-use App\Models\Delivery;
 use App\Models\ShoppingCartItem;
 use Midtrans\Config;
 use Midtrans\Snap;
@@ -52,37 +51,30 @@ class PaymentController extends Controller
 
     public function processPayment(Request $request)
     {
-        $request->validate([
-            'address_id' => 'required|exists:addresses,id',
-            'delivery_price' => 'required|numeric|min:0',
-            'courier' => 'required|string'
-        ]);
-
         $cart = ShoppingCart::where('user_id', Auth::id())
             ->where('status', 'active')
             ->with(['items.product'])
             ->first();
 
         if (!$cart || $cart->items->isEmpty()) {
-            return response()->json(['error' => 'Your cart is empty'], 400);
+            return response()->json(['error' => 'Cart empty'], 400);
         }
 
-        $delivery = Delivery::where('courier_code', $request->courier)->first();
-
-        $subtotal = $cart->items->sum(fn($item) => $item->product->price * $item->quantity);
-        $deliveryPrice = (int) $request->delivery_price;
-        $totalPrice = (int) ($subtotal + $deliveryPrice);
+        $subtotal = $cart->items->sum(fn($i) => $i->product->price * $i->quantity);
+        $totalPrice = (int) ($subtotal + $request->delivery_price);
 
         $transaction = Transaction::create([
             'user_id' => Auth::id(),
             'address_id' => $request->address_id,
             'shopping_cart_id' => $cart->id,
-            'delivery_id' => $delivery->id,
+            'delivery_id' => $request->delivery_id ?? 1,
             'payment_method' => 'Pending',
-            'delivery_price' => $deliveryPrice,
+            'delivery_price' => $request->delivery_price,
             'total_price' => $totalPrice,
             'status' => Transaction::STATUS_PENDING_PAYMENT,
         ]);
+
+        $transaction->refresh();
 
         foreach ($cart->items as $item) {
             TransactionItem::create([
@@ -93,83 +85,18 @@ class PaymentController extends Controller
             ]);
         }
 
-        $item_details = $cart->items->map(function ($item) {
-            return [
-                'id' => 'PRD-' . $item->product_id,
-                'price' => (int) $item->product->price,
-                'quantity' => (int) $item->quantity,
-                'name' => substr($item->product->name, 0, 50),
-            ];
-        })->toArray();
-
-        $item_details[] = [
-            'id' => 'SHIPPING',
-            'price' => $deliveryPrice,
-            'quantity' => 1,
-            'name' => 'Ongkos Kirim'
-        ];
-
-        $params = [
-            'transaction_details' => [
-                'order_id' => 'ORDER-' . $transaction->id,
-                'gross_amount' => $totalPrice,
-            ],
-            'customer_details' => [
-                'first_name' => Auth::user()->name,
-                'email' => Auth::user()->email,
-                'phone' => Auth::user()->phone_number ?? '08123456789',
-            ],
-            'item_details' => $item_details,
-        ];
-
-        try {
-            $snapToken = Snap::getSnapToken($params);
-            $transaction->update(['snap_token' => $snapToken]);
-            $cart->update(['status' => ShoppingCart::STATUS_CHECKED_OUT]);
-
-            return response()->json([
-                'snap_token' => $snapToken,
-                'transaction_id' => $transaction->id
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Midtrans Snap Error: ' . $e->getMessage());
-            $transaction->update(['status' => Transaction::STATUS_FAILED]);
-            return response()->json(['error' => 'Payment processing failed'], 500);
-        }
+        return $this->generateSnapToken($transaction);
     }
 
     public function finish(Transaction $transaction)
     {
-        if ($transaction->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        try {
-            $midtransStatus = \Midtrans\Transaction::status('ORDER-' . $transaction->id);
-
-            if ($midtransStatus) {
-                $paymentType = $midtransStatus->payment_type ?? null;
-                $transactionStatus = $midtransStatus->transaction_status ?? null;
-                $paymentMethod = $this->formatPaymentMethod($paymentType);
-
-                if ($transactionStatus === 'capture' || $transactionStatus === 'settlement') {
-                    $transaction->update([
-                        'status' => Transaction::STATUS_PAID,
-                        'payment_method' => $paymentMethod
-                    ]);
-                }
-            }
-        } catch (\Exception $e) {
-            Log::warning('Midtrans status check error: ' . $e->getMessage());
-        }
-
         if ($transaction->shopping_cart_id) {
             ShoppingCartItem::where('shopping_cart_id', $transaction->shopping_cart_id)->delete();
             $transaction->shopping_cart->update(['status' => ShoppingCart::STATUS_ORDERED]);
         }
 
         return view('shop.payment.finish', [
-            'transaction' => $transaction->load(['transaction_items.product', 'delivery'])
+            'transaction' => $transaction->load(['transaction_items.product', 'delivery', 'address'])
         ]);
     }
 
@@ -183,81 +110,48 @@ class PaymentController extends Controller
 
     public function retryPayment(Transaction $transaction)
     {
-        if ($transaction->user_id !== Auth::id()) {
-            abort(403);
+        if ($transaction->user_id !== Auth::id()) abort(403);
+
+        // Jika snap_token sudah ada dan status masih pending_payment, pakai token lama
+        if ($transaction->snap_token && $transaction->status === Transaction::STATUS_PENDING_PAYMENT) {
+            return response()->json([
+                'snap_token' => $transaction->snap_token,
+                'transaction_id' => $transaction->id
+            ]);
         }
 
-        if (!$transaction->snap_token) {
-            return $this->generateSnapToken($transaction);
-        }
-
-        return response()->json([
-            'snap_token' => $transaction->snap_token,
-            'transaction_id' => $transaction->id
-        ]);
+        // Jika belum ada snap_token, generate baru
+        return $this->generateSnapToken($transaction);
     }
-
     private function generateSnapToken(Transaction $transaction)
     {
-        $transaction->load(['transaction_items.product']);
-        $subtotal = $transaction->transaction_items->sum(fn($item) => $item->price * $item->quantity);
-        $totalPrice = (int) ($subtotal + $transaction->delivery_price);
-
-        $item_details = $transaction->transaction_items->map(function ($item) {
-            return [
-                'id' => 'PRD-' . $item->product_id,
-                'price' => (int) $item->price,
-                'quantity' => (int) $item->quantity,
-                'name' => substr($item->product->name, 0, 50),
-            ];
-        })->toArray();
-
-        $item_details[] = [
-            'id' => 'SHIPPING',
-            'price' => (int) $transaction->delivery_price,
-            'quantity' => 1,
-            'name' => 'Ongkos Kirim'
-        ];
-
         $params = [
             'transaction_details' => [
-                'order_id' => 'ORDER-' . $transaction->id,
-                'gross_amount' => $totalPrice,
+                'order_id' => $transaction->order_id,
+                'gross_amount' => (int) $transaction->total_price,
             ],
             'customer_details' => [
                 'first_name' => Auth::user()->name,
                 'email' => Auth::user()->email,
-                'phone' => Auth::user()->phone_number ?? '08123456789',
+                'phone' => ltrim(Auth::user()->phone_number ?? '81234567890', '0+62'),
             ],
-            'item_details' => $item_details,
         ];
 
         try {
             $snapToken = Snap::getSnapToken($params);
             $transaction->update(['snap_token' => $snapToken]);
-            return response()->json(['snap_token' => $snapToken, 'transaction_id' => $transaction->id]);
+
+            if ($transaction->shopping_cart_id) {
+                ShoppingCart::find($transaction->shopping_cart_id)->update(['status' => ShoppingCart::STATUS_CHECKED_OUT]);
+            }
+
+            return response()->json([
+                'snap_token' => $snapToken,
+                'transaction_id' => $transaction->id
+            ]);
         } catch (\Exception $e) {
             Log::error('Midtrans Snap Error: ' . $e->getMessage());
-            return response()->json(['error' => 'Payment processing failed'], 500);
+            return response()->json(['error' => 'Payment failed'], 500);
         }
-    }
-
-    private function formatPaymentMethod($paymentType): string
-    {
-        $paymentMethods = [
-            'credit_card' => 'Kartu Kredit',
-            'bank_transfer' => 'Transfer Bank',
-            'bca_va' => 'BCA Virtual Account',
-            'bni_va' => 'BNI Virtual Account',
-            'bri_va' => 'BRI Virtual Account',
-            'permata_va' => 'Permata Virtual Account',
-            'echannel' => 'Mandiri Bill Payment',
-            'gopay' => 'GoPay',
-            'shopeepay' => 'ShopeePay',
-            'qris' => 'QRIS',
-            'akulaku' => 'Akulaku',
-        ];
-
-        return $paymentMethods[strtolower($paymentType)] ?? ucfirst(str_replace('_', ' ', (string) $paymentType));
     }
 }

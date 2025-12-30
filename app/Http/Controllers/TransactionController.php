@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\Auth;
 use Midtrans\Config;
 use Illuminate\Support\Facades\Log;
 
@@ -21,48 +22,57 @@ class TransactionController extends Controller
     {
         try {
             $orderId = $request->input('order_id');
-            $statusResponse = \Midtrans\Transaction::status($orderId);
-            $status = is_array($statusResponse) ? (object) $statusResponse : $statusResponse;
+            $transactionStatus = $request->input('transaction_status');
+            $paymentType = $request->input('payment_type');
 
-            if (preg_match('/ORDER-(\d+)/', $orderId, $matches)) {
-                $transactionId = $matches[1];
-                $transaction = Transaction::find($transactionId);
+            $transaction = Transaction::where('order_id', $orderId)->first();
 
-                if (!$transaction) {
-                    return response()->json(['message' => 'Not Found'], 404);
-                }
-
-                $transactionStatus = $status->transaction_status;
-                $paymentType = $status->payment_type;
-                $paymentMethod = $this->formatPaymentMethod($paymentType);
-
-                if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
-                    $newStatus = Transaction::STATUS_PAID;
-                } elseif ($transactionStatus == 'pending') {
-                    $newStatus = Transaction::STATUS_PENDING_PAYMENT;
-                } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
-                    $newStatus = Transaction::STATUS_CANCELLED;
-                } else {
-                    $newStatus = $transaction->status;
-                }
-
-                $transaction->update([
-                    'status' => $newStatus,
-                    'payment_method' => $paymentMethod
-                ]);
-
-                return response()->json(['message' => 'OK']);
+            if (!$transaction) {
+                return response()->json(['message' => 'Not Found'], 404);
             }
-            return response()->json(['message' => 'Invalid ID'], 400);
+
+            if ($transactionStatus == 'settlement' || $transactionStatus == 'capture') {
+                $transaction->update([
+                    'status' => Transaction::STATUS_PAID,
+                    'payment_method' => $this->formatPaymentMethod($paymentType)
+                ]);
+                $this->updateUserPoints($transaction);
+            }
+
+            return response()->json(['message' => 'OK']);
         } catch (\Exception $e) {
             Log::error('Webhook Error: ' . $e->getMessage());
             return response()->json(['message' => 'Error'], 500);
         }
     }
 
+    public function updateUserPoints(Transaction $transaction)
+    {
+        $user = $transaction->user;
+        $pointsToAdd = floor($transaction->total_bill / 100000) * 10;
+        $user->points += $pointsToAdd;
+
+        if($user->role == 'guest' && $user->points >= 10) {
+            $user->role = 'member';
+        }
+    
+        $user->save();
+    }
+
+    public function complete(Transaction $transaction)
+    {
+        if ($transaction->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $transaction->update(['status' => Transaction::STATUS_COMPLETED]);
+
+        return back()->with('success', 'Pesanan telah selesai.');
+    }
+
     private function formatPaymentMethod($paymentType): string
     {
-        $paymentMethods = [
+        $methods = [
             'credit_card' => 'Kartu Kredit',
             'bank_transfer' => 'Transfer Bank',
             'bca_va' => 'BCA Virtual Account',
@@ -72,6 +82,6 @@ class TransactionController extends Controller
             'shopeepay' => 'ShopeePay',
             'qris' => 'QRIS'
         ];
-        return $paymentMethods[strtolower($paymentType)] ?? ucfirst(str_replace('_', ' ', (string) $paymentType));
+        return $methods[strtolower($paymentType)] ?? ucfirst(str_replace('_', ' ', (string) $paymentType));
     }
 }

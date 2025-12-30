@@ -25,7 +25,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Status:</span>
-                            <span class="px-3 py-1 rounded-full text-sm font-semibold {{ $transaction->getStatusBadgeClass() }}">
+                            <span class="px-3 py-1 rounded-full text-sm font-semibold bg-[#dbdeff] text-black">
                                 {{ $transaction->getStatusLabel() }}
                             </span>
                         </div>

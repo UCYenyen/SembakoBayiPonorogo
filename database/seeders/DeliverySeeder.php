@@ -10,13 +10,13 @@ class DeliverySeeder extends Seeder
     public function run(): void
     {
         $deliveries = [
-            ['name' => 'jne', 'courier_code' => 'jne'],
-            ['name' => 'jnt',  'coruier_code => jnt'],
-            ['name' => 'gosend', 'courier_code => gosend'],
+            ['name' => 'JNE', 'courier_code' => 'jne'],
+            ['name' => 'J&T', 'courier_code' => 'jnt'],
+            ['name' => 'GoSend', 'courier_code' => 'gosend'],
         ];
 
         foreach ($deliveries as $delivery) {
-            Delivery::firstOrCreate($delivery);
+            Delivery::create($delivery);
         }
     }
 }

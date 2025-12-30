@@ -80,11 +80,11 @@
                                         onchange="loadShippingOptions()">
                                     <span class="ml-2 text-sm font-medium text-gray-900">J&T</span>
                                 </label>
-                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                {{-- <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                                     <input type="radio" name="courier_brand" value="gosend" class="h-4 w-4 text-[#3F3142]"
                                         onchange="loadShippingOptions()">
                                     <span class="ml-2 text-sm font-medium text-gray-900">GOSEND</span>
-                                </label>
+                                </label> --}}
                             </div>
                         </div>
 
@@ -145,8 +145,6 @@
         </div>
     </main>
 
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}">
-    </script>
     <script>
         const subtotal = {{ $subtotal }};
         const totalWeight = {{ $cart->items->sum(fn($item) => ($item->product->weight ?? 0) * $item->quantity) }};
@@ -179,20 +177,20 @@
                         result.data.forEach(option => {
                             let costValue = parseInt(option.cost);
                             html += `
-        <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 mb-3 border-gray-200">
-            <input type="radio" name="shipping_option" value="${costValue}" 
-                onchange="updateShippingCost(${costValue}, '${option.service}')" class="w-4 h-4">
-            <div class="flex-1">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="font-bold text-gray-800 text-sm uppercase">${option.courier} ${option.service}</p>
-                        <p class="text-xs text-gray-500">${option.description}</p>
-                        <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-1 rounded">Estimasi: ${option.etd}</span>
-                    </div>
-                    <span class="font-bold text-base text-[#3F3142]">Rp${formatNumber(costValue)}</span>
-                </div>
-            </div>
-        </label>`;
+                            <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 mb-3 border-gray-200">
+                                <input type="radio" name="shipping_option" value="${costValue}" 
+                                    onchange="updateShippingCost(${costValue}, '${option.service}')" class="w-4 h-4">
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="font-bold text-gray-800 text-sm uppercase">${option.courier} ${option.service}</p>
+                                            <p class="text-xs text-gray-500">${option.description}</p>
+                                            <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-1 rounded">Estimasi: ${option.etd}</span>
+                                        </div>
+                                        <span class="font-bold text-base text-[#3F3142]">Rp${formatNumber(costValue)}</span>
+                                    </div>
+                                </div>
+                            </label>`;
                         });
                         container.innerHTML = html;
                     } else {

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -14,6 +15,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->string('no_resi')->nullable();
+            $table->string('order_id')->unique()->default(DB::raw('(UUID())'));
             $table->string('payment_method')->nullable();
             $table->string('snap_token')->nullable();
             $table->bigInteger('delivery_price')->default(0);

@@ -52,7 +52,7 @@
                                         <p class="font-semibold">{{ $transaction->created_at->format('d M Y') }}</p>
                                     </div>
                                 </div>
-                                <span class="px-4 py-2 rounded-full text-sm font-semibold {{ $transaction->getStatusBadgeClass() }}">
+                                <span class="px-4 py-2 rounded-full text-sm font-semibold bg-[#e8bec4] text-black">
                                     {{ $transaction->getStatusLabel() }}
                                 </span>
                             </div>

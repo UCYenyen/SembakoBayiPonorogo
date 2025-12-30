@@ -72,7 +72,7 @@
                                         </p>
                                     </div>
                                 </div>
-                                <span class="px-4 py-2 rounded-full text-sm font-semibold {{ $transaction->getStatusBadgeClass() }}">
+                                <span class="px-4 py-2 rounded-full text-sm font-semibold bg-[#dbdeff] text-black">
                                     {{ $transaction->getStatusLabel() }}
                                 </span>
                             </div>
@@ -97,7 +97,7 @@
 
                             <!-- Action Buttons -->
                             <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t">
-                                <a href="{{ route('admin.transactions.show', $transaction) }}" 
+                                <a href="{{ route('admin.transactions.detail', $transaction) }}" 
                                    class="px-6 py-2 border-2 border-[#3F3142] text-[#3F3142] rounded-lg font-semibold hover:bg-[#3F3142] hover:text-white transition-colors">
                                     View Detail
                                 </a>

@@ -12,7 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
-            'payment/webhook',
+            'webhook/midtrans',
+            'webhook/shipping'
         ]);
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminPageGuard::class,
