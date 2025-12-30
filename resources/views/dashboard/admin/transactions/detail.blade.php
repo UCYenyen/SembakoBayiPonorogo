@@ -2,23 +2,26 @@
 @section('title', 'Transaction Detail')
 @section('content')
     <main class="bg-[#FFF3F3] text-[#3F3142] min-h-screen py-8">
-        <div class="w-[90%] lg:w-[80%] mx-auto">
-            <div class="flex justify-between items-center mb-6">
-                <a href="{{ route('admin.transactions.index') }}" 
-                   class="inline-flex items-center gap-2 text-[#3F3142] hover:underline">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                    Back to Transactions
-                </a>
-            
-                <a href="{{ route('admin.transactions.edit', $transaction) }}" 
-                   class="bg-[#3F3142] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors">
+        <div class="w-[80%] mx-auto">
+            <div class="flex justify-between items-center mb-6 bg-white shadow-lg rounded-lg px-6 py-4">
+                <div class="flex gap-4 justify-center items-center">
+                    <a href="{{ route('admin.transactions.index') }}"
+                        class="text-white bg-[#3F3142] hover:bg-[#5C4B5E] transition-colors rounded-full p-2 hover:underline">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                            </path>
+                        </svg>
+                    </a>
+                    <h1 class="text-4xl font-bold">Transaction Detail #{{ $transaction->id }}</h1>
+                </div>
+
+                <a href="{{ route('admin.transactions.edit', $transaction) }}"
+                    class="bg-[#3F3142] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors">
                     Edit
                 </a>
             </div>
 
-            <h1 class="text-4xl font-bold mb-8">Transaction Detail #{{ $transaction->id }}</h1>
+
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="lg:col-span-2 space-y-6">
@@ -35,7 +38,21 @@
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Telepon</span>
-                                <span class="font-semibold">{{ $transaction->user->phone_number ?? '-' }}</span>
+                                <span class="font-semibold">+{{ $transaction->user->phone_number ?? '-' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Alamat</span>
+                                <span class="font-semibold">
+                                    {{ $transaction->address->subdistrict_name }}, {{ $transaction->address->city_name }}
+                                    {{ $transaction->address->province_name }},
+                                    {{ $transaction->address->postal_code }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Detail Alamat</span>
+                                <span class="font-semibold">
+                                    {{ $transaction->address->extra_detail }}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -44,11 +61,10 @@
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-2xl font-bold mb-6">Pesanan</h2>
                         <div class="space-y-4">
-                            @foreach($transaction->transaction_items as $item)
+                            @foreach ($transaction->transaction_items as $item)
                                 <div class="flex gap-4 pb-4 border-b last:border-b-0">
-                                    <img src="{{ asset('storage/' . $item->product->image_url) }}" 
-                                         alt="{{ $item->product->name }}"
-                                         class="w-24 h-24 object-cover rounded-lg">
+                                    <img src="{{ asset('storage/' . $item->product->image_url) }}"
+                                        alt="{{ $item->product->name }}" class="w-24 h-24 object-cover rounded-lg">
                                     <div class="flex-1">
                                         <h4 class="font-semibold text-lg mb-1">{{ $item->product->name }}</h4>
                                         <div class="flex justify-between items-center">
@@ -61,17 +77,6 @@
                                 </div>
                             @endforeach
                         </div>
-                    </div>
-
-                    {{-- Shipping Address --}}
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-2xl font-bold mb-4">Alamat Pengiriman</h2>
-                        <p class="text-gray-700 leading-relaxed">
-                            <span class="font-bold">{{ $transaction->address->name }}</span><br>
-                            {{ $transaction->address->extra_detail }}<br>
-                            {{ $transaction->address->subdistrict_name }}, {{ $transaction->address->city_name }}<br>
-                            {{ $transaction->address->province_name }}, {{ $transaction->address->postal_code }}
-                        </p>
                     </div>
                 </div>
 
@@ -94,24 +99,27 @@
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Kurir</span>
-                                <span class="font-semibold uppercase">{{ $transaction->delivery->courier_code }} - {{ $transaction->delivery->name }}</span>
+                                <span class="font-semibold uppercase">{{ $transaction->delivery->courier_code }} -
+                                    {{ $transaction->delivery->name }}</span>
                             </div>
-                            @if($transaction->no_resi)
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Tracking #</span>
-                                <span class="font-mono font-bold text-blue-600">{{ $transaction->no_resi }}</span>
-                            </div>
+                            @if ($transaction->no_resi)
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Tracking #</span>
+                                    <span class="font-mono font-bold text-blue-600">{{ $transaction->no_resi }}</span>
+                                </div>
                             @endif
                         </div>
 
                         <div class="mt-6 pt-6 border-t space-y-3">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Subtotal</span>
-                                <span class="font-semibold">Rp{{ number_format($transaction->total_price, 0, ',', '.') }}</span>
+                                <span
+                                    class="font-semibold">Rp{{ number_format($transaction->total_price, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Ongkos Kirim</span>
-                                <span class="font-semibold">Rp{{ number_format($transaction->delivery_price, 0, ',', '.') }}</span>
+                                <span
+                                    class="font-semibold">Rp{{ number_format($transaction->delivery_price, 0, ',', '.') }}</span>
                             </div>
                         </div>
 

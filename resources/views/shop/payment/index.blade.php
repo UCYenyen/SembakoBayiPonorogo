@@ -150,6 +150,13 @@
         const totalWeight = {{ $cart->items->sum(fn($item) => ($item->product->weight ?? 0) * $item->quantity) }};
         let selectedShippingCost = 0;
 
+        // Mapping courier ke delivery_id sesuai database
+        const courierToDeliveryId = {
+            'jne': 1,
+            'jnt': 2,
+            'gosend': 3
+        };
+
         function formatNumber(num) {
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
@@ -177,20 +184,21 @@
                         result.data.forEach(option => {
                             let costValue = parseInt(option.cost);
                             html += `
-                            <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 mb-3 border-gray-200">
-                                <input type="radio" name="shipping_option" value="${costValue}" 
-                                    onchange="updateShippingCost(${costValue}, '${option.service}')" class="w-4 h-4">
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <p class="font-bold text-gray-800 text-sm uppercase">${option.courier} ${option.service}</p>
-                                            <p class="text-xs text-gray-500">${option.description}</p>
-                                            <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-1 rounded">Estimasi: ${option.etd}</span>
-                                        </div>
-                                        <span class="font-bold text-base text-[#3F3142]">Rp${formatNumber(costValue)}</span>
+                        <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 mb-3 border-gray-200">
+                            <input type="radio" name="shipping_option" value="${costValue}" 
+                                data-courier="${courier}"
+                                onchange="updateShippingCost(${costValue}, '${option.service}', '${courier}')" class="w-4 h-4">
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-bold text-gray-800 text-sm uppercase">${option.courier} ${option.service}</p>
+                                        <p class="text-xs text-gray-500">${option.description}</p>
+                                        <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-1 rounded">Estimasi: ${option.etd}</span>
                                     </div>
+                                    <span class="font-bold text-base text-[#3F3142]">Rp${formatNumber(costValue)}</span>
                                 </div>
-                            </label>`;
+                            </div>
+                        </label>`;
                         });
                         container.innerHTML = html;
                     } else {
@@ -203,11 +211,17 @@
                 });
         }
 
-        function updateShippingCost(cost, service) {
+        function updateShippingCost(cost, service, courier) {
             selectedShippingCost = parseInt(cost);
-            document.getElementById('delivery_price').value = selectedShippingCost;
-            document.getElementById('delivery_id').value = 1;
 
+            // Set delivery_price
+            document.getElementById('delivery_price').value = selectedShippingCost;
+
+            // Set delivery_id berdasarkan courier yang dipilih
+            const deliveryId = courierToDeliveryId[courier] || 1; // default ke 1 jika tidak ada mapping
+            document.getElementById('delivery_id').value = deliveryId;
+
+            // Update tampilan
             document.getElementById('shipping-cost-display').textContent = 'Rp' + formatNumber(selectedShippingCost);
 
             const grandTotal = subtotal + selectedShippingCost;
@@ -224,6 +238,9 @@
                 return;
             }
 
+            // Ambil delivery_id dari hidden input yang sudah di-set oleh updateShippingCost
+            const deliveryId = document.getElementById('delivery_id').value;
+
             this.disabled = true;
 
             fetch('{{ route('payment.process') }}', {
@@ -235,6 +252,7 @@
                     },
                     body: JSON.stringify({
                         address_id: selectedAddress.value,
+                        delivery_id: deliveryId, // Kirim delivery_id yang sudah sesuai
                         delivery_price: selectedShippingCost,
                         courier: selectedCourier.value
                     })

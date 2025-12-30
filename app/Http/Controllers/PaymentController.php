@@ -51,6 +51,13 @@ class PaymentController extends Controller
 
     public function processPayment(Request $request)
     {
+        $validated = $request->validate([
+            'address_id' => 'required|exists:addresses,id',
+            'delivery_id' => 'required|exists:deliveries,id',
+            'delivery_price' => 'required|numeric|min:0',
+            'courier' => 'required|string|in:jne,jnt,gosend'
+        ]);
+
         $cart = ShoppingCart::where('user_id', Auth::id())
             ->where('status', 'active')
             ->with(['items.product'])
@@ -67,7 +74,7 @@ class PaymentController extends Controller
             'user_id' => Auth::id(),
             'address_id' => $request->address_id,
             'shopping_cart_id' => $cart->id,
-            'delivery_id' => $request->delivery_id ?? 1,
+            'delivery_id' => $request->delivery_id,
             'payment_method' => 'Pending',
             'delivery_price' => $request->delivery_price,
             'total_price' => $totalPrice,
@@ -112,15 +119,13 @@ class PaymentController extends Controller
     {
         if ($transaction->user_id !== Auth::id()) abort(403);
 
-        // Jika snap_token sudah ada dan status masih pending_payment, pakai token lama
         if ($transaction->snap_token && $transaction->status === Transaction::STATUS_PENDING_PAYMENT) {
             return response()->json([
                 'snap_token' => $transaction->snap_token,
                 'transaction_id' => $transaction->id
             ]);
         }
-
-        // Jika belum ada snap_token, generate baru
+        
         return $this->generateSnapToken($transaction);
     }
     private function generateSnapToken(Transaction $transaction)
