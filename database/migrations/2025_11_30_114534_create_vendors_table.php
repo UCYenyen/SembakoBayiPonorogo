@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('vendors', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('phone_number');
+            $table->string('phone_number')->nullable();
+            $table->enum('type', ['online', 'offline'])->nullable();
+            $table->string('link')->nullable();
             $table->timestamps();
         });
     }

@@ -303,7 +303,6 @@
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-    // Load default shipping options on page load
     document.addEventListener('DOMContentLoaded', function() {
         const defaultAddress = document.querySelector('.address-radio:checked');
         if (defaultAddress) {

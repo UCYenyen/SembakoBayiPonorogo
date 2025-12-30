@@ -12,5 +12,7 @@ class Vendor extends Model
     protected $fillable = [
         'name',
         'phone_number',
+        'type',
+        'link',
     ];
 }

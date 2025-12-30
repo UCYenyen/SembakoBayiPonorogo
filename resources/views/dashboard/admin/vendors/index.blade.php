@@ -9,7 +9,7 @@
                     <h1 class="text-3xl font-bold">Vendor Management</h1>
                     <a href="{{ route('admin.vendors.create') }}"
                         class="bg-[#3F3142] w-full sm:w-fit text-white px-6 py-3 rounded-lg hover:bg-[#5C4B5E] transition-colors font-semibold">
-                        + Add New Vendor
+                        + Tambah Vendor Baru
                     </a>
                 </div>
             </div>
@@ -35,9 +35,9 @@
                         <thead class="bg-[#3F3142] text-white">
                             <tr>
                                 <th class="px-4 py-3 text-left">ID</th>
-                                <th class="px-4 py-3 text-left">Vendor Name</th>
-                                <th class="px-4 py-3 text-left">Phone Number</th>
-                                <th class="px-4 py-3 text-center">Actions</th>
+                                <th class="px-4 py-3 text-left">Nama Vendor</th>
+                                <th class="px-4 py-3 text-left">Nomor Telepon</th>
+                                <th class="px-4 py-3 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -75,8 +75,13 @@
                             @empty
                                 <tr>
                                     <td colspan="4" class="px-4 py-8 text-center text-gray-500">
-                                        No vendors found. <a href="{{ route('admin.vendors.create') }}"
-                                            class="text-[#3F3142] hover:underline font-semibold">Add your first vendor</a>
+                                        Masih belum ada vendor.
+                                        <br>
+                                        <a href="{{ route('admin.vendors.create') }}"
+                                            class="text-[#3F3142] hover:underline font-semibold">
+                                            Tambah vendor pertama
+                                            Anda
+                                        </a>
                                     </td>
                                 </tr>
                             @endforelse
