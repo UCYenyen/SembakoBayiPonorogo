@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Brand;
 use App\Models\Product;
-use App\Models\BaseVoucher;
 use App\Models\Vendor;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -64,26 +63,7 @@ class AdminController extends Controller
         ]);
     }
 
-    public function vouchers()
-    {
-        $vouchers = BaseVoucher::orderBy('created_at', 'desc')->paginate(15);
-
-        return view('dashboard.admin.vouchers.index', [
-            'vouchers' => $vouchers
-        ]);
-    }
-
-    public function createVoucher()
-    {
-        return view('dashboard.admin.vouchers.create');
-    }
-
-    public function editVoucher(BaseVoucher $baseVoucher)
-    {
-        return view('dashboard.admin.vouchers.edit', [
-            'voucher' => $baseVoucher
-        ]);
-    }
+   
 
     public function transactions(Request $request)
     {

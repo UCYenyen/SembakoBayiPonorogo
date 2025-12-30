@@ -44,8 +44,7 @@
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="px-4 py-3">{{ $product->id }}</td>
                                     <td class="px-4 py-3">
-                                        <img src="{{ asset('storage/' . $product->image_url) }}"
-                                            alt="{{ $product->name }}"
+                                        <img src="{{ asset('storage/' . $product->image_url) }}" alt="{{ $product->name }}"
                                             class="w-16 h-16 object-cover rounded-lg">
                                     </td>
                                     <td class="px-4 py-3 font-semibold">{{ $product->name }}</td>
@@ -60,15 +59,18 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         @if ($product->is_hidden)
-                                            <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">Hidden</span>
+                                            <span
+                                                class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">Hidden</span>
                                         @else
-                                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">Visible</span>
+                                            <span
+                                                class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">Visible</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex justify-center items-center gap-2">
                                             <!-- Toggle Visibility -->
-                                            <form action="{{ route('admin.products.toggle', $product) }}" method="POST" class="inline">
+                                            <form action="{{ route('admin.products.toggle', $product) }}" method="POST"
+                                                class="inline">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit"
@@ -119,7 +121,7 @@
                 <!-- Pagination -->
                 @if ($products->hasPages())
                     <div class="px-6 py-4 border-t">
-                        {{ $products->links() }}
+                        {{ $products->links('vendor.pagination.simple') }}
                     </div>
                 @endif
             </div>

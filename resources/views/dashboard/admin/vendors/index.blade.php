@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Vendor Management')
 @section('content')
-    <x-pages.section title="" extraClasses="">
+    <x-pages.section title="" extraClasses="extraClasses="min-h-[80vh]">
         <div class="w-[80%] mx-auto">
             <!-- Header -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -118,7 +118,7 @@
                 <!-- Pagination -->
                 @if ($vendors->hasPages())
                     <div class="px-6 py-4 border-t">
-                        {{ $vendors->links() }}
+                        {{ $vendors->links('vendor.pagination.simple') }}
                     </div>
                 @endif
             </div>

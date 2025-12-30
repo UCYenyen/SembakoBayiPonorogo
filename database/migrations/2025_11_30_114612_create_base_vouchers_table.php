@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('base_vouchers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('disc_amt');
+            $table->bigInteger('disc_amt');
             $table->bigInteger('points_required');
             $table->timestamps();
         });

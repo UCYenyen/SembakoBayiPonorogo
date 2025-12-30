@@ -5,7 +5,6 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Pages\HomeController;
@@ -15,6 +14,8 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\Pages\UserDashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\BaseVoucherController;
+use App\Http\Middleware\AdminPageGuard;
 
 Route::get('/', [HomeController::class, 'index']);
 
@@ -23,7 +24,6 @@ Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/unauthorized', [AdminController::class, 'unauthorized']);
 
 Route::get('/api/products/search', [ProductController::class, 'liveSearch'])->name('api.products.search');
-
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/products/{product}', [ProductController::class, 'showDetails'])->name('product.show');
 Route::post('/webhook/midtrans', [TransactionController::class, 'midtransNotification']);
@@ -31,6 +31,8 @@ Route::put('/webhook/shipping', [DeliveryController::class, 'handleWebhook']);
 
 
 Route::middleware('auth')->group(function () {
+    Route::get('/api/cities/search', [AddressController::class, 'searchCities'])->name('api.cities.search');
+
     Route::get('/dashboard/user', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/user/transactions/{transaction}', [UserDashboardController::class, 'show'])
         ->name('user.transaction.show');
@@ -50,58 +52,63 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{address}/set-default', [AddressController::class, 'setDefault'])->name('set-default');
     });
 
-    Route::get('/api/cities/search', [AddressController::class, 'searchCities'])->name('api.cities.search');
+    Route::prefix('cart')->name('cart.')->group(function () {
+        Route::get('/', [ShoppingCartController::class, 'index'])->name('index');
+        Route::post('/add/{product}', [ShoppingCartController::class, 'addToCart'])->name('add');
+        Route::patch('/update/{cartItem}', [ShoppingCartController::class, 'updateQuantity'])->name('update');
+        Route::delete('/remove/{cartItem}', [ShoppingCartController::class, 'removeItem'])->name('remove');
+        Route::delete('/clear', [ShoppingCartController::class, 'clearCart'])->name('clear');
+    });
 
-    Route::get('/cart', [ShoppingCartController::class, 'index'])->name('cart.index');
-    Route::post('/cart/add/{product}', [ShoppingCartController::class, 'addToCart'])->name('cart.add');
-    Route::patch('/cart/update/{cartItem}', [ShoppingCartController::class, 'updateQuantity'])->name('cart.update');
-    Route::delete('/cart/remove/{cartItem}', [ShoppingCartController::class, 'removeItem'])->name('cart.remove');
-    Route::delete('/cart/clear', [ShoppingCartController::class, 'clearCart'])->name('cart.clear');
-
-    Route::get('/payment', [PaymentController::class, 'index'])->name('payment.checkout');
-    Route::post('/payment/process', [PaymentController::class, 'processPayment'])->name('payment.process');
-    Route::get('/payment/finish/{transaction}', [PaymentController::class, 'finish'])->name('payment.finish');
-    Route::get('/payment/unfinish/{transaction}', [PaymentController::class, 'unfinish'])->name('payment.unfinish');
-    Route::post('/payment/retry/{transaction}', [PaymentController::class, 'retryPayment'])->name('payment.retry');
-    Route::get('/payment/check-status', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
+    Route::prefix('payment')->name('payment.')->group(function () {
+        Route::get('/', [PaymentController::class, 'index'])->name('checkout');
+        Route::post('/process', [PaymentController::class, 'processPayment'])->name('process');
+        Route::get('/finish/{transaction}', [PaymentController::class, 'finish'])->name('finish');
+        Route::get('/unfinish/{transaction}', [PaymentController::class, 'unfinish'])->name('unfinish');
+        Route::post('/retry/{transaction}', [PaymentController::class, 'retryPayment'])->name('retry');
+        Route::get('/check-status', [PaymentController::class, 'checkStatus'])->name('check-status');
+    });
 
     Route::get('/check-ongkir/{address}', [DeliveryController::class, 'checkOngkir']);
     Route::post('/track-delivery/{transaction}', [DeliveryController::class, 'trackDelivery'])->name('track.package');
 
-    Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('admin.dashboard');
-    Route::get('/dashboard/admin/products', [AdminController::class, 'products'])->name('admin.products');
-    Route::get('/dashboard/admin/products/create', [AdminController::class, 'createProduct'])
-        ->name('admin.products.create');
-    Route::post('/dashboard/admin/products', [ProductController::class, 'store'])->name('admin.products.store');
-    Route::get('/dashboard/admin/products/{product}/edit', [AdminController::class, 'editProduct'])
-        ->name('admin.products.edit');
-    Route::put('/dashboard/admin/products/{product}', [ProductController::class, 'update'])
-        ->name('admin.products.update');
-    Route::patch('/dashboard/admin/products/{product}/toggle', [ProductController::class, 'toggleVisibility'])
-        ->name('admin.products.toggle');
-    Route::delete('/dashboard/admin/products/{product}', [ProductController::class, 'destroy'])
-        ->name('admin.products.delete');
+    Route::middleware(AdminPageGuard::class)->group(function () {
+        Route::prefix('dashboard/admin')->name('admin.')->group(function () {
+            Route::get('/', [AdminController::class, 'index'])->name('dashboard');
+            Route::get('/products', [AdminController::class, 'products'])->name('products');
+            Route::get('/products/create', [AdminController::class, 'createProduct'])
+                ->name('products.create');
+            Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+            Route::get('/products/{product}/edit', [AdminController::class, 'editProduct'])
+                ->name('products.edit');
+            Route::put('/products/{product}', [ProductController::class, 'update'])
+                ->name('products.update');
+            Route::patch('/products/{product}/toggle', [ProductController::class, 'toggleVisibility'])
+                ->name('products.toggle');
+            Route::delete('/products/{product}', [ProductController::class, 'destroy'])
+                ->name('products.delete');
 
-    Route::get('/dashboard/admin/vouchers', [AdminController::class, 'vouchers'])->name('admin.vouchers.index');
-    Route::get('/dashboard/admin/vouchers/create', [AdminController::class, 'createVoucher'])->name('admin.vouchers.create');
-    Route::post('/dashboard/admin/vouchers', [VoucherController::class, 'store'])->name('admin.vouchers.store');
-    Route::get('/dashboard/admin/vouchers/{baseVoucher}/edit', [AdminController::class, 'editVoucher'])->name('admin.vouchers.edit');
-    Route::put('/dashboard/admin/vouchers/{baseVoucher}', [VoucherController::class, 'update'])->name('admin.vouchers.update');
-    Route::delete('/dashboard/admin/vouchers/{baseVoucher}', [VoucherController::class, 'destroy'])->name('admin.vouchers.delete');
+            Route::get('/vouchers', [BaseVoucherController::class, 'showVouchers'])->name('vouchers.index');
+            Route::get('/vouchers/create', [BaseVoucherController::class, 'createVoucher'])->name('vouchers.create');
+            Route::post('/vouchers', [BaseVoucherController::class, 'store'])->name('vouchers.store');
+            Route::get('/vouchers/{baseVoucher}/edit', [BaseVoucherController::class, 'editVoucher'])->name('vouchers.edit');
+            Route::put('/vouchers/{baseVoucher}', [BaseVoucherController::class, 'update'])->name('vouchers.update');
+            Route::delete('/vouchers/{baseVoucher}', [BaseVoucherController::class, 'destroy'])->name('vouchers.delete');
+            Route::get('/vendors', [AdminController::class, 'vendors'])->name('vendors.index');
+            Route::get('/vendors/create', [AdminController::class, 'createVendor'])->name('vendors.create');
+            Route::post('/vendors', [VendorController::class, 'store'])->name('vendors.store');
+            Route::get('/vendors/{vendor}/edit', [AdminController::class, 'editVendor'])->name('vendors.edit');
+            Route::put('/vendors/{vendor}', [VendorController::class, 'update'])->name('vendors.update');
+            Route::delete('/vendors/{vendor}', [VendorController::class, 'destroy'])->name('vendors.delete');
 
-    Route::get('/dashboard/admin/vendors', [AdminController::class, 'vendors'])->name('admin.vendors.index');
-    Route::get('/dashboard/admin/vendors/create', [AdminController::class, 'createVendor'])->name('admin.vendors.create');
-    Route::post('/dashboard/admin/vendors', [VendorController::class, 'store'])->name('admin.vendors.store');
-    Route::get('/dashboard/admin/vendors/{vendor}/edit', [AdminController::class, 'editVendor'])->name('admin.vendors.edit');
-    Route::put('/dashboard/admin/vendors/{vendor}', [VendorController::class, 'update'])->name('admin.vendors.update');
-    Route::delete('/dashboard/admin/vendors/{vendor}', [VendorController::class, 'destroy'])->name('admin.vendors.delete');
-
-    Route::get('/dashboard/admin/transactions', [AdminController::class, 'transactions'])->name('admin.transactions.index');
-    Route::get('/dashboard/admin/transactions/{transaction}/detail', [AdminController::class, 'showTransaction'])->name('admin.transactions.detail');
-    Route::get('/dashboard/admin/transactions/{transaction}/edit', [AdminController::class, 'editTransaction'])
-        ->name('admin.transactions.edit');
-    Route::patch('/dashboard/admin/transactions/{transaction}/update', [AdminController::class, 'updateTransactionStatus'])
-        ->name('admin.transactions.update-status');
+            Route::get('/transactions', [AdminController::class, 'transactions'])->name('transactions.index');
+            Route::get('/transactions/{transaction}/detail', [AdminController::class, 'showTransaction'])->name('transactions.detail');
+            Route::get('/transactions/{transaction}/edit', [AdminController::class, 'editTransaction'])
+                ->name('transactions.edit');
+            Route::patch('/transactions/{transaction}/update', [AdminController::class, 'updateTransactionStatus'])
+                ->name('transactions.update-status');
+        });
+    });
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

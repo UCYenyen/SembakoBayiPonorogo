@@ -12,7 +12,8 @@ class Testimony extends Model
     protected $fillable = [
         'transaction_id',
         'rating',
-        'description'
+        'description',
+        'image_url',
     ];
     public function transaction()
     {

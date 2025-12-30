@@ -1,5 +1,4 @@
 <div class="bg-white rounded-lg flex flex-col gap-4">
-    <!-- Status Tabs -->
     <div class="bg-white rounded-lg overflow-x-auto">
         <div class="flex border-b min-w-max">
             <a href="{{ route('dashboard', ['status' => 'all']) }}"
@@ -33,7 +32,6 @@
         </div>
     </div>
 
-    <!-- Orders List -->
     @if ($transactions->count() > 0)
         <div class="space-y-4">
             @foreach ($transactions as $transaction)
@@ -110,11 +108,11 @@
                                         Lacak Pesanan
                                     </button>
                                 @elseif($transaction->isDelivered())
-                                    <form action="{{ route('user.transaction.complete', $transaction) }}" method="POST">
+                                    <form action="{{ route('user.transaction.complete', $transaction) }}"
+                                        method="POST">
                                         @csrf
                                         @method('PATCH')
-                                        <button
-                                            type="submit"
+                                        <button type="submit"
                                             class="px-6 py-2 bg-[#3F3142] text-white rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors whitespace-nowrap">
                                             Selesai
                                         </button>
@@ -131,8 +129,11 @@
                 </div>
             @endforeach
         </div>
-
-        {{ $transactions->links() }}
+        @if ($transactions->hasPages())
+            <div class="px-6 py-4 border-t">
+                {{ $transactions->links('vendor.pagination.simple') }}
+            </div>
+        @endif
     @else
         <div class="bg-white rounded-lg shadow-md p-12 text-center">
             <svg class="w-32 h-32 mx-auto mb-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

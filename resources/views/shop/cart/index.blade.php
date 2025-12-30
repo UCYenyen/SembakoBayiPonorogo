@@ -1,9 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Shopping Cart')
 @section('content')
-    <main class="bg-[#FFF3F3] text-[#3F3142] min-h-screen py-8">
-        <div class="w-[90%] lg:w-[80%] mx-auto">
-            <h1 class="text-4xl font-bold mb-8">Keranjang Belanja</h1>
+    <main class="bg-[#FFF3F3] text-[#3F3142] min-h-[80vh] py-8">
+        <div class="w-[80%] min-h-[60vh] mx-auto">
             @if($cartItems->count() > 0)
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2 space-y-4">
@@ -32,10 +31,6 @@
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Subtotal ({{ $cartItems->count() }} items)</span>
                                     <span class="font-semibold">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Pajak (11%)</span>
-                                    <span class="font-semibold">Rp{{ number_format($tax, 0, ',', '.') }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Pengiriman</span>
@@ -78,7 +73,7 @@
                     </div>
                 </div>
             @else
-                <div class="bg-white rounded-lg shadow-lg p-12 text-center">
+                <div class="bg-white rounded-lg shadow-lg p-12 text-center w-full min-h-[60vh] justify-center items-center flex flex-col">
                     <svg class="w-32 h-32 mx-auto mb-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                     </svg>
