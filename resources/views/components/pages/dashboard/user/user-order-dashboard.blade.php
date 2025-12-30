@@ -1,4 +1,4 @@
-<div class="bg-white rounded-lg">
+<div class="bg-white rounded-lg flex flex-col gap-4">
     <!-- Status Tabs -->
     <div class="bg-white rounded-lg overflow-x-auto">
         <div class="flex border-b min-w-max">
@@ -37,7 +37,7 @@
     @if ($transactions->count() > 0)
         <div class="space-y-4">
             @foreach ($transactions as $transaction)
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-white shadow-md overflow-hidden">
                     <div class="bg-gray-50 border-b overflow-x-auto no-scrollbar touch-pan-x">
                         <div class="px-6 py-4 flex items-center justify-start gap-12 w-max min-w-full">
                             <div class="flex-shrink-0">
@@ -110,9 +110,19 @@
                                         Lacak Pesanan
                                     </button>
                                 @elseif($transaction->isDelivered())
+                                    <form action="{{ route('user.transaction.complete', $transaction) }}" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button
+                                            type="submit"
+                                            class="px-6 py-2 bg-[#3F3142] text-white rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors whitespace-nowrap">
+                                            Selesai
+                                        </button>
+                                    </form>
+                                @elseif($transaction->isCompleted())
                                     <button
                                         class="px-6 py-2 bg-[#3F3142] text-white rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors whitespace-nowrap">
-                                        Selesai
+                                        Ulas
                                     </button>
                                 @endif
                             </div>
@@ -122,9 +132,7 @@
             @endforeach
         </div>
 
-        <div class="mt-8">
-            {{ $transactions->links() }}
-        </div>
+        {{ $transactions->links() }}
     @else
         <div class="bg-white rounded-lg shadow-md p-12 text-center">
             <svg class="w-32 h-32 mx-auto mb-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

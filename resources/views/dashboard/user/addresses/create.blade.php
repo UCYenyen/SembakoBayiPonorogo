@@ -77,10 +77,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Jalan</label>
                         <input type="text" name="extra_detail" required
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow"
-                            placeholder="Detail jalan/patokan" />
+                            placeholder="Nama, Nomor Jalan. Contoh: Jl. Merdeka No. 10" />
                     </div>
 
                     <div class="flex gap-4">

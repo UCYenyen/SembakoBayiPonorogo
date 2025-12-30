@@ -12,57 +12,53 @@ class DeliveryController extends Controller
 {
     public function trackDelivery(Transaction $transaction)
     {
-        $awb = $transaction->no_resi;
-        $courier = strtolower($transaction->delivery->courier_code ?? 'jne');
-
-        $fullPhone = optional($transaction->user)->phone ?? '';
-        $lastPhone = substr(preg_replace('/[^0-9]/', '', $fullPhone), -5);
-
-        $url = "https://rajaongkir.komerce.id/api/v1/track/waybill?awb={$awb}&courier={$courier}";
-
-        if ($courier === 'jne' && !empty($lastPhone)) {
-            $url .= "&last_phone_number={$lastPhone}";
-        }
+        $awb = trim($transaction->no_resi);
+        $courier = strtolower($transaction->delivery->courier_code);
+        $fullPhone = $transaction->user->phone_number;
+        $cleanPhone = preg_replace('/[^0-9]/', '', $fullPhone);
+        $lastPhone = strlen($cleanPhone) >= 5 ? substr($cleanPhone, -5) : $cleanPhone;
 
         try {
+            $queryParams = [
+                'awb' => $awb,
+                'courier' => $courier,
+            ];
+
+            if ($courier === 'jne') {
+                $queryParams['last_phone_number'] = $lastPhone;
+            }
+
+            $url = "https://rajaongkir.komerce.id/api/v1/track/waybill?" . http_build_query($queryParams);
+
             $response = Http::withHeaders([
-                'key' => config('rajaongkir.api_key')
+                'key' => config('rajaongkir.api_key'),
+                'Accept' => 'application/json'
             ])->post($url);
 
             if ($response->successful()) {
                 $responseData = $response->json();
 
-                if (isset($responseData['meta']) && $responseData['meta']['status'] === 'error') {
+                if (isset($responseData['meta']) && ($responseData['meta']['status'] === 'error')) {
                     return response()->json([
                         'success' => false,
                         'message' => $responseData['meta']['message']
                     ], 404);
                 }
-                // Jika status delivery == delivered, update status transaksi jadi done
-                if (
-                    isset($responseData['data']['summary']['status']) &&
-                    strtolower($responseData['data']['summary']['status']) === 'delivered'
-                ) {
+                $status = strtolower($responseData['data']['summary']['status'] ?? '');
+                if ($status === 'delivered') {
                     $transaction->status = 'delivered';
                     $transaction->save();
                 }
 
                 return response()->json([
                     'success' => true,
-                    'data' => $responseData['data'] ?? []
+                    'data' => $responseData['data']
                 ]);
             }
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal terhubung ke server kurir'
-            ], $response->status());
+            return response()->json(['success' => false, 'message' => 'Gagal terhubung ke kurir'], 500);
         } catch (\Exception $e) {
-            Log::error('Error tracking delivery: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan sistem'
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 

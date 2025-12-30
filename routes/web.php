@@ -34,6 +34,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/user', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/user/transactions/{transaction}', [UserDashboardController::class, 'show'])
         ->name('user.transaction.show');
+    Route::patch('/dashboard/user/transactions/{transaction}/complete', [TransactionController::class, 'complete'])
+        ->name('user.transaction.complete');
 
     Route::prefix('dashboard/user/addresses')->name('user.addresses.')->group(function () {
         Route::get('/cities/{provinceId}', [AddressController::class, 'getCities'])->name('cities');

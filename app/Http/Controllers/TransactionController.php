@@ -67,7 +67,7 @@ class TransactionController extends Controller
 
         $transaction->update(['status' => Transaction::STATUS_COMPLETED]);
 
-        return back()->with('success', 'Pesanan telah selesai.');
+        return back();
     }
 
     private function formatPaymentMethod($paymentType): string

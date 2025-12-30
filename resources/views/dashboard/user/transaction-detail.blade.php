@@ -172,7 +172,7 @@
                             <div class="flex gap-4">
                                 <div class="flex flex-col items-center">
                                     <div
-                                        class="w-10 h-10 rounded-full {{ $transaction->isDelivered() || $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }} flex items-center justify-center text-white">
+                                        class="w-10 h-10 rounded-full {{ $transaction->isCompleted() ? 'bg-[#3F3142]' : 'bg-gray-300' }} flex items-center justify-center text-white">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd"
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -183,7 +183,7 @@
                                 <div class="flex-1">
                                     <h3 class="font-semibold">Pesanan Selesai</h3>
                                     <p class="text-sm text-gray-600">
-                                        {{ $transaction->isDelivered() || $transaction->isCompleted() ? $transaction->updated_at->format('d M Y, H:i') : '-' }}
+                                        {{ $transaction->isCompleted() ? $transaction->updated_at->format('d M Y, H:i') : '-' }}
                                     </p>
                                 </div>
                             </div>
