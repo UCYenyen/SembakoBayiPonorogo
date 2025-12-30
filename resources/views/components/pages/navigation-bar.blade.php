@@ -15,11 +15,6 @@
                     <button @click="open = !open"
                         class="flex items-center justify-center p-1 rounded-full hover:bg-gray-100 transition-colors">
                         @if(Auth::user()->avatar)
-                            <img src="{{ Auth::user()->avatar }}" 
-                                 alt="{{ Auth::user()->name }}" 
-                                 class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full object-cover border-2 border-[#3F3142]"
-                                 referrerpolicy="no-referrer"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <div class="w-10 h-10 min-w-[40px] min-h-[40px] bg-[#3F3142] rounded-full items-center justify-center text-white text-sm font-semibold hidden">
                                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                             </div>
