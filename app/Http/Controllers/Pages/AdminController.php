@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\Product;
 use App\Models\BaseVoucher;
+use App\Models\Vendor;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 
@@ -144,5 +145,26 @@ class AdminController extends Controller
     {
         $transaction->load(['user', 'transaction_items.product', 'delivery', 'address']);
         return view('dashboard.admin.transactions.edit', compact('transaction'));
+    }
+
+    public function vendors()
+    {
+        $vendors = Vendor::orderBy('id', 'asc')->paginate(15);
+
+        return view('dashboard.admin.vendors.index', [
+            'vendors' => $vendors
+        ]);
+    }
+
+    public function createVendor()
+    {
+        return view('dashboard.admin.vendors.create');
+    }
+
+    public function editVendor(Vendor $vendor)
+    {
+        return view('dashboard.admin.vendors.edit', [
+            'vendor' => $vendor
+        ]);
     }
 }

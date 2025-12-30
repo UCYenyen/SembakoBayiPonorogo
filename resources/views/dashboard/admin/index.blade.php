@@ -11,7 +11,7 @@
                 </x-admin-menu-chooser>
                 <x-admin-menu-chooser
                     extraClasses="flex flex-col justify-center items-center w-full h-full p-4 gap-4 bg-white shadow-lg rounded-lg"
-                    link="/dashboard/admin" title="Atur Layanan" description="Tambah atau ubah layanan pengiriman">
+                    link="/dashboard/admin/vendors" title="Atur Vendor" description="Tambah atau ubah vendor produk">
                     <x-eos-service class="text-xl max-w-[84px]" />
                 </x-admin-menu-chooser>
                 <x-admin-menu-chooser

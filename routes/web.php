@@ -1,19 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\VendorController;
+use App\Http\Controllers\AddressController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\ShopController;
 use App\Http\Controllers\Pages\AdminController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Pages\UserDashboardController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ShoppingCartController;
-use App\Http\Controllers\AddressController;
-use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\DeliveryController;
-use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\ShoppingCartController;
+use App\Http\Controllers\Pages\UserDashboardController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 Route::get('/', [HomeController::class, 'index']);
 
@@ -85,6 +86,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/admin/vouchers/{baseVoucher}/edit', [AdminController::class, 'editVoucher'])->name('admin.vouchers.edit');
     Route::put('/dashboard/admin/vouchers/{baseVoucher}', [VoucherController::class, 'update'])->name('admin.vouchers.update');
     Route::delete('/dashboard/admin/vouchers/{baseVoucher}', [VoucherController::class, 'destroy'])->name('admin.vouchers.delete');
+
+    Route::get('/dashboard/admin/vendors', [AdminController::class, 'vendors'])->name('admin.vendors.index');
+    Route::get('/dashboard/admin/vendors/create', [AdminController::class, 'createVendor'])->name('admin.vendors.create');
+    Route::post('/dashboard/admin/vendors', [VendorController::class, 'store'])->name('admin.vendors.store');
+    Route::get('/dashboard/admin/vendors/{vendor}/edit', [AdminController::class, 'editVendor'])->name('admin.vendors.edit');
+    Route::put('/dashboard/admin/vendors/{vendor}', [VendorController::class, 'update'])->name('admin.vendors.update');
+    Route::delete('/dashboard/admin/vendors/{vendor}', [VendorController::class, 'destroy'])->name('admin.vendors.delete');
 
     Route::get('/dashboard/admin/transactions', [AdminController::class, 'transactions'])->name('admin.transactions.index');
     Route::get('/dashboard/admin/transactions/{transaction}/detail', [AdminController::class, 'showTransaction'])->name('admin.transactions.detail');
