@@ -25,6 +25,7 @@ jobs:
             
             git fetch origin main
             git reset --hard origin/main
+            git pull origin main
             
             # 1. Build ulang (semua composer/npm build sudah masuk di Dockerfile)
             docker compose up -d --build
