@@ -4,7 +4,18 @@ WORKDIR /var/www/html
 
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev zip unzip \
-    libzip-dev libicu-dev libjpeg-dev libfreetype6-dev gnupg
+    libzip-dev libicu-dev libjpeg-dev libfreetype6-dev gnupg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+    pdo \
+    pdo_mysql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -18,8 +29,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
 
 COPY . .
 
-# Perubahan disini: Kita tetap install dev dependencies agar class Debugbar ditemukan 
-# ATAU jalankan optimize setelahnya
 RUN composer install --no-interaction --optimize-autoloader
 RUN npm install && npm run build
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
