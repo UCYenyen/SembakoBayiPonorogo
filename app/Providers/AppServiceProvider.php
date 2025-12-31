@@ -5,7 +5,6 @@ namespace App\Providers;
 use App\Repositories\TransactionRepository;
 use App\Repositories\TransactionRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +21,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        URL::forceScheme('https');
+       
     }
 }
