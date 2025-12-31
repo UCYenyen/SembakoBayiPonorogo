@@ -1,7 +1,4 @@
-version: "3.8"
-
 services:
-  # App Laravel
   app:
     build:
       context: .
@@ -11,12 +8,9 @@ services:
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html
-      # Kita tidak perlu menulis storage & bootstrap secara terpisah 
-      # karena sudah tercakup di dalam folder "." (root) di atas.
     networks:
       - sb_network
 
-  # Web Server
   nginx:
     image: nginx:alpine
     container_name: sb_nginx
@@ -31,7 +25,6 @@ services:
     depends_on:
       - app
 
-  # Database
   db:
     image: mysql:8.0
     container_name: sb_db
@@ -41,14 +34,6 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-191205}
     volumes:
       - sb_db_data:/var/lib/mysql
-    networks:
-      - sb_network
-
-  # Gowa
-  gowa:
-    image: gowatech/gowa:latest
-    container_name: sb_gowa
-    restart: always
     networks:
       - sb_network
 
