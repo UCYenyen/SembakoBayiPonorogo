@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Create Vendor')
 @section('content')
-    <main class="bg-[#FFF3F3] text-[#3F3142] flex items-center justify-center min-h-screen py-12">
+    <main class="bg-[#FFF3F3] text-[#3F3142] flex items-center justify-center min-h-[80vh] py-12">
         <div class="w-full max-w-2xl mx-auto px-4">
             <div class="bg-white rounded-lg shadow-lg p-8">
                 <h1 class="text-3xl font-bold mb-6">Create New Vendor</h1>

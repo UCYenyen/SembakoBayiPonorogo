@@ -1,197 +1,130 @@
 @extends('layouts.app')
-@section('title', 'Home')
+@section('title', 'Edit Produk')
 @section('content')
-    <x-pages.section title="" extraClasses="">
-        <div class="w-[80%] mx-auto flex flex-col gap-4">
-            <!-- Header -->
-            <a href="/dashboard/admin/products/index"
-                class="bg-[#3F3142] w-full sm:w-fit text-white px-6 py-3 rounded-lg hover:bg-[#5C4B5E] transition-colors font-semibold">
-                Back
-            </a>
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <div class="flex justify-center items-start flex-col gap-4">
-                    <h1 class="text-3xl font-bold">Product Management</h1>
-                </div>
+    <main class="bg-[#FFF3F3] text-[#3F3142] flex items-center justify-center min-h-[80vh] py-12">
+        <div class="w-full max-w-2xl mx-auto px-4">
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h1 class="text-3xl font-bold mb-6">Edit Produk</h1>
+
+                <form action="{{ route('admin.products.update', $product->id) }}" method="POST"
+                    class="space-y-6 bg-white/80 p-4 rounded-lg" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+
+                    <div>
+                        <label for="name" class="block text-sm font-medium mb-2">Nama Produk *</label>
+                        <input type="text" name="name" id="name" value="{{ old('name', $product->name) }}"
+                            required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm font-medium mb-2">Deskripsi *</label>
+                        <textarea name="description" id="description" rows="4" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">{{ old('description', $product->description) }}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="price" class="block text-sm font-medium mb-2">Harga (Rp) *</label>
+                            <input type="number" name="price" id="price" value="{{ old('price', $product->price) }}"
+                                min="0" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label for="stocks" class="block text-sm font-medium mb-2">Stok *</label>
+                            <input type="number" name="stocks" id="stocks"
+                                value="{{ old('stocks', $product->stocks) }}" min="0" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="category_id" class="block text-sm font-medium mb-2">Kategori *</label>
+                            <select name="category_id" id="category_id" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">
+                                <option value="">Select Category</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}"
+                                        {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="brand_id" class="block text-sm font-medium mb-2">Brand *</label>
+                            <select name="brand_id" id="brand_id" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">
+                                <option value="">Select Brand</option>
+                                @foreach ($brands as $brand)
+                                    <option value="{{ $brand->id }}"
+                                        {{ old('brand_id', $product->brand_id) == $brand->id ? 'selected' : '' }}>
+                                        {{ $brand->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="image_file" class="block text-sm font-medium mb-2">Gambar Produk</label>
+                        @if ($product->image_url)
+                            <div class="mb-2">
+                                <p class="text-xs text-gray-500 mb-1">Gambar saat ini:</p>
+                                <img src="{{ asset('storage/' . $product->image_url) }}"
+                                    class="w-full h-auto object-cover rounded border" alt="">
+                            </div>
+                        @endif
+                        <input type="file" name="image_file" id="image_file" accept="image/*"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#3F3142] file:text-white hover:file:bg-[#5C4B5E]">
+                        <p class="text-xs text-gray-500 mt-1">*Kosongkan jika tidak ingin mengubah gambar.</p>
+                    </div>
+
+                    <div class="flex gap-4 pt-4">
+                        <button type="submit"
+                            class="flex-1 bg-[#3F3142] text-white px-6 py-3 rounded-lg hover:bg-[#5C4B5E] transition-colors font-semibold">
+                            Update Product
+                        </button>
+                        <a href="{{ route('admin.products') }}"
+                            class="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors font-semibold text-center">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
             </div>
-
-            <!-- Success Message -->
-            @if (session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            <!-- Products Table -->
-            <form action="/dashboard/admin/products/{{ $product->id }}" method="POST" class="space-y-6 bg-white/80 p-4 rounded-lg"
-                enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-
-                <!-- Product Name -->
-                <div>
-                    <label for="name" class="block text-sm font-medium mb-2">Product Name *</label>
-                    <input type="text" name="name" id="name" placeholder="{{$product->name}}" old="{{ old('name', $product->name) }}" value="{{$product->name }}" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">
-                </div>
-
-                <!-- Description -->
-                <div>
-                    <label for="description" class="block text-sm font-medium mb-2">Description *</label>
-                    <textarea name="description" placeholder="{{$product->description}}" id="description" rows="4" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">{{ old('description', $product->description) }}</textarea>
-                </div>
-
-                <!-- Price -->
-                <div>
-                    <label for="price" class="block text-sm font-medium mb-2">Price (Rp) *</label>
-                    <input type="number" name="price" id="price" value="{{ old('price', $product->price) }}" min="0" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">
-                </div>
-
-                <!-- Stocks -->
-                <div>
-                    <label for="stocks" class="block text-sm font-medium mb-2">Stock Quantity *</label>
-                    <input type="number" name="stocks" id="stocks" value="{{ old('stocks', $product->stocks) }}" min="0"
-                        required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">
-                </div>
-
-                <!-- Category -->
-                <div>
-                    <label for="category_id" class="block text-sm font-medium mb-2">Category *</label>
-                    <select name="category_id" id="category_id" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">
-                        <option value="">Select Category</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Brand -->
-                <div>
-                    <label for="brand_id" class="block text-sm font-medium mb-2">Brand *</label>
-                    <select name="brand_id" id="brand_id" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">
-                        <option value="">Select Brand</option>
-                        @foreach ($brands as $brand)
-                            <option value="{{ $brand->id }}" {{ old('brand_id', $product->brand_id) == $brand->id ? 'selected' : '' }}>
-                                {{ $brand->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Image URL -->
-                <div>
-                    <label for="image_url" class="block text-sm font-medium mb-2">Image URL *</label>
-                    {{-- <input type="text" name="image_url" id="image_url" value="{{ old('image_url') }}" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent"
-                            placeholder="https://example.com/image.jpg"> --}}
-                    <input type="file" name="image_file" accept="image/*"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent"
-                        required>
-                </div>
-
-                <!-- Google Maps API -->
-                <div>
-                    <label for="map" class="block text-sm font-medium mb-2">Location on Map *</label>
-                    <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $address->latitude ?? '') }}">
-                    <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $address->longitude ?? '') }}">
-                    <input type="text" id="search-input" placeholder="Search location..."
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142] focus:border-transparent">
-                    <div id="map" class="h-64 rounded-lg"></div>
-                </div>
-
-                <!-- Buttons -->
-                <div class="flex gap-4 pt-4">
-                    <button type="submit"
-                        class="flex-1 bg-[#3F3142] text-white px-6 py-3 rounded-lg hover:bg-[#5C4B5E] transition-colors font-semibold">
-                        Update Product
-                    </button>
-                    <a href="/dashboard/admin/products"
-                        class="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors font-semibold text-center">
-                        Cancel
-                    </a>
-                </div>
-            </form>
         </div>
-    </x-pages.section>
-@endsection
+    </main>
 
-<script src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&libraries=places&callback=initMap" async defer></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        let map, marker, geocoder, autocomplete;
-
-        function initMap() {
-            const existingLat = {{ $address->latitude ?? -6.2088 }};
-            const existingLng = {{ $address->longitude ?? 106.8456 }};
-            const defaultLocation = { lat: existingLat, lng: existingLng };
-
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: defaultLocation,
-                zoom: 15,
+        // 1. Alert Sukses
+        @if (session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#3F3142',
             });
+        @endif
 
-            geocoder = new google.maps.Geocoder();
-            
-            marker = new google.maps.Marker({
-                map: map,
-                position: defaultLocation,
-                draggable: true,
+        // 2. Alert Error Validasi (Laravel Validation Errors)
+        @if ($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi Kesalahan',
+                html: `
+                    <ul style="text-align: left;">
+                        @foreach ($errors->all() as $error)
+                            <li>- {{ $error }}</li>
+                        @endforeach
+                    </ul>
+                `,
+                confirmButtonColor: '#3F3142',
             });
-
-            const input = document.getElementById('search-input');
-            autocomplete = new google.maps.places.Autocomplete(input, {
-                componentRestrictions: { country: 'id' },
-                fields: ['geometry', 'formatted_address']
-            });
-
-            autocomplete.addListener('place_changed', function() {
-                const place = autocomplete.getPlace();
-                if (!place.geometry) return;
-
-                map.setCenter(place.geometry.location);
-                marker.setPosition(place.geometry.location);
-                updateAddress(place.geometry.location);
-            });
-
-            map.addListener('click', function(event) {
-                marker.setPosition(event.latLng);
-                updateAddress(event.latLng);
-            });
-
-            marker.addListener('dragend', function(event) {
-                updateAddress(event.latLng);
-            });
-        }
-
-        function updateAddress(location) {
-            const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
-            const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
-
-            document.getElementById('latitude').value = lat;
-            document.getElementById('longitude').value = lng;
-
-            // Get address
-            geocoder.geocode({ location: { lat, lng } }, function(results, status) {
-                if (status === 'OK' && results[0]) {
-                    document.getElementById('detail').value = results[0].formatted_address;
-                }
-            });
-        }
-
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const lat = document.getElementById('latitude').value;
-            const lng = document.getElementById('longitude').value;
-
-            if (!lat || !lng) {
-                e.preventDefault();
-                alert('Please select a valid location on the map!');
-                return false;
-            }
-        });
+        @endif
     </script>
+@endsection

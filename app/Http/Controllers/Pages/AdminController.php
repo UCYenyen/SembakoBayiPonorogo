@@ -50,9 +50,6 @@ class AdminController extends Controller
     }
     public function editProduct(Product $product)
     {
-        // Product sudah ter-load dengan category dan brand otomatis
-        // Tidak perlu findOrFail() lagi
-
         $categories = Category::all();
         $brands = Brand::all();
 
@@ -67,7 +64,6 @@ class AdminController extends Controller
 
     public function transactions(Request $request)
     {
-        // Default filter ke status 'paid' agar admin tahu mana yang harus dikirim
         $status = $request->get('status', 'paid');
 
         $query = Transaction::with(['user', 'transaction_items.product', 'delivery', 'address'])

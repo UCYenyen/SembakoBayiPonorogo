@@ -118,7 +118,7 @@ class ProductController extends Controller
             'brand_id',
         ]));
 
-        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
+        return redirect()->route('admin.products')->with('success', 'Product updated successfully!');
     }
 
     public function toggleVisibility(Product $product)
@@ -127,7 +127,7 @@ class ProductController extends Controller
         $product->save();
 
         $status = $product->is_hidden ? 'hidden' : 'visible';
-        return redirect()->route('admin.products.index')->with('success', "Product is now {$status}!");
+        return redirect()->route('admin.products')->with('success', "Product is now {$status}!");
     }
 
     public function destroy(Product $product)
@@ -138,7 +138,7 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
+        return redirect()->route('admin.products')->with('success', 'Product deleted successfully!');
     }
 
     public function liveSearch(Request $request)

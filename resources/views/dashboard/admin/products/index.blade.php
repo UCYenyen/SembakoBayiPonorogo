@@ -1,81 +1,80 @@
 @extends('layouts.app')
 @section('title', 'Product Management')
 @section('content')
-    <x-pages.section title="" extraClasses="">
+    <x-pages.section title="" extraClasses="min-h-[80vh]">
         <div class="w-[80%] mx-auto">
-            <!-- Header -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
                 <div class="flex justify-between items-center flex-col gap-4 sm:flex-row">
                     <h1 class="text-3xl font-bold">Product Management</h1>
-                    {{-- ✅ Gunakan route() helper --}}
                     <a href="{{ route('admin.products.create') }}"
-                        class="bg-[#3F3142] w-full sm:w-fit text-white px-6 py-3 rounded-lg hover:bg-[#5C4B5E] transition-colors font-semibold">
+                        class="bg-[#3F3142] w-full sm:w-fit text-white px-6 py-3 rounded-lg hover:bg-[#5C4B5E] transition-colors font-semibold text-center">
                         + Add New Product
                     </a>
                 </div>
             </div>
 
-            <!-- Success Message -->
-            @if (session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            <!-- Products Table -->
             <div class="bg-white rounded-lg shadow-lg overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full table-auto">
+                    <table class="w-full border-collapse">
                         <thead class="bg-[#3F3142] text-white">
                             <tr>
-                                <th class="px-4 py-3 text-left">ID</th>
-                                <th class="px-4 py-3 text-left">Image</th>
-                                <th class="px-4 py-3 text-left">Name</th>
-                                <th class="px-4 py-3 text-left">Category</th>
-                                <th class="px-4 py-3 text-left">Brand</th>
-                                <th class="px-4 py-3 text-left">Price</th>
-                                <th class="px-4 py-3 text-left">Stock</th>
-                                <th class="px-4 py-3 text-left">Status</th>
-                                <th class="px-4 py-3 text-center">Actions</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold uppercase tracking-wider">ID</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold uppercase tracking-wider">Gambar</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold uppercase tracking-wider">Nama</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold uppercase tracking-wider">Kategori</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold uppercase tracking-wider">Merek</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold uppercase tracking-wider">Harga</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold uppercase tracking-wider">Stok</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-4 text-center text-sm font-semibold uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-gray-200">
                             @forelse($products as $product)
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3">{{ $product->id }}</td>
-                                    <td class="px-4 py-3">
-                                        <img src="{{ asset('storage/' . $product->image_url) }}" alt="{{ $product->name }}"
-                                            class="w-16 h-16 object-cover rounded-lg">
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-4 align-middle text-sm text-gray-600">#{{ $product->id }}</td>
+                                    <td class="px-4 py-4 align-middle">
+                                        <div class="w-16 h-16 overflow-hidden rounded-lg border">
+                                            <img src="{{ asset('storage/' . $product->image_url) }}"
+                                                alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                        </div>
                                     </td>
-                                    <td class="px-4 py-3 font-semibold">{{ $product->name }}</td>
-                                    <td class="px-4 py-3">{{ $product->category->name ?? 'N/A' }}</td>
-                                    <td class="px-4 py-3">{{ $product->brand->name ?? 'N/A' }}</td>
-                                    <td class="px-4 py-3">Rp{{ number_format($product->price, 0, ',', '.') }}</td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-4 align-middle">
+                                        <div class="font-bold text-gray-900 leading-tight">{{ $product->name }}</div>
+                                    </td>
+                                    <td class="px-4 py-4 align-middle text-sm text-gray-700">
+                                        {{ $product->category->name ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-4 align-middle text-sm text-gray-700">
+                                        {{ $product->brand->name ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-4 align-middle text-sm font-medium whitespace-nowrap">
+                                        Rp{{ number_format($product->price, 0, ',', '.') }}
+                                    </td>
+                                    <td class="px-4 py-4 align-middle whitespace-nowrap">
                                         <span
-                                            class="px-2 py-1 rounded-full text-sm {{ $product->stocks > 10 ? 'bg-green-100 text-green-800' : ($product->stocks > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                                            class="px-2.5 py-1 rounded-full text-xs font-bold
+                                            {{ $product->stocks > 10 ? 'bg-gray-100 text-gray-800' : ($product->stocks > 0 ? 'bg-yellow-100 text-gray-800' : 'bg-red-100 text-gray-800') }}">
                                             {{ $product->stocks }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-4 align-middle">
                                         @if ($product->is_hidden)
                                             <span
-                                                class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">Hidden</span>
+                                                class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold uppercase tracking-wider">Hidden</span>
                                         @else
                                             <span
-                                                class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">Visible</span>
+                                                class="px-3 py-1 bg-[#dbdeff] text-gray-700 rounded-full text-xs font-bold uppercase tracking-wider">Active</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-4 align-middle text-center">
                                         <div class="flex justify-center items-center gap-2">
-                                            <!-- Toggle Visibility -->
                                             <form action="{{ route('admin.products.toggle', $product) }}" method="POST"
                                                 class="inline">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit"
-                                                    class="p-2 rounded-lg transition-colors {{ $product->is_hidden ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' : 'bg-blue-100 hover:bg-blue-200 text-blue-700' }}"
-                                                    title="{{ $product->is_hidden ? 'Show Product' : 'Hide Product' }}">
+                                                    class="p-2 rounded-md transition-all {{ $product->is_hidden ? 'bg-gray-100 text-gray-500 hover:bg-gray-200' : 'bg-blue-50 text-blue-600 hover:bg-blue-100' }}">
                                                     @if ($product->is_hidden)
                                                         <x-heroicon-o-eye-slash class="w-5 h-5" />
                                                     @else
@@ -84,22 +83,18 @@
                                                 </button>
                                             </form>
 
-                                            <!-- Edit -->
                                             <a href="{{ route('admin.products.edit', $product) }}"
-                                                class="p-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-lg transition-colors"
-                                                title="Edit Product">
+                                                class="p-2 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-md transition-all">
                                                 <x-heroicon-o-pencil class="w-5 h-5" />
                                             </a>
 
-                                            <!-- Delete -->
-                                            <form action="{{ route('admin.products.delete', $product) }}" method="POST"
-                                                class="inline"
-                                                onsubmit="return confirm('Are you sure you want to delete this product?')">
+                                            <form id="delete-form-{{ $product->id }}"
+                                                action="{{ route('admin.products.delete', $product) }}" method="POST"
+                                                class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit"
-                                                    class="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
-                                                    title="Delete Product">
+                                                <button type="button" onclick="confirmDelete({{ $product->id }})"
+                                                    class="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition-all">
                                                     <x-heroicon-o-trash class="w-5 h-5" />
                                                 </button>
                                             </form>
@@ -108,9 +103,13 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="px-4 py-8 text-center text-gray-500">
-                                        No products found. <a href="{{ route('admin.products.create') }}"
-                                            class="text-[#3F3142] hover:underline font-semibold">Add your first product</a>
+                                    <td colspan="9" class="px-4 py-12 text-center text-gray-500">
+                                        <div class="flex flex-col items-center">
+                                            <span>Tidak ada produk yang ditemukan.</span>
+                                            <a href="{{ route('admin.products.create') }}"
+                                                class="text-[#3F3142] font-bold hover:underline">Tambah produk pertama
+                                                Anda</a>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse
@@ -118,13 +117,49 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 @if ($products->hasPages())
-                    <div class="px-6 py-4 border-t">
+                    <div class="px-6 py-4 border-t bg-gray-50">
                         {{ $products->links('vendor.pagination.simple') }}
                     </div>
                 @endif
             </div>
         </div>
     </x-pages.section>
+    
+    <script>
+        @if (session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#3F3142',
+            });
+        @endif
+
+        @if (session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#3F3142',
+            });
+        @endif
+
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Hapus Produk?',
+                text: "Data ini akan dihapus permanen dari sistem.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3F3142',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            })
+        }
+    </script>
 @endsection

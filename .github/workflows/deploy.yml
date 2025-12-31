@@ -1,55 +1,29 @@
-name: 🚀 Auto Deploy to VPS
+name: Deploy Sembako Bayi Ponorogo
 
 on:
   push:
-    branches:
-      - main 
+    branches: [main]
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest 
-
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4 
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Deploy to VPS
-        uses: appleboy/ssh-action@v1.0.3 
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
+          username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "Deployment started..."
-            
-            # Navigate to the deployment directory 
-            cd ${{ secrets.DEPLOY_PATH }}
-            git checkout main
-
-            git status
-            
-            git fetch origin main
-
-            # Pull the latest code
+            cd /var/www/sembakobayiponorogo
             git pull origin main
-            
-            # Install Composer dependencies
-            composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
-
-            npm install 
-
-            npm run build
-            
-            # Clear and optimize Laravel caches
-            php artisan cache:clear
-            php artisan config:clear
-            php artisan route:clear
-            php artisan view:clear
-            
-            # Run database migrations
-            php artisan migrate --force
-            
-            # Restart PHP-FPM to load new code/config
-            sudo systemctl restart php8.3-fpm 
-            
-            echo "Deployment finished successfully!"
+            docker-compose up -d --build
+            docker exec sembakobayiponorogo composer install --no-dev --optimize-autoloader
+            docker exec sembakobayiponorogo php artisan migrate --force
+            docker exec sembakobayiponorogo npm install
+            docker exec sembakobayiponorogo npm run build
+            docker exec sembakobayiponorogo php artisan config:cache
+            docker exec sembakobayiponorogo php artisan route:cache

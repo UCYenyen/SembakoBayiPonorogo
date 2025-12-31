@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Edit Vendor')
 @section('content')
-    <main class="bg-[#FFF3F3] text-[#3F3142] flex items-center justify-center min-h-screen py-12">
+    <main class="bg-[#FFF3F3] text-[#3F3142] flex items-center justify-center min-h-[80vh] py-12">
         <div class="w-full max-w-2xl mx-auto px-4">
             <div class="bg-white rounded-lg shadow-lg p-8">
                 <h1 class="text-3xl font-bold mb-6">Edit Vendor</h1>
@@ -106,17 +106,13 @@
             phoneInput.addEventListener('input', function(e) {
                 let cursorPosition = this.selectionStart;
                 
-                // Hapus semua karakter non-digit
                 let value = this.value.replace(/\D/g, '');
                 
-                // Hapus leading 0 dan 62
                 value = value.replace(/^0+/, '');
                 value = value.replace(/^62/, '');
                 
-                // Batasi maksimal 12 digit
                 value = value.substring(0, 12);
 
-                // Format: XXX XXXX XXXX
                 let formatted = '';
                 if (value.length > 0) {
                     formatted = value.substring(0, 3);
@@ -130,11 +126,9 @@
                     }
                 }
 
-                // Hitung posisi cursor yang benar
                 let oldValue = this.value;
                 this.value = formatted;
 
-                // Jika user mengetik (bukan menghapus)
                 if (formatted.length >= oldValue.length) {
                     // Tambahkan offset untuk spasi yang ditambahkan
                     if (cursorPosition === 4 || cursorPosition === 9) {
@@ -145,7 +139,6 @@
                 this.setSelectionRange(cursorPosition, cursorPosition);
             });
 
-            // Handle paste
             phoneInput.addEventListener('paste', function(e) {
                 e.preventDefault();
                 let pastedText = (e.clipboardData || window.clipboardData).getData('text');
