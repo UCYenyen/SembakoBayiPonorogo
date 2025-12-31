@@ -34,8 +34,6 @@ services:
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html
-      - /var/www/html/vendor/
-      - /var/www/html/public/build/
     networks:
       - sb_network
 
