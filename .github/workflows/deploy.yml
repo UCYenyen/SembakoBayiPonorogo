@@ -1,29 +1,49 @@
-name: Deploy to VPS
+name: 🚀 Auto Deploy to VPS (Docker Mode)
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main 
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    runs-on: ubuntu-latest 
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@master
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4 
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3 
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
+          username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/sembakobayiponorogo
-            git pull origin main
+            echo "Deployment started..."
+            
+            cd ${{ secrets.DEPLOY_PATH }}
+            
+            # Ambil kode terbaru
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # Rebuild dan jalankan container
+            # Menggunakan docker compose (V2) sesuai standar Ubuntu 24.04
             docker compose up -d --build
+            
+            # Jalankan perintah Laravel DI DALAM container 'sb_app'
             docker exec sb_app composer install --no-dev --optimize-autoloader
             docker exec sb_app php artisan migrate --force
             docker exec sb_app npm install
             docker exec sb_app npm run build
+            
+            # Optimasi Cache
             docker exec sb_app php artisan config:cache
             docker exec sb_app php artisan route:cache
+            docker exec sb_app php artisan view:cache
+            
+            # Opsional: Restart Nginx container agar config baru termuat
+            docker restart sb_nginx
+            
+            echo "Deployment finished successfully!"
