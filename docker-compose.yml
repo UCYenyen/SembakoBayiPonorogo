@@ -37,6 +37,15 @@ services:
     networks:
       - sb_network
 
+  gowa:
+    image: aldinokemal2104/go-whatsapp-web-multidevice:latest
+    container_name: sb_gowa
+    restart: always
+    ports:
+      - "3030:3000"
+    networks:
+      - sb_network
+
 networks:
   sb_network:
     driver: bridge
