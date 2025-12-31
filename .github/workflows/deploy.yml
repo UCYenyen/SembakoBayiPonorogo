@@ -1,8 +1,8 @@
-name: Deploy Sembako Bayi Ponorogo
+name: Deploy to VPS
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -11,7 +11,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to VPS
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -20,10 +20,10 @@ jobs:
           script: |
             cd /var/www/sembakobayiponorogo
             git pull origin main
-            docker-compose up -d --build
-            docker exec sembakobayiponorogo composer install --no-dev --optimize-autoloader
-            docker exec sembakobayiponorogo php artisan migrate --force
-            docker exec sembakobayiponorogo npm install
-            docker exec sembakobayiponorogo npm run build
-            docker exec sembakobayiponorogo php artisan config:cache
-            docker exec sembakobayiponorogo php artisan route:cache
+            docker compose up -d --build
+            docker exec sb_app composer install --no-dev --optimize-autoloader
+            docker exec sb_app php artisan migrate --force
+            docker exec sb_app npm install
+            docker exec sb_app npm run build
+            docker exec sb_app php artisan config:cache
+            docker exec sb_app php artisan route:cache
