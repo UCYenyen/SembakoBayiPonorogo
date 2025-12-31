@@ -39,5 +39,5 @@ jobs:
             
             # 4. Hapus image lama yang tidak terpakai (menghemat disk VPS)
             docker image prune -f
-            
+            docker exec sb_app chown -R www-data:www-data storage bootstrap/cache
             echo "Deployment finished successfully!"
