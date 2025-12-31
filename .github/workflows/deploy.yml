@@ -20,30 +20,24 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "Deployment started..."
-            
+           echo "Deployment started..."
             cd ${{ secrets.DEPLOY_PATH }}
             
-            # Ambil kode terbaru
             git fetch origin main
             git reset --hard origin/main
             
-            # Rebuild dan jalankan container
-            # Menggunakan docker compose (V2) sesuai standar Ubuntu 24.04
+            # 1. Build ulang (semua composer/npm build sudah masuk di Dockerfile)
             docker compose up -d --build
             
-            # Jalankan perintah Laravel DI DALAM container 'sb_app'
-            docker exec sb_app composer install --no-dev --optimize-autoloader
+            # 2. Jalankan perintah yang hanya perlu di run saat runtime
             docker exec sb_app php artisan migrate --force
-            docker exec sb_app npm install
-            docker exec sb_app npm run build
             
-            # Optimasi Cache
+            # 3. Optimasi Cache Laravel
             docker exec sb_app php artisan config:cache
             docker exec sb_app php artisan route:cache
             docker exec sb_app php artisan view:cache
             
-            # Opsional: Restart Nginx container agar config baru termuat
-            docker restart sb_nginx
+            # 4. Hapus image lama yang tidak terpakai (menghemat disk VPS)
+            docker image prune -f
             
             echo "Deployment finished successfully!"
