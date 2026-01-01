@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->integer('rating_star');
             $table->text('description');
-            $table->string('image_url')->nullable();
             $table->foreignId('transaction_id')->constrained('transactions')->onDelete('cascade');
             $table->timestamps();
         });

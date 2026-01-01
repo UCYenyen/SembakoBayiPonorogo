@@ -13,7 +13,6 @@ class Testimony extends Model
         'transaction_id',
         'rating',
         'description',
-        'image_url',
     ];
     public function transaction()
     {

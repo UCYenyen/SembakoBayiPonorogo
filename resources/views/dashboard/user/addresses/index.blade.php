@@ -1,13 +1,13 @@
 @extends('layouts.app')
 @section('title', 'My Addresses')
 @section('content')
-    <main class="bg-[#FFF3F3] text-[#3F3142] min-h-screen py-8">
-        <div class="w-[90%] lg:w-[80%] mx-auto">
+    <main class="bg-[#FFF3F3] text-[#3F3142] min-h-[80vh] py-8">
+        <div class="w-[80%] mx-auto h-full min-h-[80vh]">
             <div class="flex justify-between items-center mb-8">
                 <h1 class="text-4xl font-bold">Alamatku</h1>
                 <a href="{{ route('user.addresses.create') }}"
                     class="bg-[#3F3142] text-white px-6 py-3 rounded-lg hover:bg-[#5C4B5E] transition-colors font-semibold">
-                    + Tambah Alamat Baru
+                    + Tambah
                 </a>
             </div>
 
@@ -67,7 +67,7 @@
                     @endforeach
                 </div>
             @else
-                <div class="bg-white rounded-lg shadow-md p-12 text-center">
+                <div class="bg-white min-h-[70vh] h-full rounded-lg shadow-md p-12 text-center flex flex-col justify-center items-center">
                     <svg class="w-24 h-24 mx-auto mb-6 text-gray-400" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
