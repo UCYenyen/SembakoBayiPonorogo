@@ -9,7 +9,6 @@ class ShoppingCart extends Model
 {
     use HasFactory;
     
-    // ✅ Add status constants matching migration ENUM values
     const STATUS_ACTIVE = 'active';
     const STATUS_ORDERED = 'ordered';
     const STATUS_CHECKED_OUT = 'checked_out';
@@ -19,7 +18,6 @@ class ShoppingCart extends Model
         'status',
     ];
     
-    // ✅ Set default status
     protected $attributes = [
         'status' => self::STATUS_ACTIVE,
     ];
@@ -34,7 +32,21 @@ class ShoppingCart extends Model
         return $this->hasMany(ShoppingCartItem::class);
     }
     
-    // ✅ Helper methods
+    public function vouchers()
+    {
+        return $this->hasMany(Voucher::class);
+    }
+    
+    // Method untuk menghitung total diskon dari vouchers yang di-preview di cart ini
+    public function getTotalVoucherDiscount()
+    {
+        return $this->vouchers()
+            ->whereNull('transaction_id') // available vouchers only
+            ->with('base_voucher')
+            ->get()
+            ->sum(fn($v) => $v->base_voucher->disc_amt);
+    }
+    
     public function isActive()
     {
         return $this->status === self::STATUS_ACTIVE;

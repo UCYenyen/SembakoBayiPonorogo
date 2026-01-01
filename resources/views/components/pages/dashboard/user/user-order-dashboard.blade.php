@@ -26,7 +26,7 @@
                 Diterima ({{ $statusCounts['delivered'] }})
             </a>
             <a href="{{ route('dashboard', ['status' => 'completed']) }}"
-                class="px-6 py-4 font-semibold border-b-2 whitespace-nowrap {{ in_array($currentStatus, ['delivered', 'completed']) ? 'border-[#3F3142] text-[#3F3142]' : 'border-transparent text-gray-500 hover:text-[#3F3142]' }}">
+                class="px-6 py-4 font-semibold border-b-2 whitespace-nowrap {{ in_array($currentStatus, ['completed']) ? 'border-[#3F3142] text-[#3F3142]' : 'border-transparent text-gray-500 hover:text-[#3F3142]' }}">
                 Selesai ({{ $statusCounts['completed'] }})
             </a>
         </div>

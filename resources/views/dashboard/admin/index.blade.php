@@ -6,8 +6,9 @@
             <div class="grid grid-cols-1 md:grid-cols-2 w-[80%] h-full gap-8">
                 <x-admin-menu-chooser
                     extraClasses="flex flex-col justify-center items-center w-full h-full p-4 gap-4 bg-white shadow-lg rounded-lg"
-                    link="/dashboard/admin/vouchers" title="Atur Event" description="Tambah atau ubah event seperti broadcast atau promo">
-                    <x-gmdi-event class="text-xl max-w-[84px]" />
+                    link="/dashboard/admin/vouchers" title="Atur Voucher" description="Tambah atau ubah event seperti broadcast atau promo">
+                    {{-- <x-gmdi-event class="text-xl max-w-[84px]" /> --}}
+                    <x-ri-ticket-fill class="text-xl max-w-[84px]"/>
                 </x-admin-menu-chooser>
                 <x-admin-menu-chooser
                     extraClasses="flex flex-col justify-center items-center w-full h-full p-4 gap-4 bg-white shadow-lg rounded-lg"

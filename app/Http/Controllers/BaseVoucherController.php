@@ -51,7 +51,10 @@ class BaseVoucherController extends Controller
 
     public function createVoucher()
     {
-        return view('dashboard.admin.vouchers.create');
+        $baseVouchers = BaseVoucher::all();
+        return view('dashboard.admin.vouchers.create', [
+            'allVouchers' => $baseVouchers
+        ]);
     }
 
     public function editVoucher(BaseVoucher $baseVoucher)

@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('base_voucher_id')->constrained('base_vouchers')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('transaction_id')->constrained('transactions')->onDelete('cascade');
-            $table->foreignId('shopping_cart_id')->constrained('shopping_carts')->onDelete('cascade');
+            $table->foreignId('transaction_id')->nullable()->constrained('transactions')->onDelete('cascade');
+            $table->foreignId('shopping_cart_id')->nullable()->constrained('shopping_carts')->onDelete('cascade');
             $table->timestamps();
         });
     }

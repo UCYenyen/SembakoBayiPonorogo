@@ -22,7 +22,6 @@
                         </form>
                     </div>
 
-                    <!-- Order Summary -->
                     <div class="lg:col-span-1">
                         <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
                             <h2 class="text-2xl font-bold mb-6">Ringkasan Pesanan</h2>
@@ -32,6 +31,12 @@
                                     <span class="text-gray-600">Subtotal ({{ $cartItems->count() }} items)</span>
                                     <span class="font-semibold">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
                                 </div>
+                                @if($voucherDiscount > 0)
+                                    <div class="flex justify-between">
+                                        <span>Diskon Voucher</span>
+                                        <span class="font-semibold">-Rp{{ number_format($voucherDiscount, 0, ',', '.') }}</span>
+                                    </div>
+                                @endif
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Pengiriman</span>
                                     <span class="font-semibold">Rp{{ number_format($shippingCost, 0, ',', '.') }}</span>
@@ -58,16 +63,61 @@
                             </a>
 
                             <div class="mt-6 pt-6 border-t">
-                                <h3 class="font-semibold mb-3">Ada voucher?</h3>
-                                <form class="flex gap-2">
-                                    <input type="text" 
-                                           placeholder="Enter code"
-                                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142]">
-                                    <button type="submit" 
-                                            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-semibold">
-                                        Gunakan
-                                    </button>
-                                </form>
+                                <h3 class="font-semibold mb-4 text-lg">Voucher Tersedia</h3>
+                                
+                                @if($availableVouchers->count() > 0)
+                                    <div class="space-y-3 mb-4">
+                                        @foreach($availableVouchers as $voucher)
+                                            <div class="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                                                <div class="flex-1">
+                                                    <p class="font-semibold text-sm">{{ $voucher->base_voucher->name }}</p>
+                                                    <p class="text-xs">Hemat Rp{{ number_format($voucher->base_voucher->disc_amt, 0, ',', '.') }}</p>
+                                                </div>
+                                                <form action="{{ route('cart.voucher.apply') }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="voucher_id" value="{{ $voucher->id }}">
+                                                    <button type="submit" 
+                                                            class="px-4 py-2 bg-[#3F3142] text-white rounded-lg hover:bg-[#5C4B5E] transition-colors text-sm font-semibold whitespace-nowrap">
+                                                        Gunakan
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    
+                                    @if($availableVouchers->hasPages())
+                                        <div class="border-t pt-3 mt-3">
+                                            {{ $availableVouchers->links('vendor.pagination.simple') }}
+                                        </div>
+                                    @endif
+                                @else
+                                    <p class="text-sm text-gray-500 mb-4">Tidak ada voucher tersedia.</p>
+                                @endif
+
+                                @if($appliedVouchers->count() > 0)
+                                    <div class="mt-4 pt-4 border-t">
+                                        <h4 class="font-semibold mb-3 text-sm text-gray-700">Voucher Digunakan:</h4>
+                                        <div class="space-y-2">
+                                            @foreach($appliedVouchers as $voucher)
+                                                <div class="flex items-center justify-between p-3 bg-[#dbdeff]/20 text-black border rounded-lg">
+                                                    <div class="flex-1">
+                                                        <p class="font-semibold text-sm">{{ $voucher->base_voucher->name }}</p>
+                                                        <p class="text-xs">-Rp{{ number_format($voucher->base_voucher->disc_amt, 0, ',', '.') }}</p>
+                                                    </div>
+                                                    <form action="{{ route('cart.voucher.remove') }}" method="POST">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <input type="hidden" name="voucher_id" value="{{ $voucher->id }}">
+                                                        <button type="submit" 
+                                                                class="text-red-600 hover:text-red-800 text-sm font-semibold">
+                                                            Hapus
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -109,5 +159,24 @@
                 input.form.submit();
             }
         }
+
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#3F3142',
+                timer: 2000
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#3F3142',
+            });
+        @endif
     </script>
 @endsection

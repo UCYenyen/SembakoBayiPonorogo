@@ -5,12 +5,6 @@
         <div class="w-[90%] lg:w-[80%] mx-auto">
             <h1 class="text-4xl font-bold mb-8">Bayar</h1>
 
-            @if (session('error'))
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                    {{ session('error') }}
-                </div>
-            @endif
-
             <form id="checkoutForm" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 @csrf
                 <input type="hidden" name="delivery_id" id="delivery_id" required>
@@ -24,7 +18,7 @@
                             <div class="space-y-3">
                                 @foreach ($addresses as $address)
                                     <label
-                                        class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {{ $address->is_default ? 'border-[#3F3142] bg-[#FFF3F3]' : '' }}">
+                                        class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                                         <input type="radio" name="address_id" value="{{ $address->id }}"
                                             class="address-radio" {{ $address->is_default ? 'checked' : '' }} required
                                             onchange="loadShippingOptions()">
@@ -114,6 +108,7 @@
                     </div>
                 </div>
 
+                <!-- Ringkasan Pesanan -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
                         <h2 class="text-2xl font-bold mb-6">Ringkasan Pesanan</h2>
@@ -122,11 +117,48 @@
                                 <span class="text-gray-600">Subtotal</span>
                                 <span class="font-semibold">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
                             </div>
+
+                            @if ($voucherDiscount > 0)
+                                <div class="flex justify-between">
+                                    <span>Diskon Voucher</span>
+                                    <span
+                                        class="font-semibold">-Rp{{ number_format($voucherDiscount, 0, ',', '.') }}</span>
+                                </div>
+                            @endif
+
+
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Pengiriman</span>
                                 <span class="font-semibold" id="shipping-cost-display">Rp0</span>
                             </div>
                         </div>
+
+                        @if ($appliedVouchers->count() > 0)
+                            <div class="flex flex-col gap-2">
+                                <span class="text-gray-600">Voucher</span>
+                                <div class="space-y-3">
+                                    @foreach ($appliedVouchers as $voucher)
+                                        <div class="flex items-center justify-between p-3 bg-[#dbdeff]/20 rounded-lg">
+                                            <div class="flex-1">
+                                                <p class="font-semibold text-sm text-black">
+                                                    {{ $voucher->base_voucher->name }}</p>
+                                                <p class="text-xs text-[#3F3142]">Hemat
+                                                    Rp{{ number_format($voucher->base_voucher->disc_amt, 0, ',', '.') }}
+                                                </p>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <svg class="w-5 h-5 text-[#3F3142]" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
                         <div class="border-t pt-4 mb-6">
                             <div class="flex justify-between items-center">
                                 <span class="text-xl font-bold">Total</span>
@@ -147,10 +179,10 @@
 
     <script>
         const subtotal = {{ $subtotal }};
+        const voucherDiscount = {{ $voucherDiscount }};
         const totalWeight = {{ $cart->items->sum(fn($item) => ($item->product->weight ?? 0) * $item->quantity) }};
         let selectedShippingCost = 0;
 
-        // Mapping courier ke delivery_id sesuai database
         const courierToDeliveryId = {
             'jne': 1,
             'jnt': 2,
@@ -214,17 +246,13 @@
         function updateShippingCost(cost, service, courier) {
             selectedShippingCost = parseInt(cost);
 
-            // Set delivery_price
             document.getElementById('delivery_price').value = selectedShippingCost;
 
-            // Set delivery_id berdasarkan courier yang dipilih
-            const deliveryId = courierToDeliveryId[courier] || 1; // default ke 1 jika tidak ada mapping
+            const deliveryId = courierToDeliveryId[courier] || 1;
             document.getElementById('delivery_id').value = deliveryId;
 
-            // Update tampilan
             document.getElementById('shipping-cost-display').textContent = 'Rp' + formatNumber(selectedShippingCost);
-
-            const grandTotal = subtotal + selectedShippingCost;
+            const grandTotal = subtotal - voucherDiscount + selectedShippingCost;
             document.getElementById('total-display').textContent = 'Rp' + formatNumber(grandTotal);
         }
 
@@ -238,7 +266,6 @@
                 return;
             }
 
-            // Ambil delivery_id dari hidden input yang sudah di-set oleh updateShippingCost
             const deliveryId = document.getElementById('delivery_id').value;
 
             this.disabled = true;
@@ -252,7 +279,7 @@
                     },
                     body: JSON.stringify({
                         address_id: selectedAddress.value,
-                        delivery_id: deliveryId, // Kirim delivery_id yang sudah sesuai
+                        delivery_id: deliveryId,
                         delivery_price: selectedShippingCost,
                         courier: selectedCourier.value
                     })

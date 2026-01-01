@@ -5,38 +5,61 @@ namespace App\Http\Controllers;
 use App\Models\BaseVoucher;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class VoucherController extends Controller
 {
     public function index()
     {
-        $vouchers = BaseVoucher::all();
-        return view('admin.vouchers.index', compact('vouchers'));
+        $user = Auth::user();
+        
+        $activeVouchers = $user->vouchers()
+            ->whereNull('transaction_id')
+            ->with('base_voucher')
+            ->paginate(9);
+        
+        // Hitung total diskon yang tersedia
+        $totalDiscount = $activeVouchers->sum(fn($v) => $v->base_voucher->disc_amt);
+        
+        return view('dashboard.user.vouchers.index', [
+            'activeVouchers' => $activeVouchers,
+            'totalDiscount' => $totalDiscount,
+        ]);
     }
+
     public function create()
     {
-        return view('admin.vouchers.create');
+        $baseVouchers = BaseVoucher::orderBy('points_required', 'asc')->get();
+        
+        return view('dashboard.user.vouchers.create', [
+            'baseVouchers' => $baseVouchers
+        ]);
     }
+
     public function store(Request $request)
     {
         $request->validate([
-            'base_voucher_id' => 'required|exists:base_vouchers,id',
-            'user_id' => 'required|exists:users,id',
+            'base_voucher_id' => 'required|exists:base_vouchers,id'
         ]);
 
-        Voucher::create($request->all());
+        $user = Auth::user();
+        $baseVoucher = BaseVoucher::find($request->base_voucher_id);
 
-        return redirect()->route('admin.vouchers.index')->with('success', 'Voucher created successfully!');
-    }
-    public function update(Request $request, Voucher $voucher)
-    {
-        $request->validate([
-            'transaction_id' => 'nullable|exists:transactions,id',
-            'shopping_cart_id' => 'nullable|exists:shopping_carts,id',
+        if ($user->points < $baseVoucher->points_required) {
+            return redirect()->route('user.vouchers.create')
+                ->with('error', 'Poin Anda tidak cukup untuk membeli voucher ini.');
+        }
+
+        $user->decrement('points', $baseVoucher->points_required);
+
+        Voucher::create([
+            'base_voucher_id' => $baseVoucher->id,
+            'user_id' => $user->id,
+            'transaction_id' => null,
+            'shopping_cart_id' => null
         ]);
 
-        $voucher->update($request->all());
-
-        return redirect()->route('admin.vouchers.index')->with('success', 'Voucher updated successfully!');
+        return redirect()->route('dashboard')
+            ->with('success', 'Voucher berhasil ditukar! Silakan gunakan pada pembelian berikutnya.');
     }
 }

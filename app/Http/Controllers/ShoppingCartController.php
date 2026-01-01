@@ -7,6 +7,7 @@ use App\Models\ShoppingCartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Voucher;
 
 class ShoppingCartController extends Controller
 {
@@ -23,15 +24,30 @@ class ShoppingCartController extends Controller
             ->get();
 
         $subtotal = $cartItems->sum(fn($item) => $item->product->price * $item->quantity);
-        $tax = $subtotal * 0.11;
+        
+        $availableVouchers = $user->vouchers()
+            ->whereNull('transaction_id')
+            ->whereNull('shopping_cart_id')
+            ->with('base_voucher')
+            ->paginate(3, ['*'], 'voucher_page');
+        
+        $appliedVouchers = $cart->vouchers()
+            ->whereNull('transaction_id')
+            ->with('base_voucher')
+            ->get();
+        
+        $voucherDiscount = $cart->getTotalVoucherDiscount();
         $shippingCost = $cartItems->isNotEmpty() ? 15000 : 0;
+        $total = max(0, $subtotal + $shippingCost - $voucherDiscount);
 
         return view('shop.cart.index', [
             'cartItems' => $cartItems,
             'subtotal' => $subtotal,
-            'tax' => $tax,
             'shippingCost' => $shippingCost,
-            'total' => $subtotal + $tax + $shippingCost,
+            'total' => $total,
+            'availableVouchers' => $availableVouchers,
+            'appliedVouchers' => $appliedVouchers,
+            'voucherDiscount' => $voucherDiscount,
         ]);
     }
 
@@ -115,5 +131,50 @@ class ShoppingCartController extends Controller
         }
 
         return back();
+    }
+
+    // Gunakan voucher (set shopping_cart_id untuk preview)
+    public function applyVoucher(Request $request)
+    {
+        $request->validate([
+            'voucher_id' => 'required|exists:vouchers,id'
+        ]);
+
+        $cart = ShoppingCart::where('user_id', Auth::id())
+            ->where('status', ShoppingCart::STATUS_ACTIVE)
+            ->firstOrFail();
+
+        $voucher = Voucher::where('id', $request->voucher_id)
+            ->where('user_id', Auth::id())
+            ->whereNull('transaction_id') // pastikan available
+            ->whereNull('shopping_cart_id') // belum di-preview di cart lain
+            ->firstOrFail();
+
+        // Set shopping_cart_id (preview voucher di cart ini)
+        $voucher->update(['shopping_cart_id' => $cart->id]);
+
+        return back()->with('success', 'Voucher berhasil ditambahkan!');
+    }
+
+    // Hapus voucher dari preview
+    public function removeVoucher(Request $request)
+    {
+        $request->validate([
+            'voucher_id' => 'required|exists:vouchers,id'
+        ]);
+
+        $cart = ShoppingCart::where('user_id', Auth::id())
+            ->where('status', ShoppingCart::STATUS_ACTIVE)
+            ->firstOrFail();
+
+        $voucher = Voucher::where('id', $request->voucher_id)
+            ->where('shopping_cart_id', $cart->id)
+            ->whereNull('transaction_id') // pastikan masih available
+            ->firstOrFail();
+
+        // Hapus shopping_cart_id (remove dari preview)
+        $voucher->update(['shopping_cart_id' => null]);
+
+        return back()->with('success', 'Voucher berhasil dihapus!');
     }
 }

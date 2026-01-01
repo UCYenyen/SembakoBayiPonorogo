@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use App\Models\TransactionItem;
 use App\Models\Address;
 use App\Models\ShoppingCartItem;
+use App\Models\Voucher;
 use Midtrans\Config;
 use Midtrans\Snap;
 
@@ -27,7 +28,7 @@ class PaymentController extends Controller
     {
         $cart = ShoppingCart::where('user_id', Auth::id())
             ->where('status', 'active')
-            ->with(['items.product'])
+            ->with(['items.product', 'vouchers.base_voucher'])
             ->first();
 
         if (!$cart || $cart->items->isEmpty()) {
@@ -41,11 +42,22 @@ class PaymentController extends Controller
             return $item->product->price * $item->quantity;
         });
 
+        // Hitung diskon voucher
+        $voucherDiscount = $cart->getTotalVoucherDiscount();
+        
+        // Get applied vouchers
+        $appliedVouchers = $cart->vouchers()
+            ->whereNull('transaction_id')
+            ->with('base_voucher')
+            ->get();
+
         return view('shop.payment.index', [
             'cart' => $cart,
             'addresses' => $addresses,
             'subtotal' => $subtotal,
-            'total' => $subtotal,
+            'voucherDiscount' => $voucherDiscount,
+            'appliedVouchers' => $appliedVouchers,
+            'total' => $subtotal - $voucherDiscount,
         ]);
     }
 
@@ -60,29 +72,41 @@ class PaymentController extends Controller
 
         $cart = ShoppingCart::where('user_id', Auth::id())
             ->where('status', 'active')
-            ->with(['items.product'])
+            ->with(['items.product', 'vouchers.base_voucher'])
             ->first();
 
         if (!$cart || $cart->items->isEmpty()) {
-            return response()->json(['error' => 'Cart empty'], 400);
+            return response()->json(['error' => 'Cart is empty'], 400);
         }
 
-        $subtotal = $cart->items->sum(fn($i) => $i->product->price * $i->quantity);
-        $totalPrice = (int) ($subtotal + $request->delivery_price);
+        // Hitung subtotal
+        $subtotal = $cart->items->sum(fn($item) => $item->product->price * $item->quantity);
+        
+        // Hitung diskon voucher
+        $voucherDiscount = $cart->getTotalVoucherDiscount();
+        
+        // Total setelah diskon voucher (disimpan di total_price)
+        $totalPrice = $subtotal - $voucherDiscount;
+        
+        // Total yang dibayar ke Midtrans (total_price + delivery)
+        $totalBill = $totalPrice + $validated['delivery_price'];
 
+        // Create transaction (order_id auto-generate dari UUID database)
         $transaction = Transaction::create([
             'user_id' => Auth::id(),
-            'address_id' => $request->address_id,
+            'address_id' => $validated['address_id'],
             'shopping_cart_id' => $cart->id,
-            'delivery_id' => $request->delivery_id,
+            'delivery_id' => $validated['delivery_id'],
             'payment_method' => 'Pending',
-            'delivery_price' => $request->delivery_price,
-            'total_price' => $totalPrice,
+            'delivery_price' => $validated['delivery_price'],
+            'total_price' => $totalPrice, // Subtotal setelah diskon voucher
             'status' => Transaction::STATUS_PENDING_PAYMENT,
         ]);
 
+        // Refresh untuk dapat order_id yang auto-generate
         $transaction->refresh();
 
+        // Create transaction items
         foreach ($cart->items as $item) {
             TransactionItem::create([
                 'transaction_id' => $transaction->id,
@@ -90,13 +114,25 @@ class PaymentController extends Controller
                 'quantity' => $item->quantity,
                 'price' => $item->product->price,
             ]);
+            
+            // Kurangi stock
+            $item->product->decrement('stocks', $item->quantity);
         }
+
+        // PENTING: Update vouchers - set transaction_id (voucher jadi USED)
+        Voucher::where('shopping_cart_id', $cart->id)
+            ->whereNull('transaction_id')
+            ->update(['transaction_id' => $transaction->id]);
 
         return $this->generateSnapToken($transaction);
     }
 
     public function finish(Transaction $transaction)
     {
+        if ($transaction->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         if ($transaction->shopping_cart_id) {
             ShoppingCartItem::where('shopping_cart_id', $transaction->shopping_cart_id)->delete();
             $transaction->shopping_cart->update(['status' => ShoppingCart::STATUS_ORDERED]);
@@ -128,12 +164,16 @@ class PaymentController extends Controller
         
         return $this->generateSnapToken($transaction);
     }
+
     private function generateSnapToken(Transaction $transaction)
     {
+        // Total bill yang harus dibayar ke Midtrans
+        $totalBill = $transaction->total_price + $transaction->delivery_price;
+        
         $params = [
             'transaction_details' => [
-                'order_id' => $transaction->order_id,
-                'gross_amount' => (int) $transaction->total_price,
+                'order_id' => $transaction->order_id, // UUID sudah auto-generate dari database
+                'gross_amount' => (int) $totalBill, // Total yang dibayar (sudah termasuk ongkir)
             ],
             'customer_details' => [
                 'first_name' => Auth::user()->name,
@@ -156,7 +196,7 @@ class PaymentController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Midtrans Snap Error: ' . $e->getMessage());
-            return response()->json(['error' => 'Payment failed'], 500);
+            return response()->json(['error' => 'Payment failed: ' . $e->getMessage()], 500);
         }
     }
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\Pages\UserDashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\BaseVoucherController;
+use App\Http\Controllers\VoucherController;
 use App\Http\Middleware\AdminPageGuard;
 
 Route::get('/', [HomeController::class, 'index']);
@@ -52,12 +53,21 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{address}/set-default', [AddressController::class, 'setDefault'])->name('set-default');
     });
 
+    Route::prefix('dashboard/user/vouchers')->name('user.vouchers.')->group(function () {
+        Route::get('/', [VoucherController::class, 'index'])->name('index');
+        Route::get('/create', [VoucherController::class, 'create'])->name('create');
+        Route::post('/store', [VoucherController::class, 'store'])->name('store');
+    });
+
     Route::prefix('cart')->name('cart.')->group(function () {
         Route::get('/', [ShoppingCartController::class, 'index'])->name('index');
         Route::post('/add/{product}', [ShoppingCartController::class, 'addToCart'])->name('add');
         Route::patch('/update/{cartItem}', [ShoppingCartController::class, 'updateQuantity'])->name('update');
         Route::delete('/remove/{cartItem}', [ShoppingCartController::class, 'removeItem'])->name('remove');
         Route::delete('/clear', [ShoppingCartController::class, 'clearCart'])->name('clear');
+
+         Route::post('/voucher/apply', [ShoppingCartController::class, 'applyVoucher'])->name('voucher.apply');
+        Route::delete('/voucher/remove', [ShoppingCartController::class, 'removeVoucher'])->name('voucher.remove');
     });
 
     Route::prefix('payment')->name('payment.')->group(function () {
