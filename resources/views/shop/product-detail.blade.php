@@ -9,7 +9,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div
                                 class="aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                                <img src="{{ asset('storage/' . $product->image_url) }}" alt="{{ $product->name }}"
+                                <img src="{{ $product->image_path }}" alt="{{ $product->name }}"
                                     class="w-full h-full object-cover">
                             </div>
 
@@ -90,9 +90,9 @@
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-2xl font-bold mb-4">Deskripsi Produk</h2>
                         {{-- filepath: resources/views/shop/product-detail.blade.php --}}
-<p class="text-gray-700 leading-relaxed whitespace-pre-line">
-    {!! nl2br(e($product->description)) !!}
-</p>
+                        <p class="text-gray-700 leading-relaxed whitespace-pre-line">
+                            {!! nl2br(e($product->description)) !!}
+                        </p>
                     </div>
 
                     <div class="bg-white rounded-lg shadow-lg p-6">
@@ -166,7 +166,7 @@
                             @foreach ($similarProducts as $similar)
                                 <a href="{{ route('product.show', $similar) }}"
                                     class="flex gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
-                                    <img src="{{ asset('storage/' . $similar->image_url) }}" alt="{{ $similar->name }}"
+                                    <img src="{{ $similar->image_path }}" alt="{{ $similar->name }}"
                                         class="w-20 h-20 object-cover rounded-lg flex-shrink-0">
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-semibold text-sm mb-1 truncate">{{ $similar->name }}</h4>
