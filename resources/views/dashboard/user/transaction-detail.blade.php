@@ -195,7 +195,7 @@
                         <div class="space-y-4">
                             @foreach ($transaction->transaction_items as $item)
                                 <div class="flex gap-4 pb-4 border-b last:border-b-0">
-                                    <img src="{{ asset('storage/' . $item->product->image_url) }}"
+                                    <img src="{{ $item->product->image_path }}"
                                         alt="{{ $item->product->name }}" class="w-24 h-24 object-cover rounded-lg">
                                     <div class="flex-1">
                                         <h4 class="font-semibold text-lg mb-1">{{ $item->product->name }}</h4>

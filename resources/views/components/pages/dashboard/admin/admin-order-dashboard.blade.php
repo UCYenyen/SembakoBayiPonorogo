@@ -65,7 +65,7 @@
                     <div class="px-6">
                         @foreach ($transaction->transaction_items->take(3) as $item)
                             <div class="flex gap-4 mb-4 last:mb-0">
-                                <img src="{{ asset('storage/' . $item->product->image_url) }}"
+                                <img src="{{ $item->product->image_path }}"
                                     alt="{{ $item->product->name }}" class="w-16 h-16 object-cover rounded-lg">
                                 <div class="flex-1">
                                     <h4 class="font-semibold text-sm">{{ $item->product->name }}</h4>

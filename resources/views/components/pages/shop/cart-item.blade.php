@@ -3,7 +3,7 @@
     <div class="flex gap-6">
         <!-- Product Image -->
         <div class="w-32 h-32 flex-shrink-0">
-            <img src="{{ asset('storage/' . $item->product->image_url) }}" alt="{{ $item->product->name }}"
+            <img src="{{ $item->product->image_path }}" alt="{{ $item->product->name }}"
                 class="w-full h-full object-cover rounded-lg">
         </div>
 

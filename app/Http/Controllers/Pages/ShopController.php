@@ -25,7 +25,35 @@ class ShopController extends Controller
         }
 
         if ($request->has('categories') && !empty($request->categories)) {
-            $query->whereIn('category_id', $request->categories);
+            $selectedCategories = $request->categories;
+            $allCategoryIds = [];
+            
+            foreach ($selectedCategories as $categoryId) {
+                $allCategoryIds[] = $categoryId;
+                
+                $category = Category::find($categoryId);
+                if ($category && $category->children->count() > 0) {
+                    // Cek apakah ada child dari kategori ini yang juga dipilih
+                    $childIds = $category->children->pluck('id')->toArray();
+                    $hasSelectedChild = !empty(array_intersect($childIds, $selectedCategories));
+                    
+                    // Hanya tambahkan children jika tidak ada child yang dipilih secara eksplisit
+                    if (!$hasSelectedChild) {
+                        foreach ($category->children as $child) {
+                            $allCategoryIds[] = $child->id;
+                            
+                            // Jika ada sub-child (level 3)
+                            if ($child->children->count() > 0) {
+                                foreach ($child->children as $subChild) {
+                                    $allCategoryIds[] = $subChild->id;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            $query->whereIn('category_id', array_unique($allCategoryIds));
         }
 
         if ($request->has('brands') && !empty($request->brands)) {
@@ -57,7 +85,10 @@ class ShopController extends Controller
 
         $products = $query->paginate(12)->withQueryString();
 
-        $categories = Category::where('level', '1')->with('children')->get();
+        $categories = Category::whereNull('parent_id')
+            ->with(['children.children'])
+            ->get();
+        
         $brands = Brand::all();
 
         return view('shop.index', [

@@ -33,29 +33,7 @@
                                 <h3 class="font-semibold text-lg mb-4">Kategori</h3>
                                 <div class="space-y-2 max-h-64 overflow-y-auto">
                                     @foreach ($categories as $category)
-                                        <div>
-                                            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                                                <input type="checkbox" name="categories[]" value="{{ $category->id }}"
-                                                    {{ in_array($category->id, request('categories', [])) ? 'checked' : '' }}
-                                                    onchange="document.getElementById('filterForm').submit()"
-                                                    class="w-4 h-4 text-[#3F3142] border-gray-300 rounded focus:ring-[#3F3142]">
-                                                <span class="text-sm">{{ $category->name }}</span>
-                                            </label>
-
-                                            @if ($category->children->count() > 0)
-                                                <div class="ml-6 mt-1 space-y-1">
-                                                    @foreach ($category->children as $subCategory)
-                                                        <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                                                            <input type="checkbox" name="categories[]" value="{{ $subCategory->id }}"
-                                                                {{ in_array($subCategory->id, request('categories', [])) ? 'checked' : '' }}
-                                                                onchange="document.getElementById('filterForm').submit()"
-                                                                class="w-3 h-3 text-[#3F3142] border-gray-300 rounded focus:ring-[#3F3142]">
-                                                            <span class="text-xs text-gray-600">{{ $subCategory->name }}</span>
-                                                        </label>
-                                                    @endforeach
-                                                </div>
-                                            @endif
-                                        </div>
+                                        <x-category-filter-item :category="$category" />
                                     @endforeach
                                 </div>
                             </div>
@@ -81,9 +59,12 @@
                                     <select name="sort"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3F3142]"
                                         onchange="updateSort(this.value)">
-                                        <option value="" {{ request('sort') == '' ? 'selected' : '' }}>Urutkan</option>
-                                        <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Harga: Rendah ke Tinggi</option>
-                                        <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Harga: Tinggi ke Rendah</option>
+                                        <option value="" {{ request('sort') == '' ? 'selected' : '' }}>Urutkan
+                                        </option>
+                                        <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>
+                                            Harga: Rendah ke Tinggi</option>
+                                        <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>
+                                            Harga: Tinggi ke Rendah</option>
                                     </select>
                                 </div>
                                 <div class="space-y-3">

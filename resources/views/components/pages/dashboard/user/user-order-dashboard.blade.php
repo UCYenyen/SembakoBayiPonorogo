@@ -69,7 +69,7 @@
                     <div class="px-6 py-4">
                         @foreach ($transaction->transaction_items as $item)
                             <div class="flex gap-4 mb-4 last:mb-0">
-                                <img src="{{ asset('storage/' . $item->product->image_url) }}"
+                                <img src="{{ $item->product->image_path }}"
                                     alt="{{ $item->product->name }}"
                                     class="w-20 h-20 object-cover rounded-lg flex-shrink-0">
                                 <div class="flex-1">

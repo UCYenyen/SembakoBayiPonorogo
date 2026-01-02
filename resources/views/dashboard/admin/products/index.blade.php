@@ -35,7 +35,7 @@
                                     <td class="px-4 py-4 align-middle text-sm text-gray-600">#{{ $product->id }}</td>
                                     <td class="px-4 py-4 align-middle">
                                         <div class="w-16 h-16 overflow-hidden rounded-lg border">
-                                            <img src="{{ asset('storage/' . $product->image_url) }}"
+                                            <img src="{{$product->image_path}}"
                                                 alt="{{ $product->name }}" class="w-full h-full object-cover">
                                         </div>
                                     </td>
