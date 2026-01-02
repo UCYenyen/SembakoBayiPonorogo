@@ -23,6 +23,7 @@ class Product extends Model
         'image_url',
         'category_id',
         'brand_id',
+        'avg_rating',
     ];
     
     public function getImagePathAttribute()

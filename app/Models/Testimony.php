@@ -10,12 +10,16 @@ class Testimony extends Model
     /** @use HasFactory<\Database\Factories\TestimoniesFactory> */
     use HasFactory;
     protected $fillable = [
-        'transaction_id',
+        'transaction_item_id',
         'rating',
         'description',
     ];
-    public function transaction()
+    public function transactionItem()
     {
-        return $this->belongsTo(Transaction::class);
+        return $this->belongsTo(TransactionItem::class);
+    }
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
     }
 }

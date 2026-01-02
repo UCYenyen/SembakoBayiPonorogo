@@ -245,10 +245,10 @@
 
         function updateShippingCost(cost, service, courier) {
             selectedShippingCost = parseInt(cost);
-
             document.getElementById('delivery_price').value = selectedShippingCost;
 
-            const deliveryId = courierToDeliveryId[courier] || 1;
+            // Convert courier ke lowercase untuk match dengan object key
+            const deliveryId = courierToDeliveryId[courier.toLowerCase()];
             document.getElementById('delivery_id').value = deliveryId;
 
             document.getElementById('shipping-cost-display').textContent = 'Rp' + formatNumber(selectedShippingCost);
