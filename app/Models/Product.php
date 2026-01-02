@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
@@ -20,17 +21,21 @@ class Product extends Model
         'discount_amount',
         'is_on_sale',
         'image_url',
-        'image_public_id',
         'category_id',
         'brand_id',
     ];
-
-    // public function resolveRouteBinding($value, $field = null)
-    // {
-    //     return $this->with(['category', 'brand'])
-    //         ->where($field ?? 'id', $value)
-    //         ->firstOrFail();
-    // }
+    
+    public function getImagePathAttribute()
+    {
+        if (Storage::disk('public')->exists($this->image_url)) {
+            return asset('storage/' . $this->image_url);
+        }
+        $publicPath = 'images/products/' . basename($this->image_url);
+        if (file_exists(public_path($publicPath))) {
+            return asset($publicPath);
+        }
+        return asset('images/placeholder.jpg');
+    }
     
     public function category()
     {

@@ -13,11 +13,15 @@ class BrandsSeeder extends Seeder
      */
     public function run(): void
     {
-        Brand::create([
-            'name' => 'Yummy Bites',
-        ]);
-        Brand::create([
-            'name' => 'Mamaku Bites',
-        ]);
+         $brands = [
+            ['name' => 'Yummy Bites'],
+            ['name' => 'Bumbu Bunda Elia'],
+            ['name' => 'Milna'],
+            ['name' => 'Baby Safe'],
+        ];
+
+        foreach ($brands as $brand) {
+            Brand::create($brand);
+        }
     }
 }

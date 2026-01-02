@@ -89,7 +89,10 @@
 
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-2xl font-bold mb-4">Deskripsi Produk</h2>
-                        <p class="text-gray-700 leading-relaxed">{{ $product->description }}</p>
+                        {{-- filepath: resources/views/shop/product-detail.blade.php --}}
+<p class="text-gray-700 leading-relaxed whitespace-pre-line">
+    {!! nl2br(e($product->description)) !!}
+</p>
                     </div>
 
                     <div class="bg-white rounded-lg shadow-lg p-6">
