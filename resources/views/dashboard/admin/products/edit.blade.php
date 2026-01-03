@@ -75,7 +75,7 @@
                         @if ($product->image_url)
                             <div class="mb-2">
                                 <p class="text-xs text-gray-500 mb-1">Gambar saat ini:</p>
-                                <img src="{{$product->image_path) }}"
+                                <img src="{{$product->image_path }}"
                                     class="w-full h-auto object-cover rounded border" alt="">
                             </div>
                         @endif

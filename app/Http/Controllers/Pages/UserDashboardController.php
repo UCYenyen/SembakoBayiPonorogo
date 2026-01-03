@@ -14,7 +14,13 @@ class UserDashboardController extends Controller
         $user = Auth::user();
         $status = $request->get('status', 'all');
 
-        $query = Transaction::with(['transaction_items.product', 'delivery', 'address'])
+        // Add 'transaction_items.testimony' to eager load testimony relationship
+        $query = Transaction::with([
+            'transaction_items.product',
+            'transaction_items.testimony',  // Added this line
+            'delivery',
+            'address'
+        ])
             ->where('user_id', $user->id)
             ->latest();
 
@@ -57,7 +63,7 @@ class UserDashboardController extends Controller
             'transactions' => $transactions,
             'statusCounts' => $statusCounts,
             'currentStatus' => $status,
-            'voucherData' => $voucherData, 
+            'voucherData' => $voucherData,
         ]);
     }
 

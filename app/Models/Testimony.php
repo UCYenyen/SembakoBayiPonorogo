@@ -11,7 +11,7 @@ class Testimony extends Model
     use HasFactory;
     protected $fillable = [
         'transaction_item_id',
-        'rating',
+        'rating_star',
         'description',
     ];
     public function transactionItem()
@@ -21,5 +21,9 @@ class Testimony extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+    public function images()
+    {
+        return $this->hasMany(ImageTestimony::class);
     }
 }

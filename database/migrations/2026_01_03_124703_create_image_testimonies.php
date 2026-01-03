@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('testimonies', function (Blueprint $table) {
+        Schema::create('image_testimonies', function (Blueprint $table) {
             $table->id();
-            $table->integer('rating_star');
-            $table->text('description');
-            $table->foreignId('transaction_item_id')->constrained('transaction_items')->onDelete('cascade');
+            $table->string('image_url');
+            $table->foreignId('testimony_id')->constrained('testimonies')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -25,9 +24,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('testimonies', function (Blueprint $table) {
-            $table->dropForeign(['transaction_item_id']);
+        Schema::table('image_testimonies', function (Blueprint $table) {
+            $table->dropForeign(['testimony_id']);
         });
-        Schema::dropIfExists('testimonies');
+        Schema::dropIfExists('image_testimonies');
     }
 };

@@ -15,6 +15,7 @@ use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\Pages\UserDashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\BaseVoucherController;
+use App\Http\Controllers\TestimoniesController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Middleware\AdminPageGuard;
 
@@ -53,6 +54,16 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{address}/set-default', [AddressController::class, 'setDefault'])->name('set-default');
     });
 
+    Route::prefix('dashboard/user/testimonies')->name('user.testimonies.')->group(function () {
+        Route::get('/create/{transactionItem}', [TestimoniesController::class, 'create'])->name('create');
+        Route::post('/store', [TestimoniesController::class, 'store'])->name('store');
+        Route::get('/view/{testimony}', [TestimoniesController::class, 'show'])->name('show');
+        Route::get('/edit/{testimony}', [TestimoniesController::class, 'edit'])->name('edit');
+        Route::patch('/update/{testimony}', [TestimoniesController::class, 'update'])->name('update');
+        Route::delete('/delete/{testimony}', [TestimoniesController::class, 'destroy'])->name('destroy');
+    });
+
+
     Route::prefix('dashboard/user/vouchers')->name('user.vouchers.')->group(function () {
         Route::get('/', [VoucherController::class, 'index'])->name('index');
         Route::get('/create', [VoucherController::class, 'create'])->name('create');
@@ -66,7 +77,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/remove/{cartItem}', [ShoppingCartController::class, 'removeItem'])->name('remove');
         Route::delete('/clear', [ShoppingCartController::class, 'clearCart'])->name('clear');
 
-         Route::post('/voucher/apply', [ShoppingCartController::class, 'applyVoucher'])->name('voucher.apply');
+        Route::post('/voucher/apply', [ShoppingCartController::class, 'applyVoucher'])->name('voucher.apply');
         Route::delete('/voucher/remove', [ShoppingCartController::class, 'removeVoucher'])->name('voucher.remove');
     });
 
