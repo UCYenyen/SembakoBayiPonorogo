@@ -39,11 +39,11 @@
 
                                 <div class="border-t border-b py-4">
                                     <p class="text-4xl font-bold text-[#3F3142]">
-                                        Rp{{ number_format($product->price, 0, ',', '.') }}
+                                        Rp{{ number_format($product->price - $product->discount_amount, 0, ',', '.') }}
                                     </p>
                                     @if ($product->is_on_sale && $product->discount_amount > 0)
                                         <p class="text-gray-500 line-through text-xl">
-                                            Rp{{ number_format($product->price + $product->discount_amount, 0, ',', '.') }}
+                                            Rp{{ number_format($product->price, 0, ',', '.') }}
                                         </p>
                                         <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                                             Hemat Rp{{ number_format($product->discount_amount, 0, ',', '.') }}

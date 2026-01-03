@@ -63,8 +63,22 @@
                         <div class="space-y-4">
                             @foreach ($transaction->transaction_items as $item)
                                 <div class="flex gap-4 pb-4 border-b last:border-b-0">
-                                    <img src="{{$item->product->image_path}}"
-                                        alt="{{ $item->product->name }}" class="w-24 h-24 object-cover rounded-lg">
+                                    <div class="relative">
+                                        <img src="{{ $item->product->image_path }}" alt="{{ $item->product->name }}"
+                                            class="w-24 h-24 object-cover rounded-lg">
+                                        @if ($transaction->isCompleted() && $item->testimony)
+                                            <div
+                                                class="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur-sm shadow-md flex items-center gap-1 rounded-lg">
+                                                <svg class="w-4 h-4 text-yellow-400" fill="currentColor"
+                                                    viewBox="0 0 20 20">
+                                                    <path
+                                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.38-2.454a1 1 0 00-1.175 0l-3.38 2.454c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.05 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z" />
+                                                </svg>
+                                                <span
+                                                    class="font-bold text-xs text-yellow-600">{{ $item->testimony->rating_star }}/5</span>
+                                            </div>
+                                        @endif
+                                    </div>
                                     <div class="flex-1">
                                         <h4 class="font-semibold text-lg mb-1">{{ $item->product->name }}</h4>
                                         <div class="flex justify-between items-center">
@@ -75,6 +89,25 @@
                                         </div>
                                     </div>
                                 </div>
+                                @if ($transaction->isCompleted())
+                                    <div class="mt-4 pt-3 border-t border-gray-50 flex flex-wrap gap-2">
+                                        @if ($item->testimony)
+                                            <a href="{{ route('user.testimonies.show', $item->testimony) }}"
+                                                class="flex-1 text-center px-3 py-2 bg-transparent border-[#3F3142] border-2 text-[#3F3142] hover:text-white rounded-lg font-semibold hover:bg-[#3F3142] transition-colors text-xs whitespace-nowrap">
+                                                Lihat Ulasan
+                                            </a>
+                                            <a href="{{ route('user.testimonies.edit', $item->testimony) }}"
+                                                class="flex-1 text-center px-3 py-2 bg-[#3F3142] text-white rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors text-xs whitespace-nowrap">
+                                                Edit
+                                            </a>
+                                        @else
+                                            <a href="{{ route('user.testimonies.create', $item) }}"
+                                                class="w-full text-center px-4 py-2 bg-[#3F3142] text-white rounded-lg font-semibold hover:bg-[#5C4B5E] transition-colors text-sm">
+                                                Ulas Produk
+                                            </a>
+                                        @endif
+                                    </div>
+                                @endif
                             @endforeach
                         </div>
                     </div>

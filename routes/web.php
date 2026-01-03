@@ -18,6 +18,7 @@ use App\Http\Controllers\BaseVoucherController;
 use App\Http\Controllers\TestimoniesController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Middleware\AdminPageGuard;
+use App\Http\Middleware\RequireSpesificUser;
 
 Route::get('/', [HomeController::class, 'index']);
 
@@ -41,53 +42,55 @@ Route::middleware('auth')->group(function () {
     Route::patch('/dashboard/user/transactions/{transaction}/complete', [TransactionController::class, 'complete'])
         ->name('user.transaction.complete');
 
-    Route::prefix('dashboard/user/addresses')->name('user.addresses.')->group(function () {
-        Route::get('/cities/{provinceId}', [AddressController::class, 'getCities'])->name('cities');
-        Route::get('/districts/{cityId}', [AddressController::class, 'getDistricts'])->name('districts');
-        Route::get('/sub-districts/{districtId}', [AddressController::class, 'getSubDistricts'])->name('sub-districts');
-        Route::get('/', [AddressController::class, 'index'])->name('index');
-        Route::get('/create', [AddressController::class, 'create'])->name('create');
-        Route::post('/create', [AddressController::class, 'store'])->name('store');
-        Route::get('/{address}/edit', [AddressController::class, 'edit'])->name('edit');
-        Route::put('/{address}', [AddressController::class, 'update'])->name('update');
-        Route::delete('/{address}', [AddressController::class, 'destroy'])->name('destroy');
-        Route::patch('/{address}/set-default', [AddressController::class, 'setDefault'])->name('set-default');
-    });
-
-    Route::prefix('dashboard/user/testimonies')->name('user.testimonies.')->group(function () {
-        Route::get('/create/{transactionItem}', [TestimoniesController::class, 'create'])->name('create');
-        Route::post('/store', [TestimoniesController::class, 'store'])->name('store');
-        Route::get('/view/{testimony}', [TestimoniesController::class, 'show'])->name('show');
-        Route::get('/edit/{testimony}', [TestimoniesController::class, 'edit'])->name('edit');
-        Route::patch('/update/{testimony}', [TestimoniesController::class, 'update'])->name('update');
-        Route::delete('/delete/{testimony}', [TestimoniesController::class, 'destroy'])->name('destroy');
-    });
-
-
     Route::prefix('dashboard/user/vouchers')->name('user.vouchers.')->group(function () {
         Route::get('/', [VoucherController::class, 'index'])->name('index');
         Route::get('/create', [VoucherController::class, 'create'])->name('create');
         Route::post('/store', [VoucherController::class, 'store'])->name('store');
     });
 
-    Route::prefix('cart')->name('cart.')->group(function () {
-        Route::get('/', [ShoppingCartController::class, 'index'])->name('index');
-        Route::post('/add/{product}', [ShoppingCartController::class, 'addToCart'])->name('add');
-        Route::patch('/update/{cartItem}', [ShoppingCartController::class, 'updateQuantity'])->name('update');
-        Route::delete('/remove/{cartItem}', [ShoppingCartController::class, 'removeItem'])->name('remove');
-        Route::delete('/clear', [ShoppingCartController::class, 'clearCart'])->name('clear');
+    Route::middleware(RequireSpesificUser::class)->group(function () {
+        Route::prefix('dashboard/user/addresses')->name('user.addresses.')->group(function () {
+            Route::get('/', [AddressController::class, 'index'])->name('index');
+            Route::get('/create', [AddressController::class, 'create'])->name('create');
+            Route::post('/create', [AddressController::class, 'store'])->name('store');
+            Route::get('/{address}/edit', [AddressController::class, 'edit'])->name('edit');
+            Route::patch('/{address}/set-default', [AddressController::class, 'setDefault'])->name('set-default');
+            Route::put('/{address}', [AddressController::class, 'update'])->name('update');
+            Route::delete('/{address}', [AddressController::class, 'destroy'])->name('destroy');
+            Route::get('/cities/{provinceId}', [AddressController::class, 'getCities'])->name('cities');
+            Route::get('/districts/{cityId}', [AddressController::class, 'getDistricts'])->name('districts');
+            Route::get('/sub-districts/{districtId}', [AddressController::class, 'getSubDistricts'])->name('sub-districts');
+        });
 
-        Route::post('/voucher/apply', [ShoppingCartController::class, 'applyVoucher'])->name('voucher.apply');
-        Route::delete('/voucher/remove', [ShoppingCartController::class, 'removeVoucher'])->name('voucher.remove');
-    });
+        Route::prefix('dashboard/user/testimonies')->name('user.testimonies.')->group(function () {
+            Route::get('/create/{transactionItem}', [TestimoniesController::class, 'create'])->name('create');
+            Route::post('/store', [TestimoniesController::class, 'store'])->name('store');
+            Route::get('/view/{testimony}', [TestimoniesController::class, 'show'])->name('show');
+            Route::get('/edit/{testimony}', [TestimoniesController::class, 'edit'])->name('edit');
+            Route::patch('/update/{testimony}', [TestimoniesController::class, 'update'])->name('update');
+            Route::delete('/delete/{testimony}', [TestimoniesController::class, 'destroy'])->name('destroy');
+        });
 
-    Route::prefix('payment')->name('payment.')->group(function () {
-        Route::get('/', [PaymentController::class, 'index'])->name('checkout');
-        Route::post('/process', [PaymentController::class, 'processPayment'])->name('process');
-        Route::get('/finish/{transaction}', [PaymentController::class, 'finish'])->name('finish');
-        Route::get('/unfinish/{transaction}', [PaymentController::class, 'unfinish'])->name('unfinish');
-        Route::post('/retry/{transaction}', [PaymentController::class, 'retryPayment'])->name('retry');
-        Route::get('/check-status', [PaymentController::class, 'checkStatus'])->name('check-status');
+
+        Route::prefix('payment')->name('payment.')->group(function () {
+            Route::get('/', [PaymentController::class, 'index'])->name('checkout');
+            Route::post('/process', [PaymentController::class, 'processPayment'])->name('process');
+            Route::get('/finish/{transaction}', [PaymentController::class, 'finish'])->name('finish');
+            Route::get('/unfinish/{transaction}', [PaymentController::class, 'unfinish'])->name('unfinish');
+            Route::post('/retry/{transaction}', [PaymentController::class, 'retryPayment'])->name('retry');
+            Route::get('/check-status', [PaymentController::class, 'checkStatus'])->name('check-status');
+        });
+
+        Route::prefix('cart')->name('cart.')->group(function () {
+            Route::get('/', [ShoppingCartController::class, 'index'])->name('index');
+            Route::post('/add/{product}', [ShoppingCartController::class, 'addToCart'])->name('add');
+            Route::patch('/update/{cartItem}', [ShoppingCartController::class, 'updateQuantity'])->name('update');
+            Route::delete('/remove/{cartItem}', [ShoppingCartController::class, 'removeItem'])->name('remove');
+            Route::delete('/clear', [ShoppingCartController::class, 'clearCart'])->name('clear');
+
+            Route::post('/voucher/apply', [ShoppingCartController::class, 'applyVoucher'])->name('voucher.apply');
+            Route::delete('/voucher/remove', [ShoppingCartController::class, 'removeVoucher'])->name('voucher.remove');
+        });
     });
 
     Route::get('/check-ongkir/{address}', [DeliveryController::class, 'checkOngkir']);

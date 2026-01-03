@@ -24,7 +24,11 @@ class AddressController extends Controller
         $provinces = collect(config('rajaongkir.provinces'));
         return view('dashboard.user.addresses.create', compact('provinces'));
     }
-
+    public function edit(Address $address)
+    {
+        $provinces = collect(config('rajaongkir.provinces'));
+        return view('dashboard.user.addresses.edit', compact('address', 'provinces'));
+    }
     public function store(Request $request)
     {
         $request->validate([
@@ -71,12 +75,10 @@ class AddressController extends Controller
     }
     public function getGeoLocation($province, $city, $district, $subdistrict)
     {
-        // Menyusun alamat tanpa extra_detail
         $address = "$subdistrict, $district, $city, $province, Indonesia";
 
-        // Menggunakan Laravel HTTP Client (lebih bersih)
         $response = Http::withHeaders([
-            'User-Agent' => 'AplikasiTokoSaya (admin@domain.com)' // Wajib diisi untuk Nominatim
+            'User-Agent' => 'AplikasiTokoSaya (admin@domain.com)'
         ])->timeout(10)->get('https://nominatim.openstreetmap.org/search', [
             'q' => $address,
             'format' => 'json',

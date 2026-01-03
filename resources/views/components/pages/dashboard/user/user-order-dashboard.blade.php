@@ -106,7 +106,7 @@
                                         <div class="mt-4 pt-3 border-t border-gray-50 flex flex-wrap gap-2">
                                             @if ($item->testimony)
                                                 <a href="{{ route('user.testimonies.show', $item->testimony) }}"
-                                                    class="flex-1 text-center px-3 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors text-xs whitespace-nowrap">
+                                                    class="flex-1 text-center px-3 py-2 bg-transparent border-[#3F3142] border-2 text-[#3F3142] hover:text-white rounded-lg font-semibold hover:bg-[#3F3142] transition-colors text-xs whitespace-nowrap">
                                                     Lihat Ulasan
                                                 </a>
                                                 <a href="{{ route('user.testimonies.edit', $item->testimony) }}"

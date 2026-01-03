@@ -133,7 +133,6 @@ class ShoppingCartController extends Controller
         return back();
     }
 
-    // Gunakan voucher (set shopping_cart_id untuk preview)
     public function applyVoucher(Request $request)
     {
         $request->validate([
@@ -146,17 +145,15 @@ class ShoppingCartController extends Controller
 
         $voucher = Voucher::where('id', $request->voucher_id)
             ->where('user_id', Auth::id())
-            ->whereNull('transaction_id') // pastikan available
-            ->whereNull('shopping_cart_id') // belum di-preview di cart lain
+            ->whereNull('transaction_id')
+            ->whereNull('shopping_cart_id')
             ->firstOrFail();
 
-        // Set shopping_cart_id (preview voucher di cart ini)
         $voucher->update(['shopping_cart_id' => $cart->id]);
 
         return back()->with('success', 'Voucher berhasil ditambahkan!');
     }
 
-    // Hapus voucher dari preview
     public function removeVoucher(Request $request)
     {
         $request->validate([
@@ -169,10 +166,9 @@ class ShoppingCartController extends Controller
 
         $voucher = Voucher::where('id', $request->voucher_id)
             ->where('shopping_cart_id', $cart->id)
-            ->whereNull('transaction_id') // pastikan masih available
+            ->whereNull('transaction_id')
             ->firstOrFail();
-
-        // Hapus shopping_cart_id (remove dari preview)
+            
         $voucher->update(['shopping_cart_id' => null]);
 
         return back()->with('success', 'Voucher berhasil dihapus!');

@@ -227,7 +227,7 @@
                                             <span class="text-gray-400">x{{ $item->quantity }}</span>
                                         </span>
                                         <span class="font-medium text-[#3F3142]">
-                                            Rp{{ number_format($item->price * $item->quantity, 0, ',', '.') }}
+                                            Rp{{ number_format(($item->price - $item->discount_amount) * $item->quantity, 0, ',', '.') }}
                                         </span>
                                     </div>
                                 @endforeach

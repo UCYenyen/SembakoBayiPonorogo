@@ -33,11 +33,9 @@ class ShopController extends Controller
                 
                 $category = Category::find($categoryId);
                 if ($category && $category->children->count() > 0) {
-                    // Cek apakah ada child dari kategori ini yang juga dipilih
                     $childIds = $category->children->pluck('id')->toArray();
                     $hasSelectedChild = !empty(array_intersect($childIds, $selectedCategories));
                     
-                    // Hanya tambahkan children jika tidak ada child yang dipilih secara eksplisit
                     if (!$hasSelectedChild) {
                         foreach ($category->children as $child) {
                             $allCategoryIds[] = $child->id;

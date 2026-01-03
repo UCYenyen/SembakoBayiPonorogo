@@ -56,7 +56,7 @@ class DeliveryController extends Controller
                 ]);
             }
 
-            return response()->json(['success' => false, 'message' => 'Gagal terhubung ke kurir'], 500);
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan saat mengambil data pengiriman, Pastikan nomor resi dan kurir sudah benar. Kontak admin jika masalah berlanjut.'], 500);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
