@@ -15,8 +15,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @foreach ($addresses as $address)
                         <div
-                            class="bg-white rounded-lg shadow-md p-6 {{ $address->is_default ? 'border-2 border-[#3F3142]' : '' }}">
-                            <div class="flex justify-between items-start mb-4">
+                            class="bg-white rounded-lg shadow-md p-6 flex flex-col justify-between {{ $address->is_default ? 'border-2 border-[#3F3142]' : '' }}">
+                            <div class="flex justify-between items-baseline mb-4">
                                 <div class="flex-1">
                                     @if ($address->is_default)
                                         <span
