@@ -25,10 +25,6 @@
                 <template x-for="product in results" :key="product.id">
                     <a :href="`/shop/products/${product.id}`"
                         class="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors border-b last:border-b-0">
-                        {{-- Product Image --}}
-                        <img :src="`/storage/${product.image_url}`" :alt="product.name"
-                            class="w-16 h-16 object-cover rounded-lg flex-shrink-0" loading="lazy">
-
                         {{-- Product Info --}}
                         <div class="flex-1 min-w-0">
                             <h3 class="font-semibold text-sm text-gray-900 truncate" x-text="product.name"></h3>
