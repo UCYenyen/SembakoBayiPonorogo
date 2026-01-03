@@ -25,10 +25,14 @@
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <form action="{{ route('user.addresses.update', $address) }}" method="POST" class="space-y-6"
                     x-data="addressEditForm({
-                        oldProvince: '{{ $address->province }}',
-                        oldCity: '{{ $address->city }}',
-                        oldDistrict: '{{ $address->district }}',
-                        oldSubDistrict: '{{ $address->subdistrict }}'
+                        oldProvince: '{{ $address->province_id }}',
+                        oldProvinceName: '{{ $address->province_name }}',
+                        oldCity: '{{ $address->city_id }}',
+                        oldCityName: '{{ $address->city_name }}',
+                        oldDistrict: '{{ $address->district_id }}',
+                        oldDistrictName: '{{ $address->district_name }}',
+                        oldSubDistrict: '{{ $address->subdistrict_id }}',
+                        oldSubDistrictName: '{{ $address->subdistrict_name }}'
                     })"
                     x-init="initEdit()">
                     @csrf
@@ -42,44 +46,44 @@
 
                     <div>
                         <label for="province" class="block text-sm font-medium text-gray-700 mb-1">Provinsi</label>
-                        <select id="province" name="province" x-model="selectedProvince" @change="fetchCities()"
+                        <select id="province" name="province" x-model="selectedProvince" @change="fetchCities()" required
                             class="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm">
                             <option value="">-- Pilih Provinsi --</option>
                             @foreach ($provinces as $province)
-                                <option value="{{ $province['id'] }}">{{ $province['name'] }}</option>
+                                <option value="{{ $province['id'] }}|{{ $province['name'] }}">{{ $province['name'] }}</option>
                             @endforeach
                         </select>
                     </div>
 
                     <div>
                         <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Kota</label>
-                        <select id="city" name="city" x-model="selectedCity" @change="fetchDistricts()" :disabled="!cities.length"
+                        <select id="city" name="city" x-model="selectedCity" @change="fetchDistricts()" :disabled="!cities.length" required
                             class="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-gray-100">
                             <option value="">-- Pilih Kota --</option>
                             <template x-for="city in cities" :key="city.id">
-                                <option :value="city.id" x-text="city.name" :selected="city.id == selectedCity"></option>
+                                <option :value="city.id + '|' + city.name" x-text="city.name"></option>
                             </template>
                         </select>
                     </div>
 
                     <div>
                         <label for="district" class="block text-sm font-medium text-gray-700 mb-1">Kecamatan</label>
-                        <select id="district" name="district" x-model="selectedDistrict" @change="fetchSubDistricts()" :disabled="!districts.length"
+                        <select id="district" name="district" x-model="selectedDistrict" @change="fetchSubDistricts()" :disabled="!districts.length" required
                             class="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-gray-100">
                             <option value="">-- Pilih Kecamatan --</option>
                             <template x-for="district in districts" :key="district.id">
-                                <option :value="district.id" x-text="district.name" :selected="district.id == selectedDistrict"></option>
+                                <option :value="district.id + '|' + district.name" x-text="district.name"></option>
                             </template>
                         </select>
                     </div>
 
                     <div>
                         <label for="subdistrict" class="block text-sm font-medium text-gray-700 mb-1">Kelurahan</label>
-                        <select id="subdistrict" name="subdistrict" x-model="selectedSubDistrict" :disabled="!subDistricts.length"
+                        <select id="subdistrict" name="subdistrict" x-model="selectedSubDistrict" :disabled="!subDistricts.length" required
                             class="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm disabled:bg-gray-100">
                             <option value="">-- Pilih Kelurahan --</option>
                             <template x-for="sd in subDistricts" :key="sd.id">
-                                <option :value="sd.id" x-text="sd.name" :selected="sd.id == selectedSubDistrict"></option>
+                                <option :value="sd.id + '|' + sd.name" x-text="sd.name"></option>
                             </template>
                         </select>
                     </div>
@@ -91,8 +95,9 @@
                     </div>
 
                     <div>
-                        <label for="extra_detail" class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
+                        <label for="extra_detail" class="block text-sm font-medium text-gray-700 mb-1">Jalan</label>
                         <input type="text" id="extra_detail" name="extra_detail" value="{{ old('extra_detail', $address->extra_detail) }}" required
+                            placeholder="Nama, Nomor Jalan. Contoh: Jl. Merdeka No. 10"
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
                     </div>
 
@@ -112,21 +117,34 @@
     <script>
         function addressEditForm(initialData) {
             return {
-                selectedProvince: initialData.oldProvince,
-                selectedCity: initialData.oldCity,
-                selectedDistrict: initialData.oldDistrict,
-                selectedSubDistrict: initialData.oldSubDistrict,
+                selectedProvince: '',
+                selectedCity: '',
+                selectedDistrict: '',
+                selectedSubDistrict: '',
                 cities: [],
                 districts: [],
                 subDistricts: [],
 
                 async initEdit() {
-                    if (this.selectedProvince) {
+                    // Set province dengan format id|name
+                    if (initialData.oldProvince && initialData.oldProvinceName) {
+                        this.selectedProvince = initialData.oldProvince + '|' + initialData.oldProvinceName;
                         await this.fetchCities(true);
-                        if (this.selectedCity) {
+                        
+                        // Set city dengan format id|name setelah cities loaded
+                        if (initialData.oldCity && initialData.oldCityName) {
+                            this.selectedCity = initialData.oldCity + '|' + initialData.oldCityName;
                             await this.fetchDistricts(true);
-                            if (this.selectedDistrict) {
+                            
+                            // Set district dengan format id|name setelah districts loaded
+                            if (initialData.oldDistrict && initialData.oldDistrictName) {
+                                this.selectedDistrict = initialData.oldDistrict + '|' + initialData.oldDistrictName;
                                 await this.fetchSubDistricts(true);
+                                
+                                // Set subdistrict dengan format id|name setelah subdistricts loaded
+                                if (initialData.oldSubDistrict && initialData.oldSubDistrictName) {
+                                    this.selectedSubDistrict = initialData.oldSubDistrict + '|' + initialData.oldSubDistrictName;
+                                }
                             }
                         }
                     }
@@ -134,38 +152,50 @@
 
                 async fetchCities(isInit = false) {
                     if (!this.selectedProvince) return;
+                    const provinceId = this.selectedProvince.split('|')[0];
                     try {
-                        const res = await fetch(`/dashboard/user/addresses/cities/${this.selectedProvince}`);
+                        const res = await fetch(`/dashboard/user/addresses/cities/${provinceId}`);
                         this.cities = await res.json();
+                        
                         if (!isInit) {
                             this.selectedCity = '';
                             this.districts = [];
                             this.subDistricts = [];
                         }
-                    } catch (e) { console.error(e); }
+                    } catch (e) { 
+                        console.error(e); 
+                    }
                 },
 
                 async fetchDistricts(isInit = false) {
                     if (!this.selectedCity) return;
+                    const cityId = this.selectedCity.split('|')[0];
                     try {
-                        const res = await fetch(`/dashboard/user/addresses/districts/${this.selectedCity}`);
+                        const res = await fetch(`/dashboard/user/addresses/districts/${cityId}`);
                         this.districts = await res.json();
+                        
                         if (!isInit) {
                             this.selectedDistrict = '';
                             this.subDistricts = [];
                         }
-                    } catch (e) { console.error(e); }
+                    } catch (e) { 
+                        console.error(e); 
+                    }
                 },
 
                 async fetchSubDistricts(isInit = false) {
                     if (!this.selectedDistrict) return;
+                    const districtId = this.selectedDistrict.split('|')[0];
                     try {
-                        const res = await fetch(`/dashboard/user/addresses/sub-districts/${this.selectedDistrict}`);
+                        const res = await fetch(`/dashboard/user/addresses/sub-districts/${districtId}`);
                         this.subDistricts = await res.json();
+                        
                         if (!isInit) {
                             this.selectedSubDistrict = '';
                         }
-                    } catch (e) { console.error(e); }
+                    } catch (e) { 
+                        console.error(e); 
+                    }
                 }
             }
         }

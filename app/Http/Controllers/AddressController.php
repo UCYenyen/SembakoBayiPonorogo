@@ -29,6 +29,51 @@ class AddressController extends Controller
         $provinces = collect(config('rajaongkir.provinces'));
         return view('dashboard.user.addresses.edit', compact('address', 'provinces'));
     }
+    public function update(Request $request, Address $address)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'province'  => 'required',
+            'city'      => 'required',
+            'district'  => 'required',
+            'subdistrict' => 'required',
+            'postal_code'  => 'required|string|max:20',
+            'extra_detail' => 'required|string|max:500',
+        ]);
+
+        // Split data seperti di store (format: id|name)
+        $provinceData = explode('|', $request->province);
+        $cityData = explode('|', $request->city);
+        $districtData = explode('|', $request->district);
+        $subdistrictData = explode('|', $request->subdistrict);
+
+        // Get geolocation
+        $geoResult = $this->getGeoLocation(
+            $provinceData[1],
+            $cityData[1],
+            $districtData[1],
+            $subdistrictData[1]
+        );
+
+        // Update address dengan field yang sama seperti store
+        $address->update([
+            'name' => $request->name,
+            'province_id' => $provinceData[0],
+            'province_name' => $provinceData[1],
+            'city_id' => $cityData[0],
+            'city_name' => $cityData[1],
+            'district_id' => $districtData[0],
+            'district_name' => $districtData[1],
+            'subdistrict_id' => $subdistrictData[0],
+            'subdistrict_name' => $subdistrictData[1],
+            'postal_code' => $request->postal_code,
+            'extra_detail' => $request->extra_detail,
+            'latitude' => $geoResult['status'] === 'success' ? $geoResult['lat'] : $address->latitude,
+            'longitude' => $geoResult['status'] === 'success' ? $geoResult['lon'] : $address->longitude,
+        ]);
+
+        return redirect()->route('user.addresses.index')->with('success', 'Alamat berhasil diperbarui.');
+    }
     public function store(Request $request)
     {
         $request->validate([
