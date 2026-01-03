@@ -116,7 +116,6 @@ class TestimoniesController extends Controller
                 Log::info('No media files in request');
             }
 
-            // Return based on request type
             if ($request->wantsJson()) {
                 return response()->json(['status' => 'success', 'testimony_id' => $testimony->id], 200);
             }
