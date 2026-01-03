@@ -30,20 +30,27 @@
                                     <span class="text-gray-600">Subtotal ({{ $cartItems->count() }} items)</span>
                                     <span class="font-semibold">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
                                 </div>
+
                                 @foreach ($cartItems as $item)
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Diskon {{ $item->product->name }}</span>
-                                        <span
-                                            class="font-semibold">-Rp{{ number_format($item->discount_amount * $item->quantity, 0, ',', '.') }}</span>
-                                    </div>
+                                    @if ($item->product->discount_amount > 0)
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600 w-[80%]">Diskon {{ $item->product->name }}</span>
+                                            <span class="font-semibold text-gray-600">
+                                                -Rp{{ number_format($item->product->discount_amount * $item->quantity, 0, ',', '.') }}
+                                            </span>
+                                        </div>
+                                    @endif
                                 @endforeach
+
                                 @if ($voucherDiscount > 0)
                                     <div class="flex justify-between">
                                         <span>Diskon Voucher</span>
-                                        <span
-                                            class="font-semibold">-Rp{{ number_format($voucherDiscount, 0, ',', '.') }}</span>
+                                        <span class="font-semibold text-gray-600">
+                                            -Rp{{ number_format($voucherDiscount, 0, ',', '.') }}
+                                        </span>
                                     </div>
                                 @endif
+
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Pengiriman</span>
                                     <span class="font-semibold">Rp{{ number_format($shippingCost, 0, ',', '.') }}</span>

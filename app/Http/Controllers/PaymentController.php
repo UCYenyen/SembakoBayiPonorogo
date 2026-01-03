@@ -39,7 +39,9 @@ class PaymentController extends Controller
         $addresses = Address::where('user_id', Auth::id())->get();
 
         $subtotal = $cart->items->sum(function ($item) {
-            return $item->product->price * $item->quantity;
+            $productPrice = $item->product->price;
+            $discount = $item->product->discount_amount ?? 0;
+            return ($productPrice - $discount) * $item->quantity;
         });
 
         $voucherDiscount = $cart->getTotalVoucherDiscount();
@@ -75,13 +77,14 @@ class PaymentController extends Controller
         if (!$cart || $cart->items->isEmpty()) {
             return response()->json(['error' => 'Cart is empty'], 400);
         }
+        $subtotal = $cart->items->sum(function ($item) {
+            $productPrice = $item->product->price;
+            $discount = $item->product->discount_amount ?? 0;
+            return ($productPrice - $discount) * $item->quantity;
+        });
 
-        $subtotal = $cart->items->sum(fn($item) => ($item->product->price - $item->product->discount_amount) * $item->quantity);
-        
         $voucherDiscount = $cart->getTotalVoucherDiscount();
-        
         $totalPrice = $subtotal - $voucherDiscount;
-        
         $totalBill = $totalPrice + $validated['delivery_price'];
 
         $transaction = Transaction::create([
@@ -91,20 +94,23 @@ class PaymentController extends Controller
             'delivery_id' => $validated['delivery_id'],
             'payment_method' => 'Pending',
             'delivery_price' => $validated['delivery_price'],
-            'total_price' => $totalPrice, 
+            'total_price' => $totalPrice,
             'status' => Transaction::STATUS_PENDING_PAYMENT,
         ]);
 
         $transaction->refresh();
 
         foreach ($cart->items as $item) {
+            $productPrice = $item->product->price;
+            $discount = $item->product->discount_amount ?? 0;
+
             TransactionItem::create([
                 'transaction_id' => $transaction->id,
                 'product_id' => $item->product_id,
                 'quantity' => $item->quantity,
-                'price' => $item->product->price,
+                'price' => $productPrice - $discount, // ✅ Simpan harga setelah diskon
             ]);
-            
+
             $item->product->decrement('stocks', $item->quantity);
         }
 
@@ -149,17 +155,17 @@ class PaymentController extends Controller
                 'transaction_id' => $transaction->id
             ]);
         }
-        
+
         return $this->generateSnapToken($transaction);
     }
 
     private function generateSnapToken(Transaction $transaction)
     {
         $totalBill = $transaction->total_price + $transaction->delivery_price;
-        
+
         $params = [
             'transaction_details' => [
-                'order_id' => $transaction->order_id, 
+                'order_id' => $transaction->order_id,
                 'gross_amount' => (int) $totalBill,
             ],
             'customer_details' => [

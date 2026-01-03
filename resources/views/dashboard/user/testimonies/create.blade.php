@@ -252,10 +252,8 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Terjadi kesalahan saat mengirim ulasan');
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = originalText;
-                    });
+                         window.location.href = "{{ route('dashboard') }}";
+                    })
             });
         });
     </script>

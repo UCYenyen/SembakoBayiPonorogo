@@ -23,19 +23,23 @@ class ShoppingCartController extends Controller
             ->with('product.category', 'product.brand')
             ->get();
 
-        $subtotal = $cartItems->sum(fn($item) => $item->product->price * $item->quantity);
-        
+        $subtotal = $cartItems->sum(function ($item) {
+            $productPrice = $item->product->price;
+            $discount = $item->product->discount_amount ?? 0;
+            return ($productPrice - $discount) * $item->quantity;
+        });
+
         $availableVouchers = $user->vouchers()
             ->whereNull('transaction_id')
             ->whereNull('shopping_cart_id')
             ->with('base_voucher')
             ->paginate(3, ['*'], 'voucher_page');
-        
+
         $appliedVouchers = $cart->vouchers()
             ->whereNull('transaction_id')
             ->with('base_voucher')
             ->get();
-        
+
         $voucherDiscount = $cart->getTotalVoucherDiscount();
         $shippingCost = $cartItems->isNotEmpty() ? 15000 : 0;
         $total = max(0, $subtotal + $shippingCost - $voucherDiscount);
@@ -50,7 +54,6 @@ class ShoppingCartController extends Controller
             'voucherDiscount' => $voucherDiscount,
         ]);
     }
-
     public function addToCart(Request $request, Product $product)
     {
         $request->validate([
@@ -168,7 +171,7 @@ class ShoppingCartController extends Controller
             ->where('shopping_cart_id', $cart->id)
             ->whereNull('transaction_id')
             ->firstOrFail();
-            
+
         $voucher->update(['shopping_cart_id' => null]);
 
         return back()->with('success', 'Voucher berhasil dihapus!');
