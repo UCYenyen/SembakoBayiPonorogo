@@ -40,7 +40,7 @@
                                         @csrf
                                         @method('PATCH')
                                         <button type="submit"
-                                            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-semibold">
+                                            class="px-4 py-2 bg-[#3F3142] text-white rounded-lg hover:bg-[#5C4B5E] transition-colors text-sm font-semibold">
                                             Jadikan Default
                                         </button>
                                     </form>
