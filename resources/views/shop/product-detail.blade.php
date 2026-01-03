@@ -89,7 +89,6 @@
 
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-2xl font-bold mb-4">Deskripsi Produk</h2>
-                        {{-- filepath: resources/views/shop/product-detail.blade.php --}}
                         <p class="text-gray-700 leading-relaxed whitespace-pre-line">
                             {!! nl2br(e($product->description)) !!}
                         </p>
@@ -100,62 +99,91 @@
 
                         <div class="flex items-center gap-8 mb-8 pb-6 border-b">
                             <div class="text-center">
-                                <p class="text-5xl font-bold text-[#3F3142]">4.5</p>
-                                <div class="flex mt-2">
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        <img src="/images/misc/star.svg" alt="star" class="w-5 h-5">
-                                    @endfor
-                                </div>
-                                <p class="text-gray-600 mt-2">127 reviews</p>
+                                @if ($productReviews->isEmpty())
+                                    <p class="text-5xl font-bold text-[#3F3142]">0</p>
+                                    <div class="flex mt-2">
+                                        Belum ada ulasan
+                                    </div>
+                                @else
+                                    <p class="text-5xl font-bold text-[#3F3142]">{{ number_format($averageRating, 1) }}</p>
+                                    <div class="flex mt-2">
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <img src="/images/misc/star.svg" alt="star" class="w-5 h-5 {{ $i <= round($averageRating) ? '' : 'opacity-30' }}">
+                                        @endfor
+                                    </div>
+                                @endif
+                                <p class="text-gray-600 mt-2">{{ $productReviews->count() }} ulasan</p>
                             </div>
 
                             <div class="flex-1">
                                 @foreach ([5, 4, 3, 2, 1] as $star)
+                                    @php
+                                        $count = $productReviews->where('rating_star', $star)->count();
+                                        $percentage = $productReviews->count() > 0 ? ($count / $productReviews->count()) * 100 : 0;
+                                    @endphp
                                     <div class="flex items-center gap-2 mb-1">
                                         <span class="text-sm w-8">{{ $star }} ⭐</span>
                                         <div class="flex-1 bg-gray-200 rounded-full h-2">
-                                            <div class="bg-[#3F3142] h-2 rounded-full" style="width: {{ rand(20, 90) }}%">
-                                            </div>
+                                            <div class="bg-[#3F3142] h-2 rounded-full" style="width: {{ $percentage }}%"></div>
                                         </div>
-                                        <span class="text-sm w-12 text-gray-600">{{ rand(10, 80) }}%</span>
+                                        <span class="text-sm w-8 text-gray-600">{{ $count }}</span>
                                     </div>
                                 @endforeach
                             </div>
                         </div>
 
                         <div class="space-y-6">
-                            @for ($i = 1; $i <= 3; $i++)
+                            @forelse ($productReviews->take(5) as $review)
                                 <div class="border-b pb-6 last:border-b-0">
-                                    <div class="flex items-start gap-4">
-                                        <div
-                                            class="w-12 h-12 bg-[#3F3142] rounded-full flex items-center justify-center text-white font-bold">
-                                            {{ chr(64 + $i) }}
+                                    <div class="flex gap-4">
+                                        <div class="w-12 h-12 bg-[#3F3142] rounded-full flex items-center justify-center text-white font-bold">
+                                            {{ strtoupper(substr($review->transactionItem->transaction->user->name, 0, 1)) }}
                                         </div>
                                         <div class="flex-1">
                                             <div class="flex items-center justify-between mb-2">
-                                                <h4 class="font-semibold">User {{ chr(64 + $i) }}</h4>
-                                                <span class="text-sm text-gray-500">{{ rand(1, 30) }} hari yang
-                                                    lalu</span>
+                                                <h4 class="font-semibold">{{ $review->transactionItem->transaction->user->name }}</h4>
+                                                <span class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
                                             </div>
                                             <div class="flex mb-2">
-                                                @for ($j = 1; $j <= 5; $j++)
-                                                    <img src="/images/misc/star.svg" alt="star" class="w-4 h-4">
+                                                @for ($i = 1; $i <= 5; $i++)
+                                                    <img src="/images/misc/star.svg" alt="star" class="w-4 h-4 {{ $i <= $review->rating_star ? '' : 'opacity-30' }}">
                                                 @endfor
                                             </div>
-                                            <p class="text-gray-700">
-                                                Produk yang bagus! Bayi saya menyukainya. Kualitasnya sangat baik dan
-                                                pengirimannya cepat. Sangat direkomendasikan!
-                                            </p>
+                                            <p class="text-gray-700 mb-3">{{ $review->description }}</p>
+                                            
+                                            @if($review->images->count() > 0)
+                                                <div class="grid grid-cols-3 md:grid-cols-4 gap-2 mt-3">
+                                                    @foreach($review->images as $image)
+                                                        @php
+                                                            $extension = pathinfo($image->image_url, PATHINFO_EXTENSION);
+                                                            $isVideo = in_array(strtolower($extension), ['mp4', 'avi', 'mov', 'webm']);
+                                                        @endphp
+                                                        @if($isVideo)
+                                                            <video controls class="w-full aspect-square object-cover rounded-lg border cursor-pointer hover:opacity-90">
+                                                                <source src="{{ asset('storage/' . $image->image_url) }}" type="video/{{ $extension }}">
+                                                            </video>
+                                                        @else
+                                                            <img src="{{ asset('storage/' . $image->image_url) }}" 
+                                                                alt="Review image" 
+                                                                class="w-full aspect-square object-cover rounded-lg border cursor-pointer hover:opacity-90"
+                                                                onclick="openImageModal(this.src)">
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
-                            @endfor
+                            @empty
+                                <p class="text-gray-500 text-center py-8">Belum ada ulasan untuk produk ini</p>
+                            @endforelse
                         </div>
 
-                        <button
-                            class="w-full mt-6 py-3 border-2 border-[#3F3142] text-[#3F3142] rounded-lg font-semibold hover:bg-[#3F3142] hover:text-white transition-colors">
-                            Lihat lebih banyak ulasan
-                        </button>
+                        @if($productReviews->count() > 5)
+                            <button class="w-full mt-6 py-3 border-2 border-[#3F3142] text-[#3F3142] rounded-lg font-semibold hover:bg-[#3F3142] hover:text-white transition-colors">
+                                Lihat {{ $productReviews->count() - 5 }} ulasan lainnya
+                            </button>
+                        @endif
                     </div>
                 </div>
 

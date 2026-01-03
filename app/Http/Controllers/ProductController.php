@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Testimony;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
@@ -31,9 +32,20 @@ class ProductController extends Controller
             ->limit(4)
             ->get();
 
+
+        $productReviews = Testimony::whereHas('transactionItem', function ($query) use ($product) {
+            $query->where('product_id', $product->id);
+        })
+            ->with(['transactionItem.transaction.user', 'images'])
+            ->get();
+
+        $averageRating = $productReviews->avg('rating_star');
+
         return view('shop.product-detail', [
             'product' => $product,
             'similarProducts' => $similarProducts,
+            'productReviews' => $productReviews,
+            'averageRating' => $averageRating,
         ]);
     }
 
