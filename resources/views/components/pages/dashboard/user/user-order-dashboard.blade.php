@@ -67,13 +67,9 @@
                     </div>
 
                     <div class="px-6 py-4">
-                        <div
-                            class="grid grid-flow-col auto-cols-[85%] md:auto-cols-[300px] gap-4 overflow-x-auto pb-4 snap-x">
-
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             @foreach ($transaction->transaction_items as $item)
-                                <div
-                                    class="flex flex-col bg-white border border-gray-100 rounded-xl p-3 snap-start shadow-sm">
-
+                                <div class="flex flex-col bg-white border border-gray-100 rounded-xl p-3 shadow-sm">
                                     <div class="relative w-full aspect-square mb-3">
                                         <img src="{{ $item->product->image_path }}" alt="{{ $item->product->name }}"
                                             class="w-full h-full object-cover rounded-lg">
