@@ -16,6 +16,7 @@
         "blade-ui-kit/blade-icons": "^1.8",
         "codeat3/blade-eos-icons": "^1.15",
         "codeat3/blade-google-material-design-icons": "^1.20",
+        "davidhsianturi/blade-bootstrap-icons": "^2.1",
         "guzzlehttp/guzzle": "^7.10",
         "hasnayeen/blade-eva-icons": "^2.1",
         "intervention/image": "^3.11",

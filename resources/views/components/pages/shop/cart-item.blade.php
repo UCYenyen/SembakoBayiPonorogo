@@ -33,9 +33,16 @@
             </div>
 
             <!-- Price -->
-            <p class="text-2xl font-bold text-[#3F3142] mb-4">
-                Rp{{ number_format($item->product->price, 0, ',', '.') }}
-            </p>
+            <div class="text-2xl font-bold text-[#3F3142] mb-4">
+                @if ($item->product->is_on_sale)
+                    <p class="text-[#856C8A]/30 text-base sm:text-lg md:text-xl font-semibold line-through">
+                        Rp{{ number_format($item->product->price, 0, ',', '.') }}</p>
+                    <p class="text-[#856C8A] text-base sm:text-lg md:text-xl font-bold">
+                        Rp{{ number_format($item->product->price - $item->product->discount_amount, 0, ',', '.') }}</p>
+                @else
+                    Rp{{ number_format($item->product->price, 0, ',', '.') }}
+                @endif
+            </div>
 
             <!-- Quantity Controls -->
             <div class="flex items-center gap-4">

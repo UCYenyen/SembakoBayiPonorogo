@@ -104,7 +104,7 @@
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
                             @foreach ($products as $product)
                                 <x-pages.product-card :product="$product" productImage="{{ $product->image_url }}"
-                                    productName="{{ $product->name }}" rating="4.5"
+                                    productName="{{ $product->name }}" rating="{{ $product->average_rating }}"
                                     price="{{ number_format($product->price, 0, ',', '.') }}" />
                             @endforeach
                         </div>

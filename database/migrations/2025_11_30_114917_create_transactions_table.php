@@ -17,19 +17,20 @@ return new class extends Migration
             $table->string('no_resi')->nullable();
             $table->string('order_id')->unique()->default(DB::raw('(UUID())'));
             $table->string('payment_method')->nullable();
+            $table->bigInteger('voucher_discount')->default(0);
             $table->string('snap_token')->nullable();
             $table->bigInteger('delivery_price')->default(0);
             $table->bigInteger('total_price')->default(0);
 
             $table->enum('status', [
-                'pending_payment',    // Menunggu pembayaran
-                'paid',               // Sudah dibayar
-                'processing',         // Sedang diproses
-                'shipped',            // Sedang dikirim
-                'delivered',          // Sudah diterima
-                'completed',          // Selesai
-                'cancelled',          // Dibatalkan
-                'failed'              // Gagal
+                'pending_payment',   
+                'paid',              
+                'processing',       
+                'shipped',          
+                'delivered',          
+                'completed',          
+                'cancelled',          
+                'failed'            
             ])->default('pending_payment');
 
             // Foreign keys

@@ -109,82 +109,87 @@
                 </div>
 
                 <!-- Ringkasan Pesanan -->
-                <div class="lg:col-span-1">
-                    <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
-                        <h2 class="text-2xl font-bold mb-6">Ringkasan Pesanan</h2>
-                        <div class="space-y-3 mb-6">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Subtotal</span>
-                                <span class="font-semibold">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
-                            </div>
-                            @foreach ($cart->items as $item)
-                                @if ($item->product->discount_amount > 0)
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600">Diskon
-                                            {{ Str::limit($item->product->name, 20) }}</span>
-                                        <span class="font-semibold text-black">
-                                            -Rp{{ number_format($item->product->discount_amount * $item->quantity, 0, ',', '.') }}
-                                        </span>
-                                    </div>
-                                @endif
-                            @endforeach
-
-                            @if ($voucherDiscount > 0)
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Diskon Voucher</span>
-                                    <span class="font-semibold text-black">
-                                        -Rp{{ number_format($voucherDiscount, 0, ',', '.') }}
-                                    </span>
-                                </div>
-                            @endif
-
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Pengiriman</span>
-                                <span class="font-semibold" id="shipping-cost-display">Rp0</span>
-                            </div>
+                <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
+                    <h2 class="text-2xl font-bold mb-6">Ringkasan Pesanan</h2>
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Subtotal</span>
+                            <span class="font-semibold">Rp{{ number_format($subtotalBeforeDiscount, 0, ',', '.') }}</span>
                         </div>
 
-                        @if ($appliedVouchers->count() > 0)
-                            <div class="flex flex-col gap-2">
-                                <span class="text-gray-600">Voucher</span>
-                                <div class="space-y-3">
-                                    @foreach ($appliedVouchers as $voucher)
-                                        <div class="flex items-center justify-between p-3 bg-[#dbdeff]/20 rounded-lg">
-                                            <div class="flex-1">
-                                                <p class="font-semibold text-sm text-black">
-                                                    {{ $voucher->base_voucher->name }}</p>
-                                                <p class="text-xs text-[#3F3142]">Hemat
-                                                    Rp{{ number_format($voucher->base_voucher->disc_amt, 0, ',', '.') }}
-                                                </p>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <svg class="w-5 h-5 text-[#3F3142]" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
+                        @if ($productDiscount > 0)
+                            <div class="flex justify-between text-[#3F3142]">
+                                <span class="text-sm">Diskon Produk</span>
+                                <span class="font-semibold">-Rp{{ number_format($productDiscount, 0, ',', '.') }}</span>
                             </div>
                         @endif
 
-                        <div class="border-t pt-4 mb-6">
-                            <div class="flex justify-between items-center">
-                                <span class="text-xl font-bold">Total</span>
-                                <span class="text-2xl font-bold text-[#3F3142]" id="total-display">
-                                    Rp{{ number_format($total, 0, ',', '.') }}
-                                </span>
+                        @if ($voucherDiscount > 0)
+                            <div class="flex justify-between text-[#3F3142]">
+                                <span class="text-sm">Diskon Voucher</span>
+                                <span class="font-semibold">-Rp{{ number_format($voucherDiscount, 0, ',', '.') }}</span>
+                            </div>
+                        @endif
+
+                        <!-- Garis pemisah -->
+                        <div class="border-t my-2"></div>
+
+                        <div class="flex justify-between font-semibold">
+                            <span class="text-gray-700">Subtotal Setelah Diskon</span>
+                            <span class="text-[#3F3142]">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
+                        </div>
+
+                        <!-- Ongkir -->
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Pengiriman</span>
+                            <span class="font-semibold" id="shipping-cost-display">Rp0</span>
+                        </div>
+                    </div>
+
+                    <!-- Voucher yang digunakan -->
+                    @if ($appliedVouchers->count() > 0)
+                        <div class="mb-6 pb-4 border-b">
+                            <span class="text-sm font-semibold text-gray-700 block mb-2">Voucher Digunakan:</span>
+                            <div class="space-y-2">
+                                @foreach ($appliedVouchers as $voucher)
+                                    <div
+                                        class="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                                        <div class="flex-1">
+                                            <p class="font-semibold text-sm text-gray-800">
+                                                {{ $voucher->base_voucher->name }}
+                                            </p>
+                                            <p class="text-xs text-[#3F3142]">
+                                                Hemat Rp{{ number_format($voucher->base_voucher->disc_amt, 0, ',', '.') }}
+                                            </p>
+                                        </div>
+                                        <svg class="w-5 h-5 text-[#3F3142]" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
-                        <button type="button" id="pay-button"
-                            class="w-full bg-[#3F3142] text-white py-4 rounded-lg font-bold text-lg hover:bg-[#5C4B5E] transition-colors">
-                            Bayar
-                        </button>
+                    @endif
+
+                    <!-- Total -->
+                    <div class="border-t pt-4 mb-6">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xl font-bold">Total Pembayaran</span>
+                            <span class="text-2xl font-bold text-[#3F3142]" id="total-display">
+                                Rp{{ number_format($subtotal - $voucherDiscount, 0, ',', '.') }}
+                            </span>
+                        </div>
                     </div>
+
+                    <button type="button" id="pay-button"
+                        class="w-full bg-[#3F3142] text-white py-4 rounded-lg font-bold text-lg hover:bg-[#5C4B5E] transition-colors">
+                        Bayar
+                    </button>
                 </div>
-            </form>
+        </div>
+        </form>
         </div>
     </main>
 

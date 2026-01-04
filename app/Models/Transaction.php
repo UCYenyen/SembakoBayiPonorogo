@@ -21,6 +21,7 @@ class Transaction extends Model
         'no_resi',
         'status',
         'snap_token',
+        'voucher_discount',
     ];
     
     const STATUS_PENDING_PAYMENT = 'pending_payment';
@@ -32,6 +33,16 @@ class Transaction extends Model
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_FAILED = 'failed';
 
+    // public function getSubtotalAttribute()
+    // {
+    //     return $this->transaction_items->sum(fn($item) => $item->price * $item->quantity);
+    // }
+
+    // public function getTotalBillAttribute()
+    // {
+    //     return $this->subtotal + $this->delivery_price;
+    // }
+
     public function getSubtotalAttribute()
     {
         return $this->transaction_items->sum(fn($item) => $item->price * $item->quantity);
@@ -39,7 +50,17 @@ class Transaction extends Model
 
     public function getTotalBillAttribute()
     {
-        return $this->subtotal + $this->delivery_price;
+        return $this->total_price + $this->delivery_price;
+    }
+    
+    public function getSubtotalBeforeVoucherAttribute()
+    {
+        return $this->subtotal;
+    }
+    
+    public function getTotalAfterVoucherAttribute()
+    {
+        return $this->total_price;
     }
 
     public function user()

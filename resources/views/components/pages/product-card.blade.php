@@ -9,6 +9,11 @@
         <p class="text-sm sm:text-base">{{ $rating }}</p>
     </div>
     <div class="flex flex-col justify-center items-center gap-2 sm:gap-3 w-full">
-        <p class="text-[#856C8A] text-base sm:text-lg md:text-xl font-semibold">Rp{{ $price }}</p>
+        @if($product->is_on_sale)
+            <p class="text-[#856C8A]/30 text-base sm:text-lg md:text-xl font-semibold line-through">Rp{{ number_format($product->price, 0, ',', '.') }}</p>
+            <p class="text-[#856C8A] text-base sm:text-lg md:text-xl font-bold">Rp{{ number_format($product->price - $product->discount_amount, 0, ',', '.') }}</p>
+        @else
+            <p class="text-[#856C8A] text-base sm:text-lg md:text-xl font-semibold">Rp{{ $price }}</p>
+        @endif
     </div>
 </a>

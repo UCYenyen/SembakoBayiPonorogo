@@ -38,6 +38,15 @@ class PaymentController extends Controller
 
         $addresses = Address::where('user_id', Auth::id())->get();
 
+        $subtotalBeforeDiscount = $cart->items->sum(function ($item) {
+            return $item->product->price * $item->quantity;
+        });
+
+        $productDiscount = $cart->items->sum(function ($item) {
+            $discount = $item->product->discount_amount ?? 0;
+            return $discount * $item->quantity;
+        });
+
         $subtotal = $cart->items->sum(function ($item) {
             $productPrice = $item->product->price;
             $discount = $item->product->discount_amount ?? 0;
@@ -53,6 +62,8 @@ class PaymentController extends Controller
         return view('shop.payment.index', [
             'cart' => $cart,
             'addresses' => $addresses,
+            'subtotalBeforeDiscount' => $subtotalBeforeDiscount,
+            'productDiscount' => $productDiscount,
             'subtotal' => $subtotal,
             'voucherDiscount' => $voucherDiscount,
             'appliedVouchers' => $appliedVouchers,
@@ -77,6 +88,7 @@ class PaymentController extends Controller
         if (!$cart || $cart->items->isEmpty()) {
             return response()->json(['error' => 'Cart is empty'], 400);
         }
+
         $subtotal = $cart->items->sum(function ($item) {
             $productPrice = $item->product->price;
             $discount = $item->product->discount_amount ?? 0;
@@ -84,7 +96,9 @@ class PaymentController extends Controller
         });
 
         $voucherDiscount = $cart->getTotalVoucherDiscount();
+
         $totalPrice = $subtotal - $voucherDiscount;
+
         $totalBill = $totalPrice + $validated['delivery_price'];
 
         $transaction = Transaction::create([
@@ -108,7 +122,7 @@ class PaymentController extends Controller
                 'transaction_id' => $transaction->id,
                 'product_id' => $item->product_id,
                 'quantity' => $item->quantity,
-                'price' => $productPrice - $discount, // ✅ Simpan harga setelah diskon
+                'price' => $productPrice - $discount,
             ]);
 
             $item->product->decrement('stocks', $item->quantity);

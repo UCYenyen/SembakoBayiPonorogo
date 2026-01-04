@@ -28,13 +28,14 @@
                                 </div>
 
                                 <div class="flex items-center gap-2">
-                                    <div class="flex">
+                                    <div class="flex gap-1">
                                         @for ($i = 1; $i <= 5; $i++)
-                                            <img src="/images/misc/star.svg" alt="star" class="w-5 h-5">
+                                            <x-bi-star-fill
+                                                class="w-5 h-5 {{ $i <= round($productReviews->avg('rating_star')) ? 'text-yellow-400' : 'text-orange-800/40' }}" />
                                         @endfor
                                     </div>
-                                    <span class="text-lg font-semibold">4.5</span>
-                                    <span class="text-gray-600">(127 reviews)</span>
+                                    <span class="text-lg font-semibold">{{ $productReviews->avg('rating_star') }}</span>
+                                    {{-- <span class="text-gray-600">{{$productReviews->count()}}</span> --}}
                                 </div>
 
                                 <div class="border-t border-b py-4">
@@ -108,7 +109,8 @@
                                     <p class="text-5xl font-bold text-[#3F3142]">{{ number_format($averageRating, 1) }}</p>
                                     <div class="flex mt-2">
                                         @for ($i = 1; $i <= 5; $i++)
-                                            <img src="/images/misc/star.svg" alt="star" class="w-5 h-5 {{ $i <= round($averageRating) ? '' : 'opacity-30' }}">
+                                            <img src="/images/misc/star.svg" alt="star"
+                                                class="w-5 h-5 {{ $i <= round($averageRating) ? '' : 'opacity-30' }}">
                                         @endfor
                                     </div>
                                 @endif
@@ -119,12 +121,16 @@
                                 @foreach ([5, 4, 3, 2, 1] as $star)
                                     @php
                                         $count = $productReviews->where('rating_star', $star)->count();
-                                        $percentage = $productReviews->count() > 0 ? ($count / $productReviews->count()) * 100 : 0;
+                                        $percentage =
+                                            $productReviews->count() > 0
+                                                ? ($count / $productReviews->count()) * 100
+                                                : 0;
                                     @endphp
                                     <div class="flex items-center gap-2 mb-1">
                                         <span class="text-sm w-8">{{ $star }} ⭐</span>
                                         <div class="flex-1 bg-gray-200 rounded-full h-2">
-                                            <div class="bg-[#3F3142] h-2 rounded-full" style="width: {{ $percentage }}%"></div>
+                                            <div class="bg-[#3F3142] h-2 rounded-full" style="width: {{ $percentage }}%">
+                                            </div>
                                         </div>
                                         <span class="text-sm w-8 text-gray-600">{{ $count }}</span>
                                     </div>
@@ -136,35 +142,49 @@
                             @forelse ($productReviews->take(5) as $review)
                                 <div class="border-b pb-6 last:border-b-0">
                                     <div class="flex gap-4">
-                                        <div class="w-12 h-12 bg-[#3F3142] rounded-full flex items-center justify-center text-white font-bold">
+                                        <div
+                                            class="w-12 h-12 bg-[#3F3142] rounded-full flex items-center justify-center text-white font-bold">
                                             {{ strtoupper(substr($review->transactionItem->transaction->user->name, 0, 1)) }}
                                         </div>
                                         <div class="flex-1">
                                             <div class="flex items-center justify-between mb-2">
-                                                <h4 class="font-semibold">{{ $review->transactionItem->transaction->user->name }}</h4>
-                                                <span class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
+                                                <h4 class="font-semibold">
+                                                    {{ $review->transactionItem->transaction->user->name }}</h4>
+                                                <span
+                                                    class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
                                             </div>
                                             <div class="flex mb-2">
                                                 @for ($i = 1; $i <= 5; $i++)
-                                                    <img src="/images/misc/star.svg" alt="star" class="w-4 h-4 {{ $i <= $review->rating_star ? '' : 'opacity-30' }}">
+                                                    <img src="/images/misc/star.svg" alt="star"
+                                                        class="w-4 h-4 {{ $i <= $review->rating_star ? '' : 'opacity-30' }}">
                                                 @endfor
                                             </div>
                                             <p class="text-gray-700 mb-3">{{ $review->description }}</p>
-                                            
-                                            @if($review->images->count() > 0)
+
+                                            @if ($review->images->count() > 0)
                                                 <div class="grid grid-cols-3 md:grid-cols-4 gap-2 mt-3">
-                                                    @foreach($review->images as $image)
+                                                    @foreach ($review->images as $image)
                                                         @php
-                                                            $extension = pathinfo($image->image_url, PATHINFO_EXTENSION);
-                                                            $isVideo = in_array(strtolower($extension), ['mp4', 'avi', 'mov', 'webm']);
+                                                            $extension = pathinfo(
+                                                                $image->image_url,
+                                                                PATHINFO_EXTENSION,
+                                                            );
+                                                            $isVideo = in_array(strtolower($extension), [
+                                                                'mp4',
+                                                                'avi',
+                                                                'mov',
+                                                                'webm',
+                                                            ]);
                                                         @endphp
-                                                        @if($isVideo)
-                                                            <video controls class="w-full aspect-square object-cover rounded-lg border cursor-pointer hover:opacity-90">
-                                                                <source src="{{ asset('storage/' . $image->image_url) }}" type="video/{{ $extension }}">
+                                                        @if ($isVideo)
+                                                            <video controls
+                                                                class="w-full aspect-square object-cover rounded-lg border cursor-pointer hover:opacity-90">
+                                                                <source src="{{ asset('storage/' . $image->image_url) }}"
+                                                                    type="video/{{ $extension }}">
                                                             </video>
                                                         @else
-                                                            <img src="{{ asset('storage/' . $image->image_url) }}" 
-                                                                alt="Review image" 
+                                                            <img src="{{ asset('storage/' . $image->image_url) }}"
+                                                                alt="Review image"
                                                                 class="w-full aspect-square object-cover rounded-lg border cursor-pointer hover:opacity-90"
                                                                 onclick="openImageModal(this.src)">
                                                         @endif
@@ -179,8 +199,9 @@
                             @endforelse
                         </div>
 
-                        @if($productReviews->count() > 5)
-                            <button class="w-full mt-6 py-3 border-2 border-[#3F3142] text-[#3F3142] rounded-lg font-semibold hover:bg-[#3F3142] hover:text-white transition-colors">
+                        @if ($productReviews->count() > 5)
+                            <button
+                                class="w-full mt-6 py-3 border-2 border-[#3F3142] text-[#3F3142] rounded-lg font-semibold hover:bg-[#3F3142] hover:text-white transition-colors">
                                 Lihat {{ $productReviews->count() - 5 }} ulasan lainnya
                             </button>
                         @endif

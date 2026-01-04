@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Testimony;
 
 class Product extends Model
 {
@@ -25,7 +26,7 @@ class Product extends Model
         'brand_id',
         'avg_rating',
     ];
-    
+
     public function getImagePathAttribute()
     {
         if (Storage::disk('public')->exists($this->image_url)) {
@@ -37,14 +38,38 @@ class Product extends Model
         }
         return asset('images/placeholder.jpg');
     }
-    
+
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
-    
+
     public function brand()
     {
         return $this->belongsTo(Brand::class);
+    }
+    public function transactionItems()
+    {
+        return $this->hasMany(TransactionItem::class);
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        if (array_key_exists('average_rating', $this->attributes)) {
+            return round($this->attributes['average_rating'], 1);
+        }
+
+        $avgRating = Testimony::whereHas('transactionItem', function ($query) {
+            $query->where('product_id', $this->id);
+        })->avg('rating_star');
+
+        return $avgRating ? round($avgRating, 1) : 0;
+    }
+
+    public function getTotalReviewsAttribute()
+    {
+        return Testimony::whereHas('transactionItem', function ($query) {
+            $query->where('product_id', $this->id);
+        })->count();
     }
 }
