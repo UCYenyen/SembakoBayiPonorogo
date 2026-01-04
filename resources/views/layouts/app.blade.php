@@ -20,7 +20,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased bg-[#FFF3F3] min-h-screen">
+<body class="font-sans antialiased bg-[#FFF3F3] min-h-screen overflow-x-hidden">
     <x-pages.navigation-bar />
     <div class="h-[8vh] sm:h-[12vh]"></div>
     @yield('content')
