@@ -36,7 +36,6 @@ class Voucher extends Model
         return $this->belongsTo(ShoppingCart::class);
     }
     
-    // Helper methods
     public function isAvailable()
     {
         return is_null($this->transaction_id);

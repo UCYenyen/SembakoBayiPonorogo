@@ -65,6 +65,12 @@ class Product extends Model
 
         return $avgRating ? round($avgRating, 1) : 0;
     }
+    public function vendors()
+    {
+        return $this->belongsToMany(Vendor::class, 'product_vendors', 'product_id', 'vendor_id')
+                    ->using(ProductVendor::class)
+                    ->withTimestamps();
+    }
 
     public function getTotalReviewsAttribute()
     {

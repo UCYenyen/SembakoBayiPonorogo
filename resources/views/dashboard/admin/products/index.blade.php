@@ -2,7 +2,7 @@
 @section('title', 'Product Management')
 @section('content')
     <x-pages.section title="" extraClasses="min-h-[80vh]">
-        <div class="w-[80%] mx-auto">
+        <div class="w-[80%] mx-auto mb-[5%]">
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
                 <div class="flex justify-between items-center flex-col gap-4 sm:flex-row">
                     <h1 class="text-3xl font-bold">Product Management</h1>
@@ -35,8 +35,8 @@
                                     <td class="px-4 py-4 align-middle text-sm text-gray-600">#{{ $product->id }}</td>
                                     <td class="px-4 py-4 align-middle">
                                         <div class="w-16 h-16 overflow-hidden rounded-lg border">
-                                            <img src="{{$product->image_path}}"
-                                                alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                            <img src="{{ $product->image_path }}" alt="{{ $product->name }}"
+                                                class="w-full h-full object-cover">
                                         </div>
                                     </td>
                                     <td class="px-4 py-4 align-middle">
@@ -88,6 +88,11 @@
                                                 <x-heroicon-o-pencil class="w-5 h-5" />
                                             </a>
 
+                                            <a href="{{ route('admin.products.vendors', $product) }}"
+                                                 class="p-2 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-md transition-all">
+                                                <x-tni-address-book-o  class="w-5 h-5"/>
+                                            </a>
+
                                             <form id="delete-form-{{ $product->id }}"
                                                 action="{{ route('admin.products.delete', $product) }}" method="POST"
                                                 class="inline">
@@ -125,7 +130,7 @@
             </div>
         </div>
     </x-pages.section>
-    
+
     <script>
         @if (session('success'))
             Swal.fire({

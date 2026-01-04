@@ -33,16 +33,6 @@ class Transaction extends Model
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_FAILED = 'failed';
 
-    // public function getSubtotalAttribute()
-    // {
-    //     return $this->transaction_items->sum(fn($item) => $item->price * $item->quantity);
-    // }
-
-    // public function getTotalBillAttribute()
-    // {
-    //     return $this->subtotal + $this->delivery_price;
-    // }
-
     public function getSubtotalAttribute()
     {
         return $this->transaction_items->sum(fn($item) => $item->price * $item->quantity);
@@ -88,7 +78,6 @@ class Transaction extends Model
         return $this->hasMany(TransactionItem::class);
     }
 
-    // Helper methods
     public function isPendingPayment()
     {
         return $this->status === self::STATUS_PENDING_PAYMENT;

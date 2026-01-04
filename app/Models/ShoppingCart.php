@@ -37,11 +37,10 @@ class ShoppingCart extends Model
         return $this->hasMany(Voucher::class);
     }
     
-    // Method untuk menghitung total diskon dari vouchers yang di-preview di cart ini
     public function getTotalVoucherDiscount()
     {
         return $this->vouchers()
-            ->whereNull('transaction_id') // available vouchers only
+            ->whereNull('transaction_id')
             ->with('base_voucher')
             ->get()
             ->sum(fn($v) => $v->base_voucher->disc_amt);

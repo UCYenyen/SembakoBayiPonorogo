@@ -15,6 +15,7 @@ use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\Pages\UserDashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\BaseVoucherController;
+use App\Http\Controllers\ProductVendorController;
 use App\Http\Controllers\TestimoniesController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Middleware\AdminPageGuard;
@@ -111,6 +112,21 @@ Route::middleware('auth')->group(function () {
                 ->name('products.toggle');
             Route::delete('/products/{product}', [ProductController::class, 'destroy'])
                 ->name('products.delete');
+
+            Route::get('/products/{product}/vendors', [ProductVendorController::class, 'showVendorsForProduct'])
+                ->name('products.vendors');
+            Route::post('/products/{product}/vendors', [ProductVendorController::class, 'attachVendorToProduct'])
+                ->name('products.vendors.attach');
+            Route::delete('/products/{product}/vendors/{vendor}', [ProductVendorController::class, 'detachVendorFromProduct'])
+                ->name('products.vendors.detach');
+
+            Route::get('/vendors/{vendor}/products', [ProductVendorController::class, 'showProductsForVendor'])
+                ->name('vendors.products');
+            Route::post('/vendors/{vendor}/products', [ProductVendorController::class, 'attachProductToVendor'])
+                ->name('vendors.products.attach');
+            Route::delete('/vendors/{vendor}/products/{product}', [ProductVendorController::class, 'detachProductFromVendor'])
+                ->name('vendors.products.detach');
+
 
             Route::get('/vouchers', [BaseVoucherController::class, 'showVouchers'])->name('vouchers.index');
             Route::get('/vouchers/create', [BaseVoucherController::class, 'createVoucher'])->name('vouchers.create');

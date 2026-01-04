@@ -16,6 +16,7 @@
         "blade-ui-kit/blade-icons": "^1.8",
         "codeat3/blade-eos-icons": "^1.15",
         "codeat3/blade-google-material-design-icons": "^1.20",
+        "codeat3/blade-teeny-icons": "^1.11",
         "davidhsianturi/blade-bootstrap-icons": "^2.1",
         "guzzlehttp/guzzle": "^7.10",
         "hasnayeen/blade-eva-icons": "^2.1",
@@ -25,7 +26,8 @@
         "laravel/socialite": "^5.23",
         "laravel/telescope": "^5.15",
         "laravel/tinker": "^2.10.1",
-        "midtrans/midtrans-php": "^2.6"
+        "midtrans/midtrans-php": "^2.6",
+        "troccoli/blade-health-icons": "^5.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",

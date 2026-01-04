@@ -35,8 +35,9 @@
                                         {{ $vendor->phone_number ? '+62' . $vendor->phone_number : '-' }}
                                     </td>
                                     <td class="px-4 py-3">
-                                        @if($vendor->type)
-                                            <span class="px-3 py-1 rounded-full text-sm font-semibold text-gray-800 bg-[#dbdeff] ">
+                                        @if ($vendor->type)
+                                            <span
+                                                class="px-3 py-1 rounded-full text-sm font-semibold text-gray-800 bg-[#dbdeff] ">
                                                 {{ ucfirst($vendor->type) }}
                                             </span>
                                         @else
@@ -44,10 +45,10 @@
                                         @endif
                                     </td>
                                     <td class="px-8 py-3">
-                                        @if($vendor->link)
-                                            <a href="{{ $vendor->link }}" target="_blank" 
-                                               class="text-blue-600 hover:text-blue-800 hover:underline truncate block max-w-lg"
-                                               title="{{ $vendor->link }}">
+                                        @if ($vendor->link)
+                                            <a href="{{ $vendor->link }}" target="_blank"
+                                                class="text-blue-600 hover:text-blue-800 hover:underline truncate block max-w-lg"
+                                                title="{{ $vendor->link }}">
                                                 {{ Str::limit($vendor->link, 50) }}
                                             </a>
                                         @else
@@ -56,12 +57,20 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex justify-center items-center gap-2">
+                                            <a href="{{ route('admin.vendors.products', $vendor) }}"
+                                                class="flex items-center justify-center p-2 bg-yellow-50 hover:bg-gray-100 text-gray-600 rounded-lg transition-colors h-9 w-9"
+                                                title="Manage Products">
+                                                <x-heroicon-o-cube class="w-5 h-5" />
+                                            </a>
+
                                             <a href="{{ route('admin.vendors.edit', $vendor) }}"
                                                 class="p-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-lg transition-colors">
                                                 <x-heroicon-o-pencil class="w-5 h-5" />
                                             </a>
 
-                                            <form id="delete-form-{{ $vendor->id }}" action="{{ route('admin.vendors.delete', $vendor) }}" method="POST" class="inline">
+                                            <form id="delete-form-{{ $vendor->id }}"
+                                                action="{{ route('admin.vendors.delete', $vendor) }}" method="POST"
+                                                class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="button" onclick="confirmDelete({{ $vendor->id }})"
@@ -91,7 +100,7 @@
     </x-pages.section>
 
     <script>
-        @if(session('success'))
+        @if (session('success'))
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
@@ -100,7 +109,7 @@
             });
         @endif
 
-        @if(session('error'))
+        @if (session('error'))
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
